@@ -1,6 +1,6 @@
 package org.example.controller.enitty;
 
-import jdk.jfr.DataAmount;
+
 import lombok.Data;
 
 @Data

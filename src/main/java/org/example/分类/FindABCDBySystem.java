@@ -8,7 +8,10 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.Assistant;
 import org.example.func_two.Main2;
 import org.example.func_two.OtherInfo2;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,28 +22,32 @@ import java.util.stream.Collectors;
 /**
  * 分裂
  */
-public class FindABCD {
-    public static void main(String[] args) {
-        doFindABDC("src/main/java/org/example/excel/副本厦门往来清理跟进表-全匹配版 （禹洲泉州）-标识.xlsx");
-    }
+@Service
+public class FindABCDBySystem {
+    @Resource
+    private JdbcTemplate jdbcTemplate;
 
 
     public static void doFindABDC(String sourceFile){
         List<AssistantResult> excelExcelData = new ArrayList<>();
         List<OtherInfo2> cachedDataList = new ArrayList<>();
+        List<Assistant> assistantList = new ArrayList<>();
 
-        String fileName1 = "src/main/java/org/example/excel/往来科目明细.xlsx";
         EasyExcel.read(fileName1, OtherInfo2.class, new PageReadListener<OtherInfo2>(dataList -> {
             Main2.organizeData(dataList);
             cachedDataList.addAll(dataList);
         })).sheet().doRead();
-        List<SourceFileData> sourceFileDataList = new ArrayList<>();
-        EasyExcel.read(sourceFile, SourceFileData.class, new PageReadListener<SourceFileData>(sourceFileDataList::addAll)).sheet("往来清理明细表").doRead();
-        List<SourceFileData> dataList = sourceFileDataList.stream().skip(1).collect(Collectors.toList());
+        // 要查询ABCD的字段
+        EasyExcel.read(sourceFile, Assistant.class, new PageReadListener<Assistant>(assistantList::addAll)).sheet("往来清理明细表").doRead();
 
-        for (int i = 0; i < dataList.size(); i++) {
-            SourceFileData assistant = dataList.get(i);
 
+        List<Assistant> realAssistantList = assistantList.stream()
+//                .filter(item -> "禹洲物业服务有限公司泉州分公司应付账款-暂估款-物业-外拓项目-住宅--泉州海德堡SS:438846:JODV0:SYZ000311".equals(item.getR()))
+                .skip(1)
+                .collect(Collectors.toList());
+        for (int i = 0; i < realAssistantList.size(); i++) {
+            Assistant assistant = realAssistantList.get(i);
+            System.out.println("当前行：" + (i + 2));
             String z = assistant.getZ();
             if (z == null) {
                 System.out.println("z 为null 当前月无需处理");

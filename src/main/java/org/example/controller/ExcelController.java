@@ -1,5 +1,6 @@
 package org.example.controller;
 
+
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
@@ -8,6 +9,7 @@ import com.alibaba.excel.util.ListUtils;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.controller.enitty.OracleData;
 import org.example.分类.AssistantResult;
+import org.example.分类.FindABCD;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
@@ -41,35 +43,31 @@ public class ExcelController {
     public void test2(){
         doAsync();
     }
+    @GetMapping("/findABCD")
+    public void findABCD(){
+        FindABCD.doFindABDC();
+    }
 
-    @Async
+
     public void doAsync(){
         // 查询所有公司
         List<String> companyList = jdbcTemplate.queryForList("select z.\"公司段描述\" from ZDPROD_EXPDP_20241120 z GROUP BY z.\"公司段描述\"", String.class);
-        for (String company : companyList) {
-//            StopWatch stopWatch = new StopWatch();
+        for (int i = 0; i < companyList.size(); i++) {
+            String company = companyList.get(i);
             System.out.println("当前公司为："+company);
-            System.out.println(DateUtil.date());
+            System.out.println("sql执行开始："+DateUtil.date());
             String sql = "SELECT * from ZDPROD_EXPDP_20241120 z where z.\"公司段描述\" = " + "'"+company+"'";
             List<Map<String, Object>> dataList = jdbcTemplate.queryForList(sql);
-//            List<ResultSet> dataList =
-//                    jdbcTemplate.query(sql, new RowMapper<ResultSet>() {
-//                        @Override
-//                        public ResultSet mapRow(ResultSet rs, int rowNum) throws SQLException {
-////                    OracleData oracleData = new OracleData();
-////                    oracleData.set公司段描述(rs.getString("公司段描述"));
-//                            return rs;
-//                        }
-//                    });
-            System.out.println(DateUtil.date());
-//            System.out.println(stopWatch.getTotalTimeMillis()/1000/60);
+            System.out.println("sql执行结束： "+DateUtil.date());
             System.out.println("需要处理的数据："+dataList.size());
             exportExcel(dataList,company);
+            System.out.println("已执行："+i+"还剩下："+(companyList.size() - i));
         }
+
         System.out.println("处理完成");
     }
 
-    @Async
+
     public void exportExcel(List<Map<String, Object>> dataList,String company){
         if (!dataList.isEmpty()){
             Map<String, Object> map = dataList.get(0);
@@ -79,7 +77,7 @@ public class ExcelController {
                     .sheet("模板")
                     .doWrite(dataList.stream().map(item -> JSONUtil.parse(item).toBean(OracleData.class)).collect(Collectors.toList()));
         }
-        System.out.println("导出完成："+DateUtil.date());
+        System.out.println("导出完成："+ DateUtil.date());
     }
 
     private List<List<String>> head(Map<String, Object> map) {
