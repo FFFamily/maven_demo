@@ -21,8 +21,12 @@ import java.util.stream.Collectors;
  */
 public class FindABCD {
     public static void main(String[] args) {
-        List<AssistantResult> excelExcelData = new ArrayList<>();
+        doFindABDC();
+    }
 
+
+    public static void doFindABDC(){
+        List<AssistantResult> excelExcelData = new ArrayList<>();
         List<OtherInfo2> cachedDataList = new ArrayList<>();
         List<Assistant> assistantList = new ArrayList<>();
         String fileName1 = "src/main/java/org/example/excel/往来科目明细.xlsx";
@@ -63,7 +67,7 @@ public class FindABCD {
             }
             excelExcelData.add(assistantResult);
         }
-        String resultFileName = "ABCD分类" + ".xlsx";
+        String resultFileName = "ABCD分类-"+System.currentTimeMillis() + ".xlsx";
         try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
             WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(AssistantResult.class).build();
             excelWriter.write(excelExcelData, writeSheet1);

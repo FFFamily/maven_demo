@@ -1,4 +1,4 @@
-package org.example.func_two;
+package org.example.func_three;
 
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
@@ -7,6 +7,7 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import lombok.Data;
 import org.example.Assistant;
 import org.example.Info;
 
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
  * TODO 只对B和C的进行对比，如果是系统的就不往上追
  * TODO 并且要展示最初的项目名称
  */
-public class Main2 implements ReadListener<Info> {
+public class Main3 implements ReadListener<Info> {
     /**
      * 每隔5条存储数据库，实际使用中可以100条，然后清理list ，方便内存回收
      */
@@ -34,24 +35,17 @@ public class Main2 implements ReadListener<Info> {
             organizeData(dataList);
             cachedDataList.addAll(dataList);
         })).sheet().doRead();
-        EasyExcel.read(
-                        fileName2,
-                        Assistant.class,
-                        new PageReadListener<Assistant>(assistantList::addAll)
-                ).sheet("往来清理明细表")
-                .doRead();
+        EasyExcel.read(fileName2, Assistant.class, new PageReadListener<Assistant>(assistantList::addAll)).sheet("往来清理明细表").doRead();
         List<Assistant> realAssistantList = assistantList.stream()
-                .filter(item -> "禹洲物业服务有限公司泉州分公司其他应收款-其他其他---泉州海德堡SS:117483:JODV0:SYZ000012".equals(item.getR()))
-//                .skip(1)
+//                .filter(item -> "禹洲物业服务有限公司泉州分公司合同负债-预收服务款物业管理费-其他-未开票---泉州温莎公馆CS:30012438:JODV0:泉州温莎公馆项目".equals(item.getR()))
+                .skip(1)
                 .collect(Collectors.toList());
         List<OtherInfo2> result1 = new ArrayList<>();
         List<OtherInfo2> result2 = new ArrayList<>();
         for (int i = 0; i < realAssistantList.size(); i++) {
             Assistant assistant = realAssistantList.get(i);
-            System.out.println("当前行：" + (i + 2));
             String z = assistant.getZ();
             if (z == null) {
-                System.out.println("z 为null 当前月无需处理");
                 continue;
             }
             String projectName = assistant.getR();
@@ -62,8 +56,7 @@ public class Main2 implements ReadListener<Info> {
                     cachedDataList,
                     startCollect,
                     assistant.getZ(),
-                    projectName,
-                    0);
+                    projectName);
             if (result.size() == startCollect.size() && startCollect.size() != 1) {
                 result1.addAll(result);
             } else {
@@ -85,92 +78,108 @@ public class Main2 implements ReadListener<Info> {
                                           List<OtherInfo2> cachedDataList,
                                           List<OtherInfo2> startCollect,
                                           String z,
-                                          String originProjectName,
-                                          Integer level) {
-        // 先处理一下余额等于某个借款的时候
-        // 拿到最终余额
-        BigDecimal balance;
-        try {
-            balance = new BigDecimal(z.replace(",", "").replace("(", "").replace(")", ""));
-        } catch (Exception e) {
-            balance = BigDecimal.ZERO;
-        }
-        // 排序
-        List<OtherInfo2> sortedStartCollect = disSameX(startCollect, originProjectName);
-        List<OtherInfo2> OtherInfo2s = new ArrayList<>();
-        OtherInfo2 temporaryResult = null;
-        if (z.contains("(") || z.contains(")")) {
-            // 余额为负去贷找
-            List<OtherInfo2> first = new ArrayList<>();
-            boolean flag = true;
-            for (OtherInfo2 OtherInfo2 : sortedStartCollect) {
-                if (flag && OtherInfo2.getW() != null && balance.compareTo(OtherInfo2.getW()) == 0) {
-                    temporaryResult = OtherInfo2;
-                    flag = false;
-                } else {
-                    first.add(OtherInfo2);
-                }
-            }
-            if (first.size() != sortedStartCollect.size()) {
-                // 证明已经被过滤
-                OtherInfo2s = doFilter(first);
-            }
-        } else {
-            // 余额为正去借找
-            List<OtherInfo2> first = new ArrayList<>();
-            boolean flag = true;
-            for (OtherInfo2 OtherInfo2 : sortedStartCollect) {
-                if (flag && OtherInfo2.getV() != null && balance.compareTo(OtherInfo2.getV()) == 0) {
-                    temporaryResult = OtherInfo2;
-                    flag = false;
-                } else {
-                    first.add(OtherInfo2);
-                }
-            }
-            if (first.size() != sortedStartCollect.size()) {
-                // 证明已经被过滤
-                OtherInfo2s = doFilter(first);
-            }
-        }
-        List<OtherInfo2> finalResult;
-        if (OtherInfo2s.isEmpty() && temporaryResult != null) {
-            // 证明就是正确结果
-            finalResult = new ArrayList<>();
-            finalResult.add(temporaryResult);
-        } else {
-            finalResult = doFilter(sortedStartCollect);
-        }
-        // 打印已经配置的信息
-        // 拿到结果，对结果进行向上查找
+                                          String originProjectName) {
+        List<OtherInfo2> finalResult = FindFirstLevel(startCollect,z,originProjectName);
+        Deque<OtherInfo2> deque = new LinkedList<>();
         List<OtherInfo2> result = new ArrayList<>();
-        if (level == 0) {
-            for (int i = 0; i < finalResult.size(); i++) {
-                OtherInfo2 parentItem = finalResult.get(i);
-                parentItem.setLevel(level + 1);
-                parentItem.setNo(String.valueOf(i + 1));
-                String form = parentItem.getS();
-                result.add(parentItem);
-                // 只有一级的时候进行判断
-                if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-                    find(result, cachedDataList, parentItem, originProjectName, level + 1, isOpenFindUp);
+
+
+        for (int i = 0; i < finalResult.size(); i++) {
+            OtherInfo2 otherInfo2 = finalResult.get(i);
+            int level = 1;
+            deque.push(otherInfo2);
+            // 准备进行迭代遍历
+            while (!deque.isEmpty()){
+                // 对当前层进行遍历
+                int dequeSize = deque.size();
+                for (int dequeIndex = 0; dequeIndex < dequeSize; dequeIndex++) {
+                    OtherInfo2 parentItem = deque.poll();
+                    String no = parentItem.getNo() == null ? String.valueOf(i+1) : parentItem.getNo();
+                    parentItem.setLevel(level);
+                    if (level == 1) {
+                        if (result.isEmpty() || !result.contains(parentItem)){
+                            parentItem.setLevel(level);
+                            parentItem.setNo(no);
+                            result.add(parentItem);
+                        }
+                        String form = parentItem.getS();
+                        // 只有一级的时候进行判断
+                        if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
+                            List<OtherInfo2> childList = doUpFilter(cachedDataList, parentItem, originProjectName, level+1, true);
+                            if (childList.size() == 1) {
+                                // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
+                                OtherInfo2 child = childList.get(0);
+                                if (child.getR().equals(parentItem.getR()) && (child.getV() != null ? child.getV().equals(parentItem.getW()) : child.getW().equals(parentItem.getV()))) {
+                                    // 如果凭证一样 && 借贷相抵
+                                    continue;
+                                }
+                            }
+                            if (!childList.isEmpty()){
+                                level+=1;
+                            }
+                            for (int i1 = 0; i1 < childList.size(); i1++) {
+                                OtherInfo2 child = childList.get(i1);
+                                child.setNo(parentItem.getNo() + "-" + (i1 + 1));
+                                deque.add(child);
+                            }
+                        }
+                    } else {
+                        if (result.isEmpty() || !result.contains(parentItem)){
+                            parentItem.setLevel(level);
+                            parentItem.setNo(no);
+                            result.add(parentItem);
+                        }
+                        List<OtherInfo2> childList = doUpFilter(cachedDataList, parentItem, originProjectName, level + 1, true);
+                        if (childList.size() == 1) {
+                            // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
+                            OtherInfo2 child = childList.get(0);
+                            if (child.getR().equals(parentItem.getR()) && (child.getV() != null ? child.getV().equals(parentItem.getW()) : child.getW().equals(parentItem.getV()))) {
+                                // 如果凭证一样 && 借贷相抵
+                                continue;
+                            }
+                        }
+                        if (!childList.isEmpty()){
+                            level+=1;
+                        }
+                        for (int i1 = 0; i1 < childList.size(); i1++) {
+                            OtherInfo2 child = childList.get(i1);
+                            child.setNo(parentItem.getNo() + "-" + (i1 + 1));
+                            deque.add(child);
+                        }
+                    }
                 }
             }
+        }
+
+        return result;
+    }
+
+
+    public static List<OtherInfo2> FindFirstLevel(List<OtherInfo2> startCollect, String z, String originProjectName){
+        // 解析金额
+        BigDecimal balance = covertZToBalance(z);
+        // 消除同一凭证能够借贷相抵的数据
+        List<OtherInfo2> sortedStartCollect = disSameX(startCollect, originProjectName);
+        // 先找一下能够直接借贷相抵的数据
+        FindFirstListResult firstListResult = findFirstList(z, balance, sortedStartCollect);
+        List<OtherInfo2> OtherInfo2s =firstListResult.getOtherInfo2s();
+        OtherInfo2 temporaryResult = firstListResult.getTemporaryResult();
+        List<OtherInfo2> result;
+        // 能找到直接相抵就停止找
+        if (OtherInfo2s.isEmpty() && temporaryResult != null) {
+            result = new ArrayList<>();
+            result.add(temporaryResult);
         } else {
-            for (int i = 0; i < finalResult.size(); i++) {
-                OtherInfo2 parentItem = finalResult.get(i);
-                parentItem.setLevel(level + 1);
-                parentItem.setNo(String.valueOf(i + 1));
-                result.add(parentItem);
-                find(result, cachedDataList, parentItem, originProjectName, level + 1, isOpenFindUp);
-            }
+            // 找不到就得开始过滤查找
+            result = doFilter(sortedStartCollect);
         }
         return result;
     }
 
-    public static void find(List<OtherInfo2> result, List<OtherInfo2> cachedDataList, OtherInfo2 parentItem, String originProjectName, int level, boolean isOpenFindUp) {
+    public static void find(Deque<OtherInfo2> deque, List<OtherInfo2> result, List<OtherInfo2> cachedDataList, OtherInfo2 parentItem, String originProjectName, int level, boolean isOpenFindUp) {
         List<OtherInfo2> childList = doUpFilter(cachedDataList, parentItem, originProjectName, level + 1, isOpenFindUp);
         if (childList.size() == 1) {
-            // 如果只是返回了一条，证明两种：1他没有子集 || 2他的子集也是一条
+            // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
             OtherInfo2 child = childList.get(0);
             if (child.getR().equals(parentItem.getR()) && (child.getV() != null ? child.getV().equals(parentItem.getW()) : child.getW().equals(parentItem.getV()))) {
                 // 如果凭证一样 && 借贷相抵
@@ -179,10 +188,70 @@ public class Main2 implements ReadListener<Info> {
         }
         for (int i1 = 0; i1 < childList.size(); i1++) {
             OtherInfo2 child = childList.get(i1);
-            child.setLevel(child.getLevel() == null ? parentItem.getLevel() + 1 : child.getLevel());
+//            child.setLevel(child.getLevel() == null ? parentItem.getLevel() + 1 : child.getLevel());
+            child.setLevel(level);
             child.setNo(parentItem.getNo() + "-" + (i1 + 1));
+            deque.push(child);
         }
         result.addAll(childList);
+    }
+
+    @Data
+    public static class FindFirstListResult {
+        private OtherInfo2 temporaryResult;
+        List<OtherInfo2> OtherInfo2s;
+        public FindFirstListResult(){
+            this.temporaryResult = null;
+            this.OtherInfo2s = new ArrayList<>();
+        }
+    }
+
+    public static BigDecimal covertZToBalance(String z){
+        BigDecimal balance;
+        try {
+            balance = new BigDecimal(z.replace(",", "").replace("(", "").replace(")", ""));
+        } catch (Exception e) {
+            balance = BigDecimal.ZERO;
+        }
+        return balance;
+    }
+
+    public static FindFirstListResult findFirstList(String z, BigDecimal balance, List<OtherInfo2> sortedStartCollect){
+        FindFirstListResult result = new FindFirstListResult();
+        if (z.contains("(") || z.contains(")")) {
+            // 余额为负去贷找
+            List<OtherInfo2> first = new ArrayList<>();
+            boolean flag = true;
+            for (org.example.func_three.OtherInfo2 OtherInfo2 : sortedStartCollect) {
+                if (flag && OtherInfo2.getW() != null && balance.compareTo(OtherInfo2.getW()) == 0) {
+                    result.setTemporaryResult(OtherInfo2);
+                    flag = false;
+                } else {
+                    first.add(OtherInfo2);
+                }
+            }
+            if (first.size() != sortedStartCollect.size()) {
+                // 证明已经被过滤
+                result.setOtherInfo2s(doFilter(first));
+            }
+        } else {
+            // 余额为正去借找
+            List<OtherInfo2> first = new ArrayList<>();
+            boolean flag = true;
+            for (org.example.func_three.OtherInfo2 OtherInfo2 : sortedStartCollect) {
+                if (flag && OtherInfo2.getV() != null && balance.compareTo(OtherInfo2.getV()) == 0) {
+                    result.setTemporaryResult(OtherInfo2);
+                    flag = false;
+                } else {
+                    first.add(OtherInfo2);
+                }
+            }
+            if (first.size() != sortedStartCollect.size()) {
+                // 证明已经被过滤
+                result.setOtherInfo2s(doFilter(first));
+            }
+        }
+        return result;
     }
 
     public static List<OtherInfo2> disSameX(List<OtherInfo2> list, String originProjectName) {
@@ -238,7 +307,6 @@ public class Main2 implements ReadListener<Info> {
                 .collect(Collectors.toList());
         List<OtherInfo2> result = new ArrayList<>();
         if (collect.isEmpty()) {
-            // 证明只能找到自己
         } else {
             if (collect.size() > 1) {
                 item.setErrorMsg("存在多个匹配情况");
@@ -246,6 +314,7 @@ public class Main2 implements ReadListener<Info> {
             }
             // 同一凭证下，借贷需要抵消的数据
             List<OtherInfo2> otherInfo2s = new ArrayList<>();
+            // 往下找下一个之前先添加自己
             for (OtherInfo2 otherInfo2 : collect) {
                 List<OtherInfo2> collect1 = cachedDataList.stream()
                         .filter(i -> i.getZ().equals(otherInfo2.getZ()))
@@ -274,35 +343,26 @@ public class Main2 implements ReadListener<Info> {
                     // 计算上半部和是否为0
                     BigDecimal collect1Sum = findCollect1.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(curr.getV() != null ? curr.getV() : BigDecimal.ZERO).subtract(curr.getW() != null ? curr.getW() : BigDecimal.ZERO), (l, r) -> l);
                     if (collect1Sum.compareTo(BigDecimal.ZERO) == 0) {
-                        otherInfo2sup = doMain(
-                                true,
-                                cachedDataList,
+                        otherInfo2sup = FindFirstLevel(
                                 collect1.subList(0, indexOf),
                                 otherInfo2.getV() != null ? String.valueOf(otherInfo2.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo2.getW()).toString(),
-                                originProjectName,
-                                level
+                                originProjectName
                         );
                         if (otherInfo2sup.isEmpty() && indexOf != (collect1.size() - 1)) {
-                            otherInfo2slow = doMain(
-                                    true,
-                                    cachedDataList,
+                            otherInfo2slow = FindFirstLevel(
                                     collect1.subList(indexOf + 1, collect1.size()),
                                     otherInfo2.getV() != null ? String.valueOf(otherInfo2.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo2.getW()).toString(),
-                                    originProjectName,
-                                    level
+                                    originProjectName
                             );
                         }
                     } else {
                         otherInfo2sup.add(otherInfo2);
                     }
                 } else {
-                    otherInfo2sup = doMain(
-                            true,
-                            cachedDataList,
+                    otherInfo2sup = FindFirstLevel(
                             findOne.stream().skip((long) findOne.size() - 1).collect(Collectors.toList()),
                             otherInfo2.getV() != null ? String.valueOf(otherInfo2.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo2.getW()).toString(),
-                            originProjectName,
-                            level
+                            originProjectName
                     );
                 }
                 otherInfo2s.addAll(otherInfo2sup.isEmpty() ? otherInfo2slow : otherInfo2sup);
@@ -334,7 +394,7 @@ public class Main2 implements ReadListener<Info> {
             BigDecimal W = OtherInfo2.getW();
             if (V != null) {
                 String realV = String.valueOf(V);
-                List<OtherInfo2> list = vMap.getOrDefault(realV, new ArrayList<>());
+                List<org.example.func_three.OtherInfo2> list = vMap.getOrDefault(realV, new ArrayList<>());
                 list.add(OtherInfo2);
                 vMap.put(realV, list);
             } else {
@@ -342,7 +402,7 @@ public class Main2 implements ReadListener<Info> {
             }
             if (W != null) {
                 String realW = String.valueOf(W);
-                List<OtherInfo2> list = WMap.getOrDefault(realW, new ArrayList<>());
+                List<org.example.func_three.OtherInfo2> list = WMap.getOrDefault(realW, new ArrayList<>());
                 list.add(OtherInfo2);
                 WMap.put(realW, list);
             } else {
@@ -393,7 +453,7 @@ public class Main2 implements ReadListener<Info> {
     }
 
     public static void organizeData(List<OtherInfo2> collect) {
-        for (org.example.func_two.OtherInfo2 OtherInfo2 : collect) {
+        for (org.example.func_three.OtherInfo2 OtherInfo2 : collect) {
             try {
                 // 借方金额
                 BigDecimal V = OtherInfo2.getV() == null ? null : OtherInfo2.getV().equals(BigDecimal.ZERO) ? null : OtherInfo2.getV();
