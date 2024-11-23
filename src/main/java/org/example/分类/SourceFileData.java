@@ -3,16 +3,18 @@ package org.example.分类;
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class SourceFileData {
     private String NAME;
     private String LEDGER_ID;
     private String PERIOD_NAME; 
-    private String CURRENCY_CODE; 
-    private String YEAR_BEGIN_CR; 
-    private String YEAR_BEGIN_DR; 
-    private String YTD_CR; 
-    private String YTD_DR; 
+    private String CURRENCY_CODE;
+    private BigDecimal YEAR_BEGIN_CR;
+    private BigDecimal YEAR_BEGIN_DR;
+    private BigDecimal YTD_CR;
+    private BigDecimal YTD_DR;
     private String PERIOD_CR; 
     private String PERIOD_DR;
     @ExcelProperty("机构代码")
@@ -59,4 +61,6 @@ public class SourceFileData {
     private String transactionObjectCode;
     @ExcelProperty("交易对象名称")
     private String transactionObjectName;
+    @ExcelProperty("匹配字段")
+    private String match;
 }

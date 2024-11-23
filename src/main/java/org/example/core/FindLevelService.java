@@ -1,40 +1,29 @@
-package org.example.func_three;
+package org.example.core;
 
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.PageReadListener;
-import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import lombok.Data;
 import org.example.Assistant;
-import org.example.Info;
+import org.example.func_three.Main3;
+import org.example.func_three.OtherInfo3;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * TODO 只对B和C的进行对比，如果是系统的就不往上追
- * TODO 并且要展示最初的项目名称
- */
-public class Main3 implements ReadListener<Info> {
-    /**
-     * 每隔5条存储数据库，实际使用中可以100条，然后清理list ，方便内存回收
-     */
-    private static final int BATCH_COUNT = 80000;
-
-
-    public static void main(String[] args) {
-        List<OtherInfo3> cachedDataList = new ArrayList<>(BATCH_COUNT);
+public class FindLevelService {
+    public void doFind(){
+        List<OtherInfo3> dbList = new ArrayList<>();
         List<Assistant> assistantList = new ArrayList<>();
         String fileName1 = "src/main/java/org/example/excel/往来科目明细.xlsx";
         String fileName2 = "src/main/java/org/example/excel/副本厦门往来清理跟进表-全匹配版 （禹洲泉州）-标识.xlsx";
         EasyExcel.read(fileName1, OtherInfo3.class, new PageReadListener<OtherInfo3>(dataList -> {
             for (OtherInfo3 item : dataList) {
                 organizeDataItem(item);
-                cachedDataList.add(item);
+                dbList.add(item);
             }
         })).sheet().doRead();
         EasyExcel.read(fileName2, Assistant.class, new PageReadListener<Assistant>(assistantList::addAll))
@@ -52,12 +41,12 @@ public class Main3 implements ReadListener<Info> {
                 continue;
             }
             String projectName = assistant.getR();
-            List<OtherInfo3> startCollect = cachedDataList.stream()
+            List<OtherInfo3> startCollect = dbList.stream()
                     .filter(item -> item.getZ().equals(projectName))
                     .collect(Collectors.toList());
             List<OtherInfo3> result = doMain(
                     true,
-                    cachedDataList,
+                    dbList,
                     startCollect,
                     assistant.getZ(),
                     projectName);
@@ -130,7 +119,7 @@ public class Main3 implements ReadListener<Info> {
         // 消除同一凭证能够借贷相抵的数据
         List<OtherInfo3> sortedStartCollect = disSameX(startCollect, originProjectName);
         // 先找一下能够直接借贷相抵的数据
-        FindFirstListResult firstListResult = findFirstList(z, balance, sortedStartCollect);
+        Main3.FindFirstListResult firstListResult = findFirstList(z, balance, sortedStartCollect);
         List<OtherInfo3> otherInfo3s =firstListResult.getOtherInfo3s();
         OtherInfo3 temporaryResult = firstListResult.getTemporaryResult();
         List<OtherInfo3> result;
@@ -186,8 +175,8 @@ public class Main3 implements ReadListener<Info> {
         return balance;
     }
 
-    public static FindFirstListResult findFirstList(String z, BigDecimal balance, List<OtherInfo3> sortedStartCollect){
-        FindFirstListResult result = new FindFirstListResult();
+    public static Main3.FindFirstListResult findFirstList(String z, BigDecimal balance, List<OtherInfo3> sortedStartCollect){
+        Main3.FindFirstListResult result = new Main3.FindFirstListResult();
         if (z.contains("(") || z.contains(")")) {
             // 余额为负去贷找
             List<OtherInfo3> first = new ArrayList<>();
@@ -477,14 +466,5 @@ public class Main3 implements ReadListener<Info> {
             }
         }
         return start;
-    }
-
-    @Override
-    public void invoke(Info info, AnalysisContext analysisContext) {
-    }
-
-    @Override
-    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
-
     }
 }

@@ -1,15 +1,22 @@
 package org.example.分类;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import org.example.Assistant;
-import org.example.func_two.Main2;
-import org.example.func_two.OtherInfo2;
+import org.example.func_three.Assistant3;
+import org.example.func_three.Main3;
+import org.example.func_three.OtherInfo3;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,39 +26,97 @@ import java.util.stream.Collectors;
 /**
  * 分裂
  */
+@Service
 public class FindABCD {
-    public static void main(String[] args) {
-        doFindABDC("src/main/java/org/example/excel/副本厦门往来清理跟进表-全匹配版 （禹洲泉州）-标识.xlsx");
-    }
-
-
-    public static void doFindABDC(String sourceFile){
+    @Resource
+    private JdbcTemplate jdbcTemplate;
+    public void doFindABDC(String sourceFile){
         List<AssistantResult> excelExcelData = new ArrayList<>();
-        List<OtherInfo2> cachedDataList = new ArrayList<>();
-
-        String fileName1 = "src/main/java/org/example/excel/往来科目明细.xlsx";
-        EasyExcel.read(fileName1, OtherInfo2.class, new PageReadListener<OtherInfo2>(dataList -> {
-            Main2.organizeData(dataList);
-            cachedDataList.addAll(dataList);
-        })).sheet().doRead();
         List<SourceFileData> sourceFileDataList = new ArrayList<>();
-        EasyExcel.read(sourceFile, SourceFileData.class, new PageReadListener<SourceFileData>(sourceFileDataList::addAll)).sheet("往来清理明细表").doRead();
-        List<SourceFileData> dataList = sourceFileDataList.stream().skip(1).collect(Collectors.toList());
-
+        EasyExcel.read(sourceFile, SourceFileData.class, new PageReadListener<SourceFileData>(dataList -> {
+            dataList.forEach(i -> {
+                String match = i.getSEGMENT1_NAME() + "." +
+                        i.getSEGMENT2_NAME() + "." +
+                        i.getSEGMENT3_NAME() + "." +
+                        i.getSEGMENT4_NAME() + "." +
+                        i.getSEGMENT5_NAME() + "." +
+                        i.getSEGMENT6_NAME() + "." +
+                        i.getSEGMENT7_NAME() + "." +
+                        i.getSEGMENT8_NAME() + "." +
+                        i.getSEGMENT9_NAME() + "." +
+                        i.getSEGMENT10_NAME() + "." +
+                        i.getTransactionObjectCode() + "." +
+                        i.getTransactionObjectName() + ".";
+                i.setMatch(match);
+                sourceFileDataList.add(i);
+            });
+        })).sheet("sheet1").doRead();
+        List<AssistantResult> dataList = sourceFileDataList
+                .stream()
+                .collect(Collectors.groupingBy(SourceFileData::getMatch))
+                .values()
+                .stream()
+                .reduce(new ArrayList<>(),(prev, curr) ->{
+                    AssistantResult assistantResult = new AssistantResult();
+                    SourceFileData sourceFileData = curr.get(0);
+                    assistantResult.setField(sourceFileData.getMatch());
+                    BigDecimal money = curr.stream().reduce(
+                            BigDecimal.ZERO,
+                            (iprev, icurr) -> icurr.getYEAR_BEGIN_DR().subtract(icurr.getYEAR_BEGIN_CR()).add(icurr.getYTD_DR()).subtract(icurr.getYTD_CR()),
+                            (l, r) -> l);
+                    assistantResult.setMoney(money);
+                    prev.add(assistantResult);
+                    return prev;
+                },(l,r) -> l);
+        List<Assistant3> cachedDataList = new ArrayList<>();
+        for (AssistantResult assistantResult : dataList) {
+            Assistant3 assistant3 = new Assistant3();
+            assistant3.setZ(assistantResult.getMoney() == null
+                    ? ""
+                    : assistantResult.getMoney().compareTo(BigDecimal.ZERO) < 0
+                    ? "("+ assistantResult.getMoney() +")"
+                    : assistantResult.getMoney().toString());
+            assistant3.setR(assistantResult.getField());
+            cachedDataList.add(assistant3);
+        }
         for (int i = 0; i < dataList.size(); i++) {
-            SourceFileData assistant = dataList.get(i);
-
+            Assistant3 assistant = cachedDataList.get(i);
+            AssistantResult assistantResult = dataList.get(i);
             String z = assistant.getZ();
             if (z == null) {
-                System.out.println("z 为null 当前月无需处理");
                 continue;
             }
             String projectName = assistant.getR();
-            List<OtherInfo2> startCollect = cachedDataList.stream()
-                    .filter(item -> item.getZ().equals(projectName))
-                    .collect(Collectors.toList());
-            List<OtherInfo2> result = Main2.doMain(false, cachedDataList, startCollect, assistant.getZ(),projectName,0);
-            AssistantResult assistantResult;
+            String sql =  "select * from z where z.\"公司段代码\" = " + assistantResult.getField();
+            List<OtherInfo3> startCollect = jdbcTemplate.query(sql, new RowMapper<OtherInfo3>() {
+                @Override
+                public OtherInfo3 mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    OtherInfo3 info = new OtherInfo3();
+                    info.setA(String.valueOf(rowNum));
+                    // 年 + 月 + 凭证
+                    DateTime date = DateUtil.date(rs.getDate("有效日期"));
+                    int year = date.year();
+                    int month = date.month();
+                    int code = rs.getInt("单据编号");
+                    info.setQ(code);
+                    info.setR(year+"-"+month+"-"+code);
+                    info.setV(rs.getBigDecimal("输入借方"));
+                    info.setW(rs.getBigDecimal("输入贷方"));
+                    // 有效日期
+                    info.setN(date);
+                    // 有借就是 借方向
+                    info.setX(info.getV() != null ? "借" : "贷");
+                    info.setZ(rs.getString("账户组合"));
+                    return info;
+                }
+            });
+            List<OtherInfo3> result = Main3.doMain(
+                    false,
+                    null,
+                    startCollect,
+                    assistant.getZ(),
+                    projectName
+            );
             if (result.isEmpty()) {
                 // 证明全部匹配
                 assistantResult = findABCD(startCollect, assistant);
@@ -67,6 +132,7 @@ public class FindABCD {
         }
     }
 
+
     public static BigDecimal getZValue(String z) {
         BigDecimal balance;
         try {
@@ -81,16 +147,16 @@ public class FindABCD {
         return balance;
     }
 
-    public static AssistantResult findABCD(List<OtherInfo2> result, Assistant assistant) {
+    public static AssistantResult findABCD(List<OtherInfo3> result, Assistant3 assistant) {
         // 通过总账日期进行分类
         AssistantResult assistantResult = new AssistantResult();
         assistantResult.setField(assistant.getR());
         assistantResult.setIndex(assistant.getA());
         String z = assistant.getZ();
         // 期初
-        List<OtherInfo2> up = new ArrayList<>();
+        List<OtherInfo3> up = new ArrayList<>();
         // 本期
-        List<OtherInfo2> low = new ArrayList<>();
+        List<OtherInfo3> low = new ArrayList<>();
         result.forEach(item -> {
             Date time = item.getN();
             Date date = DateUtil.parse("2022-04-30", "yyyy-MM-dd");
@@ -134,8 +200,8 @@ public class FindABCD {
     /**
      * 判断是否属于ABC类
      */
-    public static void findABC(List<OtherInfo2> list, AssistantResult assistantResult) {
-        Map<String, List<OtherInfo2>> collect = list.stream().collect(Collectors.groupingBy(OtherInfo2::getS));
+    public static void findABC(List<OtherInfo3> list, AssistantResult assistantResult) {
+        Map<String, List<OtherInfo3>> collect = list.stream().collect(Collectors.groupingBy(OtherInfo3::getS));
         int systemSize = 0;
         int personalSize = 0;
         // 遍历来源字段

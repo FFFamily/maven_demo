@@ -6,7 +6,7 @@ import lombok.Data;
  * 辅助
  */
 @Data
-public class Assistant2 {
+public class Assistant3 {
     private String a;
     private String b;
     private String c;

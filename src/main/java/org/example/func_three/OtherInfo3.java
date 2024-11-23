@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-public class OtherInfo2 {
+public class OtherInfo3 {
     // 层级
 //    @ExcelProperty("阶级")
     @ExcelProperty("编号")
