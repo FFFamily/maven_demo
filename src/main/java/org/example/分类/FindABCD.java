@@ -30,36 +30,57 @@ import java.util.stream.Collectors;
 public class FindABCD {
     @Resource
     private JdbcTemplate jdbcTemplate;
+
+    public String getValue(String str){
+        return str == null ? "" : str;
+    }
+
+    private static final List<SourceFileData> sourceFileDataList = new ArrayList<>();
+
     public void doFindABDC(String sourceFile){
+        System.out.println("开始执行");
         List<AssistantResult> excelExcelData = new ArrayList<>();
-        List<SourceFileData> sourceFileDataList = new ArrayList<>();
+//        List<SourceFileData> sourceFileDataList = new ArrayList<>();
+
         EasyExcel.read(sourceFile, SourceFileData.class, new PageReadListener<SourceFileData>(dataList -> {
             dataList.forEach(i -> {
-                String match = i.getSEGMENT1_NAME() + "." +
-                        i.getSEGMENT2_NAME() + "." +
-                        i.getSEGMENT3_NAME() + "." +
-                        i.getSEGMENT4_NAME() + "." +
-                        i.getSEGMENT5_NAME() + "." +
-                        i.getSEGMENT6_NAME() + "." +
-                        i.getSEGMENT7_NAME() + "." +
-                        i.getSEGMENT8_NAME() + "." +
-                        i.getSEGMENT9_NAME() + "." +
-                        i.getSEGMENT10_NAME() + "." +
-                        i.getTransactionObjectCode() + "." +
-                        i.getTransactionObjectName() + ".";
+//                String match = getValue(i.getSEGMENT1_NAME())  + "." +
+//                        getValue(i.getSEGMENT2_NAME()) + "." +
+//                        getValue(i.getSEGMENT3_NAME()) + "." +
+//                        getValue(i.getSEGMENT4_NAME()) + "." +
+//                        getValue(i.getSEGMENT5_NAME()) + "." +
+//                        getValue(i.getSEGMENT6_NAME()) + "." +
+//                        getValue(i.getSEGMENT7_NAME()) + "." +
+//                        getValue(i.getSEGMENT8_NAME()) + "." +
+//                        getValue(i.getSEGMENT9_NAME()) + "." +
+//                        getValue(i.getSEGMENT10_NAME()) + ".";
+//                        getValue(i.getTransactionObjectCode()) + "." +
+//                        getValue(i.getTransactionObjectName());
+                String match = getValue(i.getSEGMENT1())  + "." +
+                        getValue(i.getSEGMENT2()) + "." +
+                        getValue(i.getSEGMENT3()) + "." +
+                        getValue(i.getSEGMENT4()) + "." +
+                        getValue(i.getSEGMENT5()) + "." +
+                        getValue(i.getSEGMENT6()) + "." +
+                        getValue(i.getSEGMENT7()) + "." +
+                        getValue(i.getSEGMENT8()) + "." +
+                        getValue(i.getSEGMENT9()) + "." +
+                        getValue(i.getSEGMENT10());
                 i.setMatch(match);
                 sourceFileDataList.add(i);
             });
-        })).sheet("sheet1").doRead();
+        })).sheet("Sheet1").doRead();
+        System.out.println("解析excel完成");
         List<AssistantResult> dataList = sourceFileDataList
                 .stream()
-                .collect(Collectors.groupingBy(SourceFileData::getMatch))
+                .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectCode()))
                 .values()
                 .stream()
                 .reduce(new ArrayList<>(),(prev, curr) ->{
                     AssistantResult assistantResult = new AssistantResult();
                     SourceFileData sourceFileData = curr.get(0);
-                    assistantResult.setField(sourceFileData.getMatch());
+                    assistantResult.setFieldCode(sourceFileData.getMatch());
+                    assistantResult.setTransactionObjectCode(sourceFileData.getTransactionObjectCode());
                     BigDecimal money = curr.stream().reduce(
                             BigDecimal.ZERO,
                             (iprev, icurr) -> icurr.getYEAR_BEGIN_DR().subtract(icurr.getYEAR_BEGIN_CR()).add(icurr.getYTD_DR()).subtract(icurr.getYTD_CR()),
@@ -76,7 +97,7 @@ public class FindABCD {
                     : assistantResult.getMoney().compareTo(BigDecimal.ZERO) < 0
                     ? "("+ assistantResult.getMoney() +")"
                     : assistantResult.getMoney().toString());
-            assistant3.setR(assistantResult.getField());
+            assistant3.setR(assistantResult.getFieldCode());
             cachedDataList.add(assistant3);
         }
         for (int i = 0; i < dataList.size(); i++) {
@@ -87,7 +108,12 @@ public class FindABCD {
                 continue;
             }
             String projectName = assistant.getR();
-            String sql =  "select * from z where z.\"公司段代码\" = " + assistantResult.getField();
+            String sql =  "select * from ZDPROD_EXPDP_20241120 z where z.\"账户组合\" = '" + assistantResult.getFieldCode()+"'";
+            if (assistantResult.getTransactionObjectCode() != null) {
+                sql +=  "and z.\"交易对象\" = '" + assistantResult.getTransactionObjectCode() +"'";
+            }else {
+                sql +=  "and z.\"交易对象\" is null";
+            }
             List<OtherInfo3> startCollect = jdbcTemplate.query(sql, new RowMapper<OtherInfo3>() {
                 @Override
                 public OtherInfo3 mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -104,6 +130,7 @@ public class FindABCD {
                     info.setW(rs.getBigDecimal("输入贷方"));
                     // 有效日期
                     info.setN(date);
+                    info.setS(rs.getString("来源"));
                     // 有借就是 借方向
                     info.setX(info.getV() != null ? "借" : "贷");
                     info.setZ(rs.getString("账户组合"));
@@ -124,12 +151,17 @@ public class FindABCD {
                 assistantResult = findABCD(result, assistant);
             }
             excelExcelData.add(assistantResult);
+            if (i == 5){
+                break;
+            }
+            System.out.println("处理完成");
         }
         String resultFileName = "ABCD分类-"+System.currentTimeMillis() + ".xlsx";
         try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
             WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(AssistantResult.class).build();
             excelWriter.write(excelExcelData, writeSheet1);
         }
+        System.out.println("结束");
     }
 
 
@@ -152,6 +184,7 @@ public class FindABCD {
         AssistantResult assistantResult = new AssistantResult();
         assistantResult.setField(assistant.getR());
         assistantResult.setIndex(assistant.getA());
+        assistantResult.setMoney(getZValue(assistant.getZ()));
         String z = assistant.getZ();
         // 期初
         List<OtherInfo3> up = new ArrayList<>();
@@ -211,7 +244,8 @@ public class FindABCD {
             } else if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
                 personalSize += 1;
             } else {
-                throw new RuntimeException("额外的来源类型");
+                assistantResult.setType("E");
+//                throw new RuntimeException("额外的来源类型："+ form);
             }
         }
         if (systemSize != 0 && personalSize != 0) {

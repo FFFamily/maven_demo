@@ -59,10 +59,17 @@ public class AssistantResult {
 //    private String transactionObjectName;
     // 匹配字段
     @ColumnWidth(180)
+    @ExcelProperty("匹配字段")
     private String field;
+    @ExcelProperty("匹配字段编码")
+    private String fieldCode;
     // 金额
+    @ExcelProperty("余额")
     private BigDecimal money;
+    @ExcelProperty("来源")
+    private String transactionObjectCode;
     // 类型
+    @ExcelProperty("分类")
     private String type;
 
     private Integer isIncludeUp;

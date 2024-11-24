@@ -32,6 +32,8 @@ import static org.example.拼接excel.doMontageExcel.list;
 public class ExcelController {
     @Resource
     private JdbcTemplate jdbcTemplate;
+    @Resource
+    private FindABCD findABCD;
 
     @GetMapping("/demo1")
     public void test1(){
@@ -45,7 +47,7 @@ public class ExcelController {
     }
     @GetMapping("/findABCD")
     public void findABCD(){
-
+        findABCD.doFindABDC("src/main/java/org/example/分类/9月科目辅助余额表.xlsx");
     }
 
 
