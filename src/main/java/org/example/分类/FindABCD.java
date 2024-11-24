@@ -81,12 +81,15 @@ public class FindABCD {
                     AssistantResult assistantResult = new AssistantResult();
                     SourceFileData sourceFileData = curr.get(0);
                     assistantResult.setFieldCode(sourceFileData.getMatch());
+                    assistantResult.setForm(sourceFileData.getSEGMENT3_NAME());
                     assistantResult.setTransactionObjectCode(sourceFileData.getTransactionObjectCode());
+                    assistantResult.setField(sourceFileData.getMatchName());
                     BigDecimal money = curr.stream().reduce(
                             BigDecimal.ZERO,
                             (iprev, icurr) -> icurr.getYEAR_BEGIN_DR().subtract(icurr.getYEAR_BEGIN_CR()).add(icurr.getYTD_DR()).subtract(icurr.getYTD_CR()),
                             (l, r) -> l);
                     assistantResult.setMoney(money);
+
                     prev.add(assistantResult);
                     return prev;
                 },(l,r) -> l);
@@ -104,6 +107,7 @@ public class FindABCD {
         for (int i = 0; i < dataList.size(); i++) {
             Assistant3 assistant = cachedDataList.get(i);
             AssistantResult assistantResult = dataList.get(i);
+            assistantResult.setIndex(String.valueOf(i+1));
             String z = assistant.getZ();
             if (z == null) {
                 continue;
