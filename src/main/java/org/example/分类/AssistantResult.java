@@ -67,13 +67,12 @@ public class AssistantResult {
     @ExcelProperty("余额")
     private BigDecimal money;
 
-    @ExcelProperty("来源")
-    private String form;
-
     // 类型
     @ExcelProperty("分类")
     private String type;
-
+    @ExcelProperty("交易对象编码")
     private String transactionObjectCode;
+    @ExcelProperty("交易对象编码名称")
+    private String transactionObjectName;
     private Integer isIncludeUp;
 }

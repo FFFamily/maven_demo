@@ -81,8 +81,9 @@ public class FindABCD {
                     AssistantResult assistantResult = new AssistantResult();
                     SourceFileData sourceFileData = curr.get(0);
                     assistantResult.setFieldCode(sourceFileData.getMatch());
-                    assistantResult.setForm(sourceFileData.getSEGMENT3_NAME());
+//                    assistantResult.setForm(sourceFileData.getSEGMENT3_NAME());
                     assistantResult.setTransactionObjectCode(sourceFileData.getTransactionObjectCode());
+                    assistantResult.setTransactionObjectName(sourceFileData.getTransactionObjectName());
                     assistantResult.setField(sourceFileData.getMatchName());
                     BigDecimal money = curr.stream().reduce(
                             BigDecimal.ZERO,
