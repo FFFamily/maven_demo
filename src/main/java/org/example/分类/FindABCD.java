@@ -266,6 +266,8 @@ public class FindABCD {
             assistantResult.setType("A");
         } else if (personalSize != 0) {
             assistantResult.setType("B");
+        }else {
+            assistantResult.setType("所有数据借贷抵消");
         }
     }
 
