@@ -352,7 +352,7 @@ public class Main3 implements ReadListener<Info> {
         if (size == 0) {
             return new ArrayList<>();
         }
-        System.out.println("一共检索到" + size + "明细数据");
+//        System.out.println("一共检索到" + size + "明细数据");
         HashMap<String, List<OtherInfo3>> vMap = new HashMap<>();
         HashMap<String, List<OtherInfo3>> WMap = new HashMap<>();
         // 整理数据，并拿到起始索引

@@ -157,10 +157,7 @@ public class FindABCD {
                  findABCD(result, assistantResult,assistant);
             }
             excelExcelData.add(assistantResult);
-            if (i == 100){
-                break;
-            }
-            System.out.println("处理完成");
+            System.out.println("目前进度："+ i/dataList.size() * 100);
         }
         String resultFileName = "ABCD分类-"+System.currentTimeMillis() + ".xlsx";
         try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
