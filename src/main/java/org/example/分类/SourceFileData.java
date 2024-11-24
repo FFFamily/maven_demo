@@ -63,4 +63,5 @@ public class SourceFileData {
     private String transactionObjectName;
     @ExcelProperty("匹配字段")
     private String match;
+    private String matchName;
 }

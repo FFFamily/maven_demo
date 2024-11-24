@@ -44,19 +44,19 @@ public class FindABCD {
 
         EasyExcel.read(sourceFile, SourceFileData.class, new PageReadListener<SourceFileData>(dataList -> {
             dataList.forEach(i -> {
-//                String match = getValue(i.getSEGMENT1_NAME())  + "." +
-//                        getValue(i.getSEGMENT2_NAME()) + "." +
-//                        getValue(i.getSEGMENT3_NAME()) + "." +
-//                        getValue(i.getSEGMENT4_NAME()) + "." +
-//                        getValue(i.getSEGMENT5_NAME()) + "." +
-//                        getValue(i.getSEGMENT6_NAME()) + "." +
-//                        getValue(i.getSEGMENT7_NAME()) + "." +
-//                        getValue(i.getSEGMENT8_NAME()) + "." +
-//                        getValue(i.getSEGMENT9_NAME()) + "." +
-//                        getValue(i.getSEGMENT10_NAME()) + ".";
+                String matchField = getValue(i.getSEGMENT1_NAME())  + "." +
+                        getValue(i.getSEGMENT2_NAME()) + "." +
+                        getValue(i.getSEGMENT3_NAME()) + "." +
+                        getValue(i.getSEGMENT4_NAME()) + "." +
+                        getValue(i.getSEGMENT5_NAME()) + "." +
+                        getValue(i.getSEGMENT6_NAME()) + "." +
+                        getValue(i.getSEGMENT7_NAME()) + "." +
+                        getValue(i.getSEGMENT8_NAME()) + "." +
+                        getValue(i.getSEGMENT9_NAME()) + "." +
+                        getValue(i.getSEGMENT10_NAME()) + ".";
 //                        getValue(i.getTransactionObjectCode()) + "." +
 //                        getValue(i.getTransactionObjectName());
-                String match = getValue(i.getSEGMENT1())  + "." +
+                String matchFieldCode = getValue(i.getSEGMENT1())  + "." +
                         getValue(i.getSEGMENT2()) + "." +
                         getValue(i.getSEGMENT3()) + "." +
                         getValue(i.getSEGMENT4()) + "." +
@@ -66,7 +66,8 @@ public class FindABCD {
                         getValue(i.getSEGMENT8()) + "." +
                         getValue(i.getSEGMENT9()) + "." +
                         getValue(i.getSEGMENT10());
-                i.setMatch(match);
+                i.setMatch(matchFieldCode);
+                i.setMatchName(matchField);
                 sourceFileDataList.add(i);
             });
         })).sheet("Sheet1").doRead();
@@ -146,12 +147,12 @@ public class FindABCD {
             );
             if (result.isEmpty()) {
                 // 证明全部匹配
-                assistantResult = findABCD(startCollect, assistant);
+                 findABCD(startCollect, assistantResult,assistant);
             } else {
-                assistantResult = findABCD(result, assistant);
+                 findABCD(result, assistantResult,assistant);
             }
             excelExcelData.add(assistantResult);
-            if (i == 5){
+            if (i == 100){
                 break;
             }
             System.out.println("处理完成");
@@ -179,12 +180,12 @@ public class FindABCD {
         return balance;
     }
 
-    public static AssistantResult findABCD(List<OtherInfo3> result, Assistant3 assistant) {
+    public static AssistantResult findABCD(List<OtherInfo3> result,AssistantResult assistantResult, Assistant3 assistant) {
         // 通过总账日期进行分类
-        AssistantResult assistantResult = new AssistantResult();
-        assistantResult.setField(assistant.getR());
-        assistantResult.setIndex(assistant.getA());
-        assistantResult.setMoney(getZValue(assistant.getZ()));
+//        AssistantResult assistantResult = new AssistantResult();
+//        assistantResult.setField(assistant.getR());
+//        assistantResult.setIndex(assistant.getA());
+//        assistantResult.setMoney(getZValue(assistant.getZ()));
         String z = assistant.getZ();
         // 期初
         List<OtherInfo3> up = new ArrayList<>();
@@ -217,7 +218,7 @@ public class FindABCD {
                 // 如果期初余额为负 && 最终余额大于 期初，证明本期发生了加款
                 assistantResult.setType("D");
             } else if (upSum.compareTo(BigDecimal.ZERO) == 0 && totalSum.compareTo(upSum) == 0){
-                assistantResult.setType("");
+                assistantResult.setType("期初余额为0，最终余额为0，无法判断类型");
             } else {
                 // 期初为0也会到达
                 findABC(low, assistantResult);
@@ -239,13 +240,18 @@ public class FindABCD {
         int personalSize = 0;
         // 遍历来源字段
         for (String form : collect.keySet()) {
-            if (form.equals("物业收费系统") || form.equals("EMS") || form.equals("TMS资金接口") || form.equals("PS人力资源系统") || form.equals("物业ERP")) {
-                systemSize += 1;
-            } else if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
+//            if (form.equals("物业收费系统") || form.equals("EMS") || form.equals("TMS资金接口") || form.equals("PS人力资源系统") || form.equals("物业ERP")) {
+//                systemSize += 1;
+//            } else if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
+//                personalSize += 1;
+//            } else {
+//                assistantResult.setType("E");
+////                throw new RuntimeException("额外的来源类型："+ form);
+//            }
+            if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
                 personalSize += 1;
-            } else {
-                assistantResult.setType("E");
-//                throw new RuntimeException("额外的来源类型："+ form);
+            }else {
+                systemSize += 1;
             }
         }
         if (systemSize != 0 && personalSize != 0) {
