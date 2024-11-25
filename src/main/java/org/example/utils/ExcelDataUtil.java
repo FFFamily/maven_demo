@@ -21,7 +21,7 @@ public class ExcelDataUtil {
                         getValue(i.getSEGMENT7_NAME()) + "." +
                         getValue(i.getSEGMENT8_NAME()) + "." +
                         getValue(i.getSEGMENT9_NAME()) + "." +
-                        getValue(i.getSEGMENT10_NAME()) + ".";
+                        getValue(i.getSEGMENT10_NAME());
 //                        getValue(i.getTransactionObjectCode()) + "." +
 //                        getValue(i.getTransactionObjectName());
                 String matchFieldCode = getValue(i.getSEGMENT1())  + "." +

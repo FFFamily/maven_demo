@@ -67,9 +67,7 @@ public class FindABCD {
                 },(l,r) -> l);
         List<Assistant3> cachedDataList = new ArrayList<>();
         for (AssistantResult assistantResult : dataList) {
-            if (!assistantResult.getCompanyName().equals("禹洲物业服务有限公司泉州分公司")){
-                continue;
-            }
+
             Assistant3 assistant3 = new Assistant3();
             // 左前缀匹配
             String subjectName = assistantResult.getSubjectName();
@@ -88,6 +86,9 @@ public class FindABCD {
         for (int i = 0; i < dataList.size(); i++) {
             Assistant3 assistant = cachedDataList.get(i);
             AssistantResult assistantResult = dataList.get(i);
+            if (!assistantResult.getCompanyName().equals("禹洲物业服务有限公司泉州分公司")){
+                continue;
+            }
             assistantResult.setIndex(String.valueOf(i+1));
             String z = assistant.getZ();
             if (z == null) {
@@ -137,7 +138,7 @@ public class FindABCD {
                  findABCD(result, assistantResult,assistant);
             }
             excelExcelData.add(assistantResult);
-            System.out.println("目前进度："+ i/dataList.size() * 100);
+            System.out.println("当前位置："+i +" 一共有： "+dataList.size());
         }
         String resultFileName = "ABCD分类-"+System.currentTimeMillis() + ".xlsx";
         try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
