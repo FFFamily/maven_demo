@@ -11,6 +11,7 @@ import org.example.func_three.Assistant3;
 import org.example.func_three.Main3;
 import org.example.func_three.OtherInfo3;
 import org.example.utils.ExcelDataUtil;
+import org.example.分类.entity.DraftFormatTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.example.utils.ExcelDataUtil.getDraftFormatTemplateExcelData;
 
 /**
  * 分裂
@@ -42,6 +45,7 @@ public class FindABCD {
     public void doFindABDC(String sourceFile){
         List<AssistantResult> excelExcelData = new ArrayList<>();
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData(sourceFile,"Sheet1");
+        Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("", "明细 原版");
         List<AssistantResult> dataList = sourceFileDataList
                 .stream()
                 .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectCode()))
@@ -54,17 +58,25 @@ public class FindABCD {
                     assistantResult.setFieldCode(sourceFileData.getMatch());
                     assistantResult.setSubjectName(sourceFileData.getSEGMENT3_NAME());
 //                    assistantResult.setForm(sourceFileData.getSEGMENT3_NAME());
-                    assistantResult.setTransactionObjectCode(sourceFileData.getTransactionObjectCode());
-                    assistantResult.setTransactionObjectName(sourceFileData.getTransactionObjectName());
+                    String transactionObjectCode = sourceFileData.getTransactionObjectCode();
+                    String transactionObjectName = sourceFileData.getTransactionObjectName();
+                    assistantResult.setTransactionObjectCode(transactionObjectCode);
+                    assistantResult.setTransactionObjectName(transactionObjectName);
                     assistantResult.setField(sourceFileData.getMatchName());
                     BigDecimal money = curr.stream().reduce(
                             BigDecimal.ZERO,
                             (iprev, icurr) -> icurr.getYEAR_BEGIN_DR().subtract(icurr.getYEAR_BEGIN_CR()).add(icurr.getYTD_DR()).subtract(icurr.getYTD_CR()),
                             (l, r) -> l);
                     assistantResult.setMoney(money);
+                    String key =  transactionObjectCode.substring(transactionObjectCode.indexOf(":"))+"."+transactionObjectName;
+                    DraftFormatTemplate draftFormatTemplate = mapping.get(key);
+                    assistantResult.setIsOrigin(draftFormatTemplate.getO());
+                    assistantResult.setCustomerType(draftFormatTemplate.getT());
                     prev.add(assistantResult);
                     return prev;
                 },(l,r) -> l);
+
+
         List<Assistant3> cachedDataList = new ArrayList<>();
         for (AssistantResult assistantResult : dataList) {
 
@@ -123,21 +135,12 @@ public class FindABCD {
             });
             String form = startCollect.stream().map(OtherInfo3::getS).distinct().collect(Collectors.joining("、"));
             assistantResult.setForm(form);
-            List<OtherInfo3> result = Main3.doMain(
-                    false,
-                    false,
-                    null,
-                    startCollect,
-                    assistant.getZ(),
-                    projectName
-            );
-            if (result.isEmpty()) {
-                // 证明全部匹配
-                 findABCD(startCollect, assistantResult,assistant);
-            } else {
-                 findABCD(result, assistantResult,assistant);
-            }
+            doFind(startCollect,assistant,projectName,assistantResult,true);
+            doFind(startCollect,assistant,projectName,assistantResult,false);
             excelExcelData.add(assistantResult);
+            if (i == 10000){
+                break;
+            }
             System.out.println("当前位置："+i +" 一共有： "+dataList.size());
         }
         String resultFileName = "ABCD分类-"+System.currentTimeMillis() + ".xlsx";
@@ -146,6 +149,29 @@ public class FindABCD {
             excelWriter.write(excelExcelData, writeSheet1);
         }
         System.out.println("结束");
+    }
+
+    public static void doFind(List<OtherInfo3> startCollect,Assistant3 assistant,String projectName,AssistantResult assistantResult,Boolean isFindAll){
+        List<OtherInfo3> result = Main3.doMain(
+                false,
+                isFindAll,
+                null,
+                startCollect,
+                assistant.getZ(),
+                projectName
+        );
+        String type;
+        if (result.isEmpty()) {
+            // 证明全部匹配
+            type = findABCD(startCollect, assistantResult,assistant);
+        } else {
+            type = findABCD(result, assistantResult,assistant);
+        }
+        if (isFindAll){
+            assistantResult.setType(type);
+        }else {
+            assistantResult.setOneLevelType(type);
+        }
     }
 
 
@@ -163,7 +189,7 @@ public class FindABCD {
         return balance;
     }
 
-    public static AssistantResult findABCD(List<OtherInfo3> result,AssistantResult assistantResult, Assistant3 assistant) {
+    public static String findABCD(List<OtherInfo3> result,AssistantResult assistantResult, Assistant3 assistant) {
         // 通过总账日期进行分类
 //        AssistantResult assistantResult = new AssistantResult();
 //        assistantResult.setField(assistant.getR());
@@ -186,38 +212,41 @@ public class FindABCD {
         });
         // 如果全部都在期初，那么就是归属D类
         if (!up.isEmpty() && low.isEmpty()) {
-            assistantResult.setIsIncludeUp(1);
-            assistantResult.setType("D");
+//            assistantResult.setIsIncludeUp(1);
+//            assistantResult.setType("D");
+            return "D";
         } else if (!up.isEmpty()) {
-            assistantResult.setIsIncludeUp(1);
+//            assistantResult.setIsIncludeUp(1);
             // 最终余额
             BigDecimal totalSum = getZValue(z);
             // 期初余额
             BigDecimal upSum = up.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(curr.getV() != null ? curr.getV() : BigDecimal.ZERO).subtract(curr.getW() != null ? curr.getW() : BigDecimal.ZERO), (l, r) -> l);
             if (upSum.compareTo(BigDecimal.ZERO) > 0 && totalSum.compareTo(upSum) <= 0) {
                 // 如果期初余额为正 && 最终余额小于 期初，证明本期发生了扣款
-                assistantResult.setType("D");
+//                assistantResult.setType("D");
+                return "D";
             } else if (upSum.compareTo(BigDecimal.ZERO) < 0 && totalSum.compareTo(upSum) >= 0) {
                 // 如果期初余额为负 && 最终余额大于 期初，证明本期发生了加款
-                assistantResult.setType("D");
+//                assistantResult.setType("D");
+                return "D";
             } else if (upSum.compareTo(BigDecimal.ZERO) == 0 && totalSum.compareTo(upSum) == 0){
-                assistantResult.setType("无法判断");
+//                assistantResult.setType("无法判断");
+                return "无法判断";
             } else {
                 // 期初为0也会到达
-                findABC(low, assistantResult);
+                return findABC(low, assistantResult);
             }
         } else {
             // 都是本期的
-            findABC(low, assistantResult);
+            return findABC(low, assistantResult);
         }
-        return assistantResult;
     }
 
 
     /**
      * 判断是否属于ABC类
      */
-    public static void findABC(List<OtherInfo3> list, AssistantResult assistantResult) {
+    public static String findABC(List<OtherInfo3> list, AssistantResult assistantResult) {
         Map<String, List<OtherInfo3>> collect = list.stream().collect(Collectors.groupingBy(OtherInfo3::getS));
         int systemSize = 0;
         int personalSize = 0;
@@ -239,13 +268,17 @@ public class FindABCD {
         }
         if (systemSize != 0 && personalSize != 0) {
             // 人工 + 系统
-            assistantResult.setType("C");
+//            assistantResult.setType("C");
+            return "C";
         } else if (systemSize != 0) {
-            assistantResult.setType("A");
+//            assistantResult.setType("A");
+            return "A";
         } else if (personalSize != 0) {
-            assistantResult.setType("B");
+//            assistantResult.setType("B");
+            return "B";
         }else {
-            assistantResult.setType("所有数据借贷抵消");
+//            assistantResult.setType("所有数据借贷抵消");
+            return "所有数据借贷抵消";
         }
     }
 

@@ -30,19 +30,17 @@ public class FindDiffExcel {
         list1.stream()
                 .sorted((a, b) -> {
                     // step1 对公司名称拼音的首字母进行排序
-                    String[] al = PinyinUtil.getFirstLetter(a.getSort1(), ",").split(",");
-                    String[] bl = PinyinUtil.getFirstLetter(b.getSort1(), ",").split(",");
-                    int pinyinSize = Math.min(al.length,bl.length);
-                    for (int i = 0; i < pinyinSize; i++) {
-                        int aIndex = al[i].charAt(0) - 'a';
-                        int bIndex = bl[i].charAt(0) - 'a';
-                        if (aIndex == bIndex) {
-                            continue;
-                        }
-                        return aIndex - bIndex;
+                    int sortRes1 = sortPinYin(a.getSort1(), b.getSort1());
+                    if (sortRes1 != 0){
+                        return sortRes1;
                     }
                     // step2 对科目名称排序
-                    return 0;
+                    int sortRes2 = sortPinYin(a.getSort2(), b.getSort2());
+                    if (sortRes2 != 0){
+                        return sortRes2;
+                    }
+                    // step3 排序
+                    return sortPinYin(a.getSort3(), b.getSort3());
                 });
         List<DiffExcelResult> result = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -63,7 +61,18 @@ public class FindDiffExcel {
         }
     }
 
-    public int sortPinYin(){
-        return 1;
+    public static int sortPinYin(String a, String b){
+        String[] al = PinyinUtil.getFirstLetter(a, ",").split(",");
+        String[] bl = PinyinUtil.getFirstLetter(b, ",").split(",");
+        int pinyinSize = Math.min(al.length,bl.length);
+        for (int i = 0; i < pinyinSize; i++) {
+            int aIndex = al[i].charAt(0) - 'a';
+            int bIndex = bl[i].charAt(0) - 'a';
+            if (aIndex == bIndex) {
+                continue;
+            }
+            return aIndex - bIndex;
+        }
+        return 0;
     }
 }

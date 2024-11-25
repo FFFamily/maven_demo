@@ -3,9 +3,14 @@ package org.example.utils;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import org.example.core.entity.SourceFileData;
+import org.example.分类.entity.DraftFormatTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ExcelDataUtil {
     public static List<SourceFileData> getExcelData(String filePath,String sheetName){
@@ -41,6 +46,29 @@ public class ExcelDataUtil {
         })).sheet(sheetName).doRead();
         return sourceFileDataList;
     }
+
+    public static Map<String,DraftFormatTemplate> getDraftFormatTemplateExcelData(String filePath, String sheetName){
+        Map<String,DraftFormatTemplate> sourceFileDataList = new HashMap<>();
+        EasyExcel.read(filePath, DraftFormatTemplate.class, new PageReadListener<DraftFormatTemplate>(dataList -> {
+            dataList.forEach(i -> {
+                // 科目代码
+                String a = i.getA().replaceAll("-",".");
+                // 辅助核算字段
+                String c = i.getC();
+                String regex = ":(.*?)\\s";
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(c);
+                if (matcher.find()) {
+                    String group = matcher.group(1);
+                    String key = a + group;
+                    sourceFileDataList.put(key,i);
+                }
+            });
+        })).sheet(sheetName).doRead();
+        return sourceFileDataList;
+    }
+
+
 
     private static String getValue(String str){
         return str == null ? "" : str;

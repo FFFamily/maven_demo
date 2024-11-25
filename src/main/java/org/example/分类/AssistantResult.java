@@ -32,8 +32,12 @@ public class AssistantResult {
     private BigDecimal money;
     // 类型
     @ColumnWidth(20)
-    @ExcelProperty("分类")
+    @ExcelProperty("根据所有组成分类")
     private String type;
+    @ColumnWidth(20)
+    @ExcelProperty("根据1级组成分类")
+    private String oneLevelType;
+
     // 交易对象编码
     @ColumnWidth(40)
     @ExcelProperty("交易对象编码")
@@ -47,4 +51,10 @@ public class AssistantResult {
     @ColumnWidth(40)
     @ExcelProperty("来源汇总")
     private String form;
+
+    @ExcelProperty("是否合同范围内")
+    private String isOrigin;
+
+    @ExcelProperty("客商分类")
+    private String customerType;
 }
