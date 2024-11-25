@@ -86,9 +86,9 @@ public class FindABCD {
         for (int i = 0; i < dataList.size(); i++) {
             Assistant3 assistant = cachedDataList.get(i);
             AssistantResult assistantResult = dataList.get(i);
-            if (!assistantResult.getCompanyName().equals("禹洲物业服务有限公司泉州分公司")){
-                continue;
-            }
+//            if (!assistantResult.getCompanyName().equals("禹洲物业服务有限公司泉州分公司")){
+//                continue;
+//            }
             assistantResult.setIndex(String.valueOf(i+1));
             String z = assistant.getZ();
             if (z == null) {
@@ -125,7 +125,7 @@ public class FindABCD {
             assistantResult.setForm(form);
             List<OtherInfo3> result = Main3.doMain(
                     false,
-                    true,
+                    false,
                     null,
                     startCollect,
                     assistant.getZ(),
