@@ -12,66 +12,31 @@ import java.math.BigDecimal;
 @Data
 public class AssistantResult {
     // 索引
+    @ExcelProperty("编号")
     private String index;
-//    @ExcelProperty("机构代码")
-//    private String SEGMENT1;
-//    @ExcelProperty("机构名")
-//    private String SEGMENT1_NAME;
-//    @ExcelProperty("成本中心代码")
-//    private String SEGMENT2;
-//    @ExcelProperty("成本中心名称")
-//    private String SEGMENT2_NAME;
-//    @ExcelProperty("科目代码")
-//    private String SEGMENT3;
-//    @ExcelProperty("科目名称")
-//    private String SEGMENT3_NAME ;
-//    @ExcelProperty("子目代码")
-//    private String SEGMENT4;
-//    @ExcelProperty("子目名称")
-//    private String SEGMENT4_NAME;
-//    @ExcelProperty("产品段代码")
-//    private String SEGMENT5;
-//    @ExcelProperty("产品段名称")
-//    private String SEGMENT5_NAME;
-//    @ExcelProperty("地区代码")
-//    private String SEGMENT6;
-//    @ExcelProperty("地区名称")
-//    private String SEGMENT6_NAME;
-//    @ExcelProperty("SBU代码")
-//    private String SEGMENT7;
-//    @ExcelProperty("SBU名称")
-//    private String SEGMENT7_NAME;
-//    @ExcelProperty("ICP代码")
-//    private String SEGMENT8;
-//    @ExcelProperty("ICP名称")
-//    private String SEGMENT8_NAME;
-//    @ExcelProperty("项目段代码")
-//    private String SEGMENT9;
-//    @ExcelProperty("项目段名称")
-//    private String SEGMENT9_NAME;
-//    @ExcelProperty("备用段代码")
-//    private String SEGMENT10;
-//    @ExcelProperty("备用段名称")
-//    private String SEGMENT10_NAME;
-//    @ExcelProperty("交易对象编码")
-//    private String transactionObjectCode;
-//    @ExcelProperty("交易对象名称")
-//    private String transactionObjectName;
+
+    @ExcelProperty("科目段描述")
+    private String subjectName;
     // 匹配字段
     @ColumnWidth(180)
     @ExcelProperty("匹配字段")
     private String field;
+    // 匹配字段编码
     @ExcelProperty("匹配字段编码")
     private String fieldCode;
     // 金额
     @ExcelProperty("余额")
     private BigDecimal money;
-
     // 类型
+    @ColumnWidth(20)
     @ExcelProperty("分类")
     private String type;
+    // 交易对象编码
+    @ColumnWidth(40)
     @ExcelProperty("交易对象编码")
     private String transactionObjectCode;
+    // 交易对象编码名称
+    @ColumnWidth(40)
     @ExcelProperty("交易对象编码名称")
     private String transactionObjectName;
     private Integer isIncludeUp;

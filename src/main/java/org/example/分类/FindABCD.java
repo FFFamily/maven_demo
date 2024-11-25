@@ -6,9 +6,11 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import org.example.core.entity.SourceFileData;
 import org.example.func_three.Assistant3;
 import org.example.func_three.Main3;
 import org.example.func_three.OtherInfo3;
+import org.example.utils.ExcelDataUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -35,43 +37,11 @@ public class FindABCD {
         return str == null ? "" : str;
     }
 
-    private static final List<SourceFileData> sourceFileDataList = new ArrayList<>();
+
 
     public void doFindABDC(String sourceFile){
-        System.out.println("开始执行");
         List<AssistantResult> excelExcelData = new ArrayList<>();
-//        List<SourceFileData> sourceFileDataList = new ArrayList<>();
-
-        EasyExcel.read(sourceFile, SourceFileData.class, new PageReadListener<SourceFileData>(dataList -> {
-            dataList.forEach(i -> {
-                String matchField = getValue(i.getSEGMENT1_NAME())  + "." +
-                        getValue(i.getSEGMENT2_NAME()) + "." +
-                        getValue(i.getSEGMENT3_NAME()) + "." +
-                        getValue(i.getSEGMENT4_NAME()) + "." +
-                        getValue(i.getSEGMENT5_NAME()) + "." +
-                        getValue(i.getSEGMENT6_NAME()) + "." +
-                        getValue(i.getSEGMENT7_NAME()) + "." +
-                        getValue(i.getSEGMENT8_NAME()) + "." +
-                        getValue(i.getSEGMENT9_NAME()) + "." +
-                        getValue(i.getSEGMENT10_NAME()) + ".";
-//                        getValue(i.getTransactionObjectCode()) + "." +
-//                        getValue(i.getTransactionObjectName());
-                String matchFieldCode = getValue(i.getSEGMENT1())  + "." +
-                        getValue(i.getSEGMENT2()) + "." +
-                        getValue(i.getSEGMENT3()) + "." +
-                        getValue(i.getSEGMENT4()) + "." +
-                        getValue(i.getSEGMENT5()) + "." +
-                        getValue(i.getSEGMENT6()) + "." +
-                        getValue(i.getSEGMENT7()) + "." +
-                        getValue(i.getSEGMENT8()) + "." +
-                        getValue(i.getSEGMENT9()) + "." +
-                        getValue(i.getSEGMENT10());
-                i.setMatch(matchFieldCode);
-                i.setMatchName(matchField);
-                sourceFileDataList.add(i);
-            });
-        })).sheet("Sheet1").doRead();
-        System.out.println("解析excel完成");
+        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData(sourceFile,"Sheet1");
         List<AssistantResult> dataList = sourceFileDataList
                 .stream()
                 .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectCode()))
@@ -81,6 +51,7 @@ public class FindABCD {
                     AssistantResult assistantResult = new AssistantResult();
                     SourceFileData sourceFileData = curr.get(0);
                     assistantResult.setFieldCode(sourceFileData.getMatch());
+                    assistantResult.setSubjectName(sourceFileData.getSEGMENT3_NAME());
 //                    assistantResult.setForm(sourceFileData.getSEGMENT3_NAME());
                     assistantResult.setTransactionObjectCode(sourceFileData.getTransactionObjectCode());
                     assistantResult.setTransactionObjectName(sourceFileData.getTransactionObjectName());
@@ -90,13 +61,18 @@ public class FindABCD {
                             (iprev, icurr) -> icurr.getYEAR_BEGIN_DR().subtract(icurr.getYEAR_BEGIN_CR()).add(icurr.getYTD_DR()).subtract(icurr.getYTD_CR()),
                             (l, r) -> l);
                     assistantResult.setMoney(money);
-
                     prev.add(assistantResult);
                     return prev;
                 },(l,r) -> l);
         List<Assistant3> cachedDataList = new ArrayList<>();
         for (AssistantResult assistantResult : dataList) {
             Assistant3 assistant3 = new Assistant3();
+            // 左前缀匹配
+            String subjectName = assistantResult.getSubjectName();
+            if (subjectName.startsWith("应付账款") || subjectName.startsWith("其他应付款") || subjectName.startsWith("合同负债")){
+                BigDecimal money = BigDecimal.ZERO.subtract(assistantResult.getMoney());
+                assistantResult.setMoney(money);
+            }
             assistant3.setZ(assistantResult.getMoney() == null
                     ? ""
                     : assistantResult.getMoney().compareTo(BigDecimal.ZERO) < 0
@@ -120,28 +96,25 @@ public class FindABCD {
             }else {
                 sql +=  "and z.\"交易对象\" is null";
             }
-            List<OtherInfo3> startCollect = jdbcTemplate.query(sql, new RowMapper<OtherInfo3>() {
-                @Override
-                public OtherInfo3 mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    OtherInfo3 info = new OtherInfo3();
-                    info.setA(String.valueOf(rowNum));
-                    // 年 + 月 + 凭证
-                    DateTime date = DateUtil.date(rs.getDate("有效日期"));
-                    int year = date.year();
-                    int month = date.month();
-                    int code = rs.getInt("单据编号");
-                    info.setQ(code);
-                    info.setR(year+"-"+month+"-"+code);
-                    info.setV(rs.getBigDecimal("输入借方"));
-                    info.setW(rs.getBigDecimal("输入贷方"));
-                    // 有效日期
-                    info.setN(date);
-                    info.setS(rs.getString("来源"));
-                    // 有借就是 借方向
-                    info.setX(info.getV() != null ? "借" : "贷");
-                    info.setZ(rs.getString("账户组合"));
-                    return info;
-                }
+            List<OtherInfo3> startCollect = jdbcTemplate.query(sql, (rs, rowNum) -> {
+                OtherInfo3 info = new OtherInfo3();
+                info.setA(String.valueOf(rowNum));
+                // 年 + 月 + 凭证
+                DateTime date = DateUtil.date(rs.getDate("有效日期"));
+                int year = date.year();
+                int month = date.month();
+                int code = rs.getInt("单据编号");
+                info.setQ(code);
+                info.setR(year+"-"+month+"-"+code);
+                info.setV(rs.getBigDecimal("输入借方"));
+                info.setW(rs.getBigDecimal("输入贷方"));
+                // 有效日期
+                info.setN(date);
+                info.setS(rs.getString("来源"));
+                // 有借就是 借方向
+                info.setX(info.getV() != null ? "借" : "贷");
+                info.setZ(rs.getString("账户组合"));
+                return info;
             });
             List<OtherInfo3> result = Main3.doMain(
                     false,
@@ -220,7 +193,7 @@ public class FindABCD {
                 // 如果期初余额为负 && 最终余额大于 期初，证明本期发生了加款
                 assistantResult.setType("D");
             } else if (upSum.compareTo(BigDecimal.ZERO) == 0 && totalSum.compareTo(upSum) == 0){
-                assistantResult.setType("期初余额为0，最终余额为0，无法判断类型");
+                assistantResult.setType("无法判断");
             } else {
                 // 期初为0也会到达
                 findABC(low, assistantResult);

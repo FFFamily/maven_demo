@@ -16,16 +16,10 @@ import java.util.stream.Collectors;
 
 public class FindLevelService {
     public void doFind(){
+        // 数据库信息
         List<OtherInfo3> dbList = new ArrayList<>();
         List<Assistant> assistantList = new ArrayList<>();
-        String fileName1 = "src/main/java/org/example/excel/往来科目明细.xlsx";
         String fileName2 = "src/main/java/org/example/excel/副本厦门往来清理跟进表-全匹配版 （禹洲泉州）-标识.xlsx";
-        EasyExcel.read(fileName1, OtherInfo3.class, new PageReadListener<OtherInfo3>(dataList -> {
-            for (OtherInfo3 item : dataList) {
-                organizeDataItem(item);
-                dbList.add(item);
-            }
-        })).sheet().doRead();
         EasyExcel.read(fileName2, Assistant.class, new PageReadListener<Assistant>(assistantList::addAll))
                 .sheet("往来清理明细表")
                 .doRead();

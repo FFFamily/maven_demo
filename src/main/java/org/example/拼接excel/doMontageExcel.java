@@ -24,8 +24,14 @@ import java.util.stream.Collectors;
 public class doMontageExcel {
     public static final List<Map<Integer, Object>> list =  new ArrayList<>();
 
+
+
     public static void main(String[] args) throws IOException {
-        String path = Objects.requireNonNull(montageExcel.class.getClassLoader().getResource("montage/excel")).getPath();
+        merge("montage/excel","");
+    }
+
+    public static void merge(String sourceFile1,String targetFilePath) throws IOException {
+        String path = Objects.requireNonNull(montageExcel.class.getClassLoader().getResource(sourceFile1)).getPath();
         List<String> fileNames = Files.walk(Paths.get(path))
                 .filter(Files::isRegularFile)
 //                .map(Path::getFileName)
@@ -37,10 +43,9 @@ public class doMontageExcel {
             EasyExcel.read(fileName, new PageReadListener<Map<Integer,Object>>(list::addAll)).sheet(sheetName).doRead();
         }
 
-        try (ExcelWriter excelWriter = EasyExcel.write(sheetName+".xlsx").build()) {
+        try (ExcelWriter excelWriter = EasyExcel.write("merge/"+sheetName+".xlsx").build()) {
             WriteSheet writeSheet1 = EasyExcel.writerSheet(0, sheetName).build();
             excelWriter.write(list, writeSheet1);
         }
-
     }
 }

@@ -1,4 +1,4 @@
-package org.example.分类;
+package org.example.core.entity;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;

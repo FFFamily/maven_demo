@@ -41,7 +41,7 @@ public class Main3 implements ReadListener<Info> {
                 .sheet("往来清理明细表")
                 .doRead();
         List<Assistant> realAssistantList = assistantList.stream()
-                .filter(item -> "禹洲物业服务有限公司泉州分公司合同负债-预收服务款物业管理费-其他-未开票---泉州温莎公馆CS:30012438:JODV0:泉州温莎公馆项目".equals(item.getR()))
+                .filter(item -> "禹洲物业服务有限公司泉州分公司其他应收款-暂收代垫款-代垫费用-代垫电费.-.-.-..泉州温莎美地".equals(item.getR()))
 //                .skip(1)
                 .collect(Collectors.toList());
         List<OtherInfo3> result1 = new ArrayList<>();
