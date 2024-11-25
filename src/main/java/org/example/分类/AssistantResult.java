@@ -43,4 +43,8 @@ public class AssistantResult {
     @ExcelProperty("交易对象编码名称")
     private String transactionObjectName;
     private Integer isIncludeUp;
+
+    @ColumnWidth(40)
+    @ExcelProperty("来源汇总")
+    private String form;
 }

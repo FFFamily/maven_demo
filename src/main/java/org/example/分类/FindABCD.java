@@ -120,6 +120,8 @@ public class FindABCD {
                 info.setZ(rs.getString("账户组合"));
                 return info;
             });
+            String form = startCollect.stream().map(OtherInfo3::getS).distinct().collect(Collectors.joining("、"));
+            assistantResult.setForm(form);
             List<OtherInfo3> result = Main3.doMain(
                     false,
                     true,
