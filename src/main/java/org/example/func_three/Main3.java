@@ -41,7 +41,7 @@ public class Main3 implements ReadListener<Info> {
                 .sheet("往来清理明细表")
                 .doRead();
         List<Assistant> realAssistantList = assistantList.stream()
-                .filter(item -> "禹洲物业服务有限公司泉州分公司其他应收款-暂收代垫款-代垫费用-代垫电费.-.-.-..泉州温莎美地".equals(item.getR()))
+                .filter(item -> "禹洲物业服务有限公司泉州分公司其他应收款-其他其他---泉州海德堡SS:117483:JODV0:SYZ000012".equals(item.getR()))
 //                .skip(1)
                 .collect(Collectors.toList());
         List<OtherInfo3> result1 = new ArrayList<>();
@@ -56,7 +56,7 @@ public class Main3 implements ReadListener<Info> {
                     .filter(item -> item.getZ().equals(projectName))
                     .collect(Collectors.toList());
             List<OtherInfo3> result = doMain(
-                    true,
+                    false,
                     cachedDataList,
                     startCollect,
                     assistant.getZ(),

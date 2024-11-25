@@ -91,10 +91,10 @@ public class FindABCD {
             }
             String projectName = assistant.getR();
             String sql =  "select * from ZDPROD_EXPDP_20241120 z where z.\"账户组合\" = '" + assistantResult.getFieldCode()+"'";
-            if (assistantResult.getTransactionObjectCode() != null) {
-                sql +=  "and z.\"交易对象\" = '" + assistantResult.getTransactionObjectCode() +"'";
+            if (assistantResult.getTransactionObjectName() != null) {
+                sql +=  "and z.\"交易对象名称\" like '" + assistantResult.getTransactionObjectName() +"%'";
             }else {
-                sql +=  "and z.\"交易对象\" is null";
+                sql +=  "and z.\"交易对象名称\" is null";
             }
             List<OtherInfo3> startCollect = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 OtherInfo3 info = new OtherInfo3();
