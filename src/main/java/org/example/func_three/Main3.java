@@ -56,6 +56,7 @@ public class Main3 implements ReadListener<Info> {
                     .filter(item -> item.getZ().equals(projectName))
                     .collect(Collectors.toList());
             List<OtherInfo3> result = doMain(
+                    true,
                     false,
                     cachedDataList,
                     startCollect,
@@ -77,15 +78,19 @@ public class Main3 implements ReadListener<Info> {
     }
 
     public static List<OtherInfo3> doMain(boolean isOpenFindUp,
+                                          boolean isFindAll,
                                           List<OtherInfo3> cachedDataList,
                                           List<OtherInfo3> startCollect,
                                           String z,
                                           String originProjectName) {
-        List<OtherInfo3> finalResult = FindFirstLevel(startCollect,z,originProjectName);
+        List<OtherInfo3> finalResult;
+        if (isFindAll){
+            finalResult = startCollect;
+        }else {
+            finalResult = FindFirstLevel(startCollect,z,originProjectName);
+        }
         Deque<OtherInfo3> deque = new LinkedList<>();
         List<OtherInfo3> result = new ArrayList<>();
-
-
         for (int i = 0; i < finalResult.size(); i++) {
             OtherInfo3 otherInfo3 = finalResult.get(i);
             int level = 1;

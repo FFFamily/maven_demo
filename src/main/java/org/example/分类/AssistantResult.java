@@ -15,6 +15,9 @@ public class AssistantResult {
     @ExcelProperty("编号")
     private String index;
 
+    @ExcelProperty("公司名称")
+    private String companyName;
+
     @ExcelProperty("科目段描述")
     private String subjectName;
     // 匹配字段

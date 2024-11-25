@@ -18,54 +18,42 @@ import java.util.stream.Collectors;
 
 public class FindDiffExcel {
     public static void main(String[] args) {
-//        List<String> list = new ArrayList<>();
-//        list.add("再手段");
-//        list.add("发");
-//        list.add("腌");
-//        List<String> re = list.stream()
-//                .sorted((a, b) -> {
-//                    String[] al = PinyinUtil.getFirstLetter(a, ",").split(",");
-//                    String[] bl = PinyinUtil.getFirstLetter(b, ",").split(",");
-//                    int size = Math.min(al.length,bl.length);
-//                    ;
-//                    for (int i = 0; i < size; i++) {
-//                        int aIndex = al[i].charAt(0) - 'a';
-//                        int bIndex = bl[i].charAt(0) - 'a';
-//                        if (aIndex == bIndex) {
-//                            continue;
-//                        }
-//                        return aIndex - bIndex;
-//                    }
-//                    return 0;
-//                })
-//                .collect(Collectors.toList());
-//        System.out.println(re);
         List<DiffExcelData1> list1 = new ArrayList<>();
         List<DiffExcelData2> list2 = new ArrayList<>();
         String fileName1 = "src/main/java/org/example/对比excel/excel/excel1.xlsx";
         EasyExcel.read(fileName1, new PageReadListener<DiffExcelData1>(list1::addAll)).sheet().doRead();
         String fileName2 = "src/main/java/org/example/对比excel/excel/excel2.xlsx";
         EasyExcel.read(fileName2, new PageReadListener<DiffExcelData2>(list2::addAll)).sheet().doRead();
-
-
         int size1 = list1.size();
         int size2 = list2.size();
         int size = Math.min(size1, size2);
-        list1.sort((a,b) -> {
-            if (a.getSort1()){
-
-            }
-        });
+        list1.stream()
+                .sorted((a, b) -> {
+                    // step1 对公司名称拼音的首字母进行排序
+                    String[] al = PinyinUtil.getFirstLetter(a.getSort1(), ",").split(",");
+                    String[] bl = PinyinUtil.getFirstLetter(b.getSort1(), ",").split(",");
+                    int pinyinSize = Math.min(al.length,bl.length);
+                    for (int i = 0; i < pinyinSize; i++) {
+                        int aIndex = al[i].charAt(0) - 'a';
+                        int bIndex = bl[i].charAt(0) - 'a';
+                        if (aIndex == bIndex) {
+                            continue;
+                        }
+                        return aIndex - bIndex;
+                    }
+                    // step2 对科目名称排序
+                    return 0;
+                });
         List<DiffExcelResult> result = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Map<Integer, Object> item1;
             Map<Integer, Object> item2;
-            if (i < size1){
-                item1 = list1.get(i);
-            }
-            if (i < size2){
-                item2 = list2.get(i);
-            }
+//            if (i < size1){
+//                item1 = list1.get(i);
+//            }
+//            if (i < size2){
+//                item2 = list2.get(i);
+//            }
         }
 
 
@@ -75,8 +63,7 @@ public class FindDiffExcel {
         }
     }
 
-
-    public void sortList(List<Map<Integer,Object>> list){
-
+    public int sortPinYin(){
+        return 1;
     }
 }
