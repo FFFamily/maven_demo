@@ -1,12 +1,22 @@
-package org.example;
+package org.example.寻找等级;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-public class OtherInfo {
+public class OtherInfo3 {
+    // 层级
+//    @ExcelProperty("阶级")
+    @ExcelProperty("编号")
+    private String no;
+    @ExcelProperty("当前层级")
+    private Integer level;
+    @ExcelProperty("异常")
+    private String errorMsg;
     @ExcelProperty("编号")
     private String a;
 //    @ExcelProperty("区域")
@@ -42,7 +52,8 @@ public class OtherInfo {
 //    @ExcelProperty("会计科目说明")
 //    private String p;
     @ExcelProperty("凭证编号")
-    private String q;
+    private Integer q;
+    @ColumnWidth(40)
     @ExcelProperty("凭证号规则")
     private String r;
     @ExcelProperty("来源")
@@ -52,15 +63,20 @@ public class OtherInfo {
 //    @ExcelProperty("往来单位")
 //    private String u;
     @ExcelProperty("借方金额")
-    private Double v;
+    private BigDecimal v;
     @ExcelProperty("贷方金额")
-    private Double w;
+    private BigDecimal w;
     @ExcelProperty("方向")
     private String x;
 //    @ExcelProperty("余额")
 //    private String y;
+    @ColumnWidth(200)
     @ExcelProperty("合并段值")
     private String z;
+
+    @ColumnWidth(200)
+    @ExcelProperty("最初的合并段值")
+    private String originZ;
 //    @ExcelProperty("AA")
 //    private String aa;
 //    @ExcelProperty("AB")

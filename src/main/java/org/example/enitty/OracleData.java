@@ -1,4 +1,4 @@
-package org.example.controller.enitty;
+package org.example.enitty;
 
 
 import lombok.Data;

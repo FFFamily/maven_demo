@@ -1,4 +1,4 @@
-package org.example.core;
+package org.example.寻找等级;
 
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
@@ -6,69 +6,37 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import lombok.Data;
-import org.example.Assistant;
-import org.example.func_three.Main3;
-import org.example.func_three.OtherInfo3;
+import org.example.enitty.Assistant;
+import org.example.utils.SqlUtil;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class FindLevelService {
-    public void doFind(){
-        // 数据库信息
-        List<OtherInfo3> dbList = new ArrayList<>();
-        List<Assistant> assistantList = new ArrayList<>();
-        String fileName2 = "src/main/java/org/example/excel/副本厦门往来清理跟进表-全匹配版 （禹洲泉州）-标识.xlsx";
-        EasyExcel.read(fileName2, Assistant.class, new PageReadListener<Assistant>(assistantList::addAll))
-                .sheet("往来清理明细表")
-                .doRead();
-        List<Assistant> realAssistantList = assistantList.stream()
-                .filter(item -> "禹洲物业服务有限公司泉州分公司合同负债-预收服务款物业管理费-其他-未开票---泉州温莎公馆CS:30012438:JODV0:泉州温莎公馆项目".equals(item.getR()))
-//                .skip(1)
-                .collect(Collectors.toList());
-        List<OtherInfo3> result1 = new ArrayList<>();
-        List<OtherInfo3> result2 = new ArrayList<>();
-        for (Assistant assistant : realAssistantList) {
-            String z = assistant.getZ();
-            if (z == null) {
-                continue;
-            }
-            String projectName = assistant.getR();
-            List<OtherInfo3> startCollect = dbList.stream()
-                    .filter(item -> item.getZ().equals(projectName))
-                    .collect(Collectors.toList());
-            List<OtherInfo3> result = doMain(
-                    true,
-                    dbList,
-                    startCollect,
-                    assistant.getZ(),
-                    projectName);
-            if (result.size() == startCollect.size() && startCollect.size() != 1) {
-                result1.addAll(result);
-            } else {
-                result2.addAll(result);
-            }
-        }
-        String resultFileName = "模版" + System.currentTimeMillis()+".xlsx";
-        try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
-            WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
-            excelWriter.write(result2, writeSheet1);
-            WriteSheet writeSheet2 = EasyExcel.writerSheet(1, "未能匹配").head(OtherInfo3.class).build();
-            excelWriter.write(result1, writeSheet2);
-        }
-    }
-
+/**
+ * TODO 只对B和C的进行对比，如果是系统的就不往上追
+ * TODO 并且要展示最初的项目名称
+ */
+@Service
+public class FindLevelBySystem {
+    @Resource
+    private SqlUtil sqlUtil;
     public static List<OtherInfo3> doMain(boolean isOpenFindUp,
+                                          boolean isFindAll,
                                           List<OtherInfo3> cachedDataList,
                                           List<OtherInfo3> startCollect,
                                           String z,
                                           String originProjectName) {
-        List<OtherInfo3> finalResult = FindFirstLevel(startCollect,z,originProjectName);
+        List<OtherInfo3> finalResult;
+        if (isFindAll){
+            finalResult = startCollect;
+        }else {
+            finalResult = FindFirstLevel(startCollect,z,originProjectName);
+        }
         Deque<OtherInfo3> deque = new LinkedList<>();
         List<OtherInfo3> result = new ArrayList<>();
-
-
         for (int i = 0; i < finalResult.size(); i++) {
             OtherInfo3 otherInfo3 = finalResult.get(i);
             int level = 1;
@@ -113,7 +81,7 @@ public class FindLevelService {
         // 消除同一凭证能够借贷相抵的数据
         List<OtherInfo3> sortedStartCollect = disSameX(startCollect, originProjectName);
         // 先找一下能够直接借贷相抵的数据
-        Main3.FindFirstListResult firstListResult = findFirstList(z, balance, sortedStartCollect);
+        FindFirstListResult firstListResult = findFirstList(z, balance, sortedStartCollect);
         List<OtherInfo3> otherInfo3s =firstListResult.getOtherInfo3s();
         OtherInfo3 temporaryResult = firstListResult.getTemporaryResult();
         List<OtherInfo3> result;
@@ -169,8 +137,8 @@ public class FindLevelService {
         return balance;
     }
 
-    public static Main3.FindFirstListResult findFirstList(String z, BigDecimal balance, List<OtherInfo3> sortedStartCollect){
-        Main3.FindFirstListResult result = new Main3.FindFirstListResult();
+    public static FindFirstListResult findFirstList(String z, BigDecimal balance, List<OtherInfo3> sortedStartCollect){
+        FindFirstListResult result = new FindFirstListResult();
         if (z.contains("(") || z.contains(")")) {
             // 余额为负去贷找
             List<OtherInfo3> first = new ArrayList<>();
@@ -335,7 +303,7 @@ public class FindLevelService {
         if (size == 0) {
             return new ArrayList<>();
         }
-        System.out.println("一共检索到" + size + "明细数据");
+//        System.out.println("一共检索到" + size + "明细数据");
         HashMap<String, List<OtherInfo3>> vMap = new HashMap<>();
         HashMap<String, List<OtherInfo3>> WMap = new HashMap<>();
         // 整理数据，并拿到起始索引
@@ -461,4 +429,5 @@ public class FindLevelService {
         }
         return start;
     }
+
 }

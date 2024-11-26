@@ -1,5 +1,8 @@
 package org.example.对比Excel.entity;
 
+import lombok.Data;
+
+@Data
 public class DiffExcelData2 {
     private String a;
     private String b;

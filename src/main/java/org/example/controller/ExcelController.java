@@ -5,27 +5,31 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.util.ListUtils;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import org.example.controller.enitty.OracleData;
+import org.example.core.entity.SourceFileData;
+import org.example.enitty.Assistant;
+import org.example.enitty.OracleData;
+import org.example.utils.ExcelDataUtil;
 import org.example.分类.AssistantResult;
 import org.example.分类.FindABCD;
+import org.example.分类.entity.DraftFormatTemplate;
+import org.example.寻找等级.FindLevel;
+import org.example.寻找等级.OtherInfo3;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.example.拼接excel.doMontageExcel.list;
+import static org.example.utils.ExcelDataUtil.getZ;
 
 @RestController
 @RequestMapping("/test")
@@ -48,6 +52,65 @@ public class ExcelController {
     @GetMapping("/findABCD")
     public void findABCD(){
         findABCD.doFindABDC("src/main/java/org/example/分类/9月科目辅助余额表.xlsx");
+    }
+    @GetMapping("/findABCD")
+    public void findLevel(){
+
+        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
+        List<Assistant> assistantList = new ArrayList<>();
+        sourceFileDataList
+                .stream()
+                .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectCode()))
+                .values()
+                .stream()
+                .reduce(new ArrayList<>(),(prev, curr) ->{
+                    SourceFileData sourceFileData = curr.get(0);
+                    Assistant assistant = new Assistant();
+                    BigDecimal balance = ExcelDataUtil.getBalance(curr);
+                    BigDecimal money = ExcelDataUtil.getMoney(sourceFileData.getSEGMENT3_NAME(),balance);
+                    assistant.setZ(getZ(money));
+                    prev.add(assistant);
+                    return prev;
+                },(l,r) -> l);
+        for (SourceFileData sourceFileData : sourceFileDataList) {
+
+
+        }
+
+        List<OtherInfo3> cachedDataList = new ArrayList<>();
+
+        List<Assistant> realAssistantList = assistantList.stream().skip(1).collect(Collectors.toList());
+        List<OtherInfo3> result1 = new ArrayList<>();
+        List<OtherInfo3> result2 = new ArrayList<>();
+        for (Assistant assistant : realAssistantList) {
+            String z = assistant.getZ();
+            if (z == null) {
+                continue;
+            }
+            String projectName = assistant.getR();
+            List<OtherInfo3> startCollect = cachedDataList.stream()
+                    .filter(item -> item.getZ().equals(projectName))
+                    .collect(Collectors.toList());
+            List<OtherInfo3> result = FindLevel.doMain(
+                    true,
+                    false,
+                    cachedDataList,
+                    startCollect,
+                    assistant.getZ(),
+                    projectName);
+            if (result.size() == startCollect.size() && startCollect.size() != 1) {
+                result1.addAll(result);
+            } else {
+                result2.addAll(result);
+            }
+        }
+        String resultFileName = "模版" + System.currentTimeMillis()+".xlsx";
+        try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
+            WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
+            excelWriter.write(result2, writeSheet1);
+            WriteSheet writeSheet2 = EasyExcel.writerSheet(1, "未能匹配").head(OtherInfo3.class).build();
+            excelWriter.write(result1, writeSheet2);
+        }
     }
 
 

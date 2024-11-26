@@ -1,15 +1,13 @@
-package org.example.func_three;
+package org.example.寻找等级;
 
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.PageReadListener;
-import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import lombok.Data;
-import org.example.Assistant;
-import org.example.Info;
+import org.example.enitty.Assistant;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -19,7 +17,8 @@ import java.util.stream.Collectors;
  * TODO 只对B和C的进行对比，如果是系统的就不往上追
  * TODO 并且要展示最初的项目名称
  */
-public class Main3 implements ReadListener<Info> {
+@Service
+public class FindLevel {
     /**
      * 每隔5条存储数据库，实际使用中可以100条，然后清理list ，方便内存回收
      */
@@ -484,12 +483,4 @@ public class Main3 implements ReadListener<Info> {
         return start;
     }
 
-    @Override
-    public void invoke(Info info, AnalysisContext analysisContext) {
-    }
-
-    @Override
-    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
-
-    }
 }

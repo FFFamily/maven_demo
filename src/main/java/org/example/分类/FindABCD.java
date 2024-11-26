@@ -4,22 +4,19 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.core.entity.SourceFileData;
-import org.example.func_three.Assistant3;
-import org.example.func_three.Main3;
-import org.example.func_three.OtherInfo3;
+import org.example.enitty.Assistant;
+import org.example.utils.SqlUtil;
+import org.example.寻找等级.FindLevel;
+import org.example.寻找等级.OtherInfo3;
 import org.example.utils.ExcelDataUtil;
 import org.example.分类.entity.DraftFormatTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.example.utils.ExcelDataUtil.getDraftFormatTemplateExcelData;
+import static org.example.utils.ExcelDataUtil.getZ;
 
 /**
  * 分裂
@@ -35,6 +33,8 @@ import static org.example.utils.ExcelDataUtil.getDraftFormatTemplateExcelData;
 public class FindABCD {
     @Resource
     private JdbcTemplate jdbcTemplate;
+    @Resource
+    private SqlUtil sqlUtil;
 
     public String getValue(String str){
         return str == null ? "" : str;
@@ -63,6 +63,7 @@ public class FindABCD {
                     assistantResult.setTransactionObjectCode(transactionObjectCode);
                     assistantResult.setTransactionObjectName(transactionObjectName);
                     assistantResult.setField(sourceFileData.getMatchName());
+                    BigDecimal money = ExcelDataUtil.getBalance(curr);
                     assistantResult.setSEGMENT1_NAME(sourceFileData.getSEGMENT1_NAME());
                     assistantResult.setSEGMENT2_NAME(sourceFileData.getSEGMENT2_NAME());
                     assistantResult.setSEGMENT3_NAME(sourceFileData.getSEGMENT3_NAME());
@@ -73,10 +74,6 @@ public class FindABCD {
                     assistantResult.setSEGMENT8_NAME(sourceFileData.getSEGMENT8_NAME());
                     assistantResult.setSEGMENT9_NAME(sourceFileData.getSEGMENT9_NAME());
                     assistantResult.setSEGMENT10_NAME(sourceFileData.getSEGMENT10_NAME());
-                    BigDecimal money = curr.stream().reduce(
-                            BigDecimal.ZERO,
-                            (iprev, icurr) -> icurr.getYEAR_BEGIN_DR().subtract(icurr.getYEAR_BEGIN_CR()).add(icurr.getYTD_DR()).subtract(icurr.getYTD_CR()),
-                            (l, r) -> l);
                     assistantResult.setMoney(money);
                     String key;
                     if (transactionObjectCode != null){
@@ -99,26 +96,18 @@ public class FindABCD {
                 },(l,r) -> l);
 
 
-        List<Assistant3> cachedDataList = new ArrayList<>();
+        List<Assistant> cachedDataList = new ArrayList<>();
         for (AssistantResult assistantResult : dataList) {
-
-            Assistant3 assistant3 = new Assistant3();
+            Assistant assistant3 = new Assistant();
+            BigDecimal money = ExcelDataUtil.getMoney(assistantResult.getSubjectName(),assistantResult.getMoney());
+            assistantResult.setMoney(money);
             // 左前缀匹配
-            String subjectName = assistantResult.getSubjectName();
-            if (subjectName.startsWith("应付账款") || subjectName.startsWith("其他应付款") || subjectName.startsWith("合同负债")){
-                BigDecimal money = BigDecimal.ZERO.subtract(assistantResult.getMoney());
-                assistantResult.setMoney(money);
-            }
-            assistant3.setZ(assistantResult.getMoney() == null
-                    ? ""
-                    : assistantResult.getMoney().compareTo(BigDecimal.ZERO) < 0
-                    ? "("+ assistantResult.getMoney() +")"
-                    : assistantResult.getMoney().toString());
+            assistant3.setZ(getZ(assistantResult.getMoney()));
             assistant3.setR(assistantResult.getFieldCode());
             cachedDataList.add(assistant3);
         }
         for (int i = 0; i < dataList.size(); i++) {
-            Assistant3 assistant = cachedDataList.get(i);
+            Assistant assistant = cachedDataList.get(i);
             AssistantResult assistantResult = dataList.get(i);
 //            if (assistantResult.getIsOrigin() == null){
 //                System.out.println("跳过："+i);
@@ -139,26 +128,7 @@ public class FindABCD {
             }else {
                 sql +=  "and z.\"交易对象名称\" is null";
             }
-            List<OtherInfo3> startCollect = jdbcTemplate.query(sql, (rs, rowNum) -> {
-                OtherInfo3 info = new OtherInfo3();
-                info.setA(String.valueOf(rowNum));
-                // 年 + 月 + 凭证
-                DateTime date = DateUtil.date(rs.getDate("有效日期"));
-                int year = date.year();
-                int month = date.month();
-                int code = rs.getInt("单据编号");
-                info.setQ(code);
-                info.setR(year+"-"+month+"-"+code);
-                info.setV(rs.getBigDecimal("输入借方"));
-                info.setW(rs.getBigDecimal("输入贷方"));
-                // 有效日期
-                info.setN(date);
-                info.setS(rs.getString("来源"));
-                // 有借就是 借方向
-                info.setX(info.getV() != null ? "借" : "贷");
-                info.setZ(rs.getString("账户组合"));
-                return info;
-            });
+            List<OtherInfo3> startCollect = sqlUtil.find(sql);
             String form = startCollect.stream().map(OtherInfo3::getS).distinct().collect(Collectors.joining("、"));
             assistantResult.setForm(form);
             doFind(startCollect,assistant,projectName,assistantResult,true);
@@ -177,8 +147,8 @@ public class FindABCD {
         System.out.println("结束");
     }
 
-    public static void doFind(List<OtherInfo3> startCollect,Assistant3 assistant,String projectName,AssistantResult assistantResult,Boolean isFindAll){
-        List<OtherInfo3> result = Main3.doMain(
+    public static void doFind(List<OtherInfo3> startCollect,Assistant assistant,String projectName,AssistantResult assistantResult,Boolean isFindAll){
+        List<OtherInfo3> result = FindLevel.doMain(
                 false,
                 isFindAll,
                 null,
@@ -217,7 +187,7 @@ public class FindABCD {
         return balance;
     }
 
-    public static String findABCD(List<OtherInfo3> result,AssistantResult assistantResult, Assistant3 assistant) {
+    public static String findABCD(List<OtherInfo3> result,AssistantResult assistantResult, Assistant assistant) {
         // 通过总账日期进行分类
 //        AssistantResult assistantResult = new AssistantResult();
 //        assistantResult.setField(assistant.getR());

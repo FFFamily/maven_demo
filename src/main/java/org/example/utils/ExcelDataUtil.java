@@ -5,6 +5,7 @@ import com.alibaba.excel.read.listener.PageReadListener;
 import org.example.core.entity.SourceFileData;
 import org.example.分类.entity.DraftFormatTemplate;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ExcelDataUtil {
-    public static List<SourceFileData> getExcelData(String filePath,String sheetName){
+    public static List<SourceFileData> getExcelData(String filePath, String sheetName){
         List<SourceFileData> sourceFileDataList = new ArrayList<>();
         EasyExcel.read(filePath, SourceFileData.class, new PageReadListener<SourceFileData>(dataList -> {
             dataList.forEach(i -> {
@@ -45,6 +46,29 @@ public class ExcelDataUtil {
             });
         })).sheet(sheetName).doRead();
         return sourceFileDataList;
+    }
+
+    /**
+     *
+     * @param subjectName 科目段描述
+     * @param money 余额
+     */
+    public static BigDecimal getMoney(String subjectName,BigDecimal money){
+        if (subjectName.startsWith("应付账款") || subjectName.startsWith("其他应付款") || subjectName.startsWith("合同负债")){
+            return BigDecimal.ZERO.subtract(money);
+        }
+        return money;
+    }
+
+    public static BigDecimal getBalance(List<SourceFileData>  curr){
+        return curr.stream().reduce(
+                BigDecimal.ZERO,
+                (iprev, icurr) -> iprev.add(icurr.getYEAR_BEGIN_DR().subtract(icurr.getYEAR_BEGIN_CR()).add(icurr.getYTD_DR()).subtract(icurr.getYTD_CR())),
+                (l, r) -> l);
+    }
+
+    public static String getZ(BigDecimal money){
+        return money == null ? "" : money.compareTo(BigDecimal.ZERO) < 0 ? "("+ money +")" : money.toString();
     }
 
     public static Map<String,DraftFormatTemplate> getDraftFormatTemplateExcelData(String filePath, String sheetName){

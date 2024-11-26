@@ -1,4 +1,4 @@
-package org.example.func_two;
+package org.example.enitty;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
  * 辅助
  */
 @Data
-public class Assistant2 {
+public class Assistant {
     private String a;
     private String b;
     private String c;

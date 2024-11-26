@@ -1,4 +1,4 @@
-package org.example;
+package org.example.test_demo;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class Demo1 {
     public static void main(String[] args) {
-        String input = ".SS:446432:IYJU0:总部.润楹物业服务（成都）有限公司重庆分公司工会委员会 总部";
+        String input = ".CS:BFWWO-A000001:BFWW0:天津.业主客商 天津";
         String regex = ":(.*?)\\s";
 
         Pattern pattern = Pattern.compile(regex);

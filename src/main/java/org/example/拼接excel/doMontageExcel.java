@@ -7,8 +7,7 @@ import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.util.ListUtils;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import org.example.Assistant;
-import org.example.func_two.OtherInfo2;
+
 
 import java.io.File;
 import java.io.IOException;
