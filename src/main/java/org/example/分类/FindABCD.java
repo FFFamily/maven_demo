@@ -109,13 +109,6 @@ public class FindABCD {
         for (int i = 0; i < dataList.size(); i++) {
             Assistant assistant = cachedDataList.get(i);
             AssistantResult assistantResult = dataList.get(i);
-//            if (assistantResult.getIsOrigin() == null){
-//                System.out.println("跳过："+i);
-//                continue;
-//            }
-//            if (!assistantResult.getCompanyName().equals("禹洲物业服务有限公司泉州分公司")){
-//                continue;
-//            }
             assistantResult.setIndex(String.valueOf(i+1));
             String z = assistant.getZ();
             if (z == null) {
