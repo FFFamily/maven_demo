@@ -19,7 +19,7 @@ public class DiffExcelData1 {
     // 排序1：辅助核算
     private String k;
     private String l;
-    private String m;
+    private BigDecimal m;
     private String n;
     private String o;
     private String p;
