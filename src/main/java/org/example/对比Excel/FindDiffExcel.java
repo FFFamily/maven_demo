@@ -20,9 +20,9 @@ public class FindDiffExcel {
     public static void main(String[] args) {
         List<DiffExcelData1> list1 = new ArrayList<>();
         List<DiffExcelData2> list2 = new ArrayList<>();
-        String fileName1 = "src/main/java/org/example/对比excel/excel/excel1.xlsx";
+        String fileName1 = "src/main/java/org/example/对比excel/excel/2022年1-4月NC科目辅助余额表-0506.xlsx";
         EasyExcel.read(fileName1, new PageReadListener<DiffExcelData1>(list1::addAll)).sheet("2022年1-4月NC账面数-六大往来").doRead();
-        String fileName2 = "src/main/java/org/example/对比excel/excel/excel2.xlsx";
+        String fileName2 = "src/main/java/org/example/对比excel/excel/CRC_B00_GL_辅助核算余额 _211124-禹洲切换日22.5-12(六大往来）.xlsx";
         EasyExcel.read(fileName2, new PageReadListener<DiffExcelData2>(list2::addAll)).sheet("Sheet1").doRead();
         int size1 = list1.size();
         int size2 = list2.size();
