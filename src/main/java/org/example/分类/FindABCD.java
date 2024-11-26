@@ -45,7 +45,7 @@ public class FindABCD {
     public void doFindABDC(String sourceFile){
         List<AssistantResult> excelExcelData = new ArrayList<>();
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData(sourceFile,"Sheet1");
-        Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("", "明细 原版");
+        Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
         List<AssistantResult> dataList = sourceFileDataList
                 .stream()
                 .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectCode()))
@@ -63,15 +63,37 @@ public class FindABCD {
                     assistantResult.setTransactionObjectCode(transactionObjectCode);
                     assistantResult.setTransactionObjectName(transactionObjectName);
                     assistantResult.setField(sourceFileData.getMatchName());
+                    assistantResult.setSEGMENT1_NAME(sourceFileData.getSEGMENT1_NAME());
+                    assistantResult.setSEGMENT2_NAME(sourceFileData.getSEGMENT2_NAME());
+                    assistantResult.setSEGMENT3_NAME(sourceFileData.getSEGMENT3_NAME());
+                    assistantResult.setSEGMENT4_NAME(sourceFileData.getSEGMENT4_NAME());
+                    assistantResult.setSEGMENT5_NAME(sourceFileData.getSEGMENT5_NAME());
+                    assistantResult.setSEGMENT6_NAME(sourceFileData.getSEGMENT6_NAME());
+                    assistantResult.setSEGMENT7_NAME(sourceFileData.getSEGMENT7_NAME());
+                    assistantResult.setSEGMENT8_NAME(sourceFileData.getSEGMENT8_NAME());
+                    assistantResult.setSEGMENT9_NAME(sourceFileData.getSEGMENT9_NAME());
+                    assistantResult.setSEGMENT10_NAME(sourceFileData.getSEGMENT10_NAME());
                     BigDecimal money = curr.stream().reduce(
                             BigDecimal.ZERO,
                             (iprev, icurr) -> icurr.getYEAR_BEGIN_DR().subtract(icurr.getYEAR_BEGIN_CR()).add(icurr.getYTD_DR()).subtract(icurr.getYTD_CR()),
                             (l, r) -> l);
                     assistantResult.setMoney(money);
-                    String key =  transactionObjectCode.substring(transactionObjectCode.indexOf(":"))+"."+transactionObjectName;
+                    String key;
+                    if (transactionObjectCode != null){
+                        int i = transactionObjectCode.indexOf(":");
+                        if (i != -1){
+                             key = assistantResult.getFieldCode()+transactionObjectCode.substring(i+1)+"."+transactionObjectName;
+                        }else {
+                            key = assistantResult.getFieldCode()+transactionObjectCode;
+                        }
+                    }else {
+                        key = assistantResult.getFieldCode();
+                    }
                     DraftFormatTemplate draftFormatTemplate = mapping.get(key);
-                    assistantResult.setIsOrigin(draftFormatTemplate.getO());
-                    assistantResult.setCustomerType(draftFormatTemplate.getT());
+                    if (draftFormatTemplate != null) {
+                        assistantResult.setIsOrigin(draftFormatTemplate.getO());
+                        assistantResult.setCustomerType(draftFormatTemplate.getT());
+                    }
                     prev.add(assistantResult);
                     return prev;
                 },(l,r) -> l);
@@ -98,6 +120,10 @@ public class FindABCD {
         for (int i = 0; i < dataList.size(); i++) {
             Assistant3 assistant = cachedDataList.get(i);
             AssistantResult assistantResult = dataList.get(i);
+//            if (assistantResult.getIsOrigin() == null){
+//                System.out.println("跳过："+i);
+//                continue;
+//            }
 //            if (!assistantResult.getCompanyName().equals("禹洲物业服务有限公司泉州分公司")){
 //                continue;
 //            }
@@ -138,9 +164,9 @@ public class FindABCD {
             doFind(startCollect,assistant,projectName,assistantResult,true);
             doFind(startCollect,assistant,projectName,assistantResult,false);
             excelExcelData.add(assistantResult);
-            if (i == 10000){
-                break;
-            }
+//            if (i == 1000){
+//                break;
+//            }
             System.out.println("当前位置："+i +" 一共有： "+dataList.size());
         }
         String resultFileName = "ABCD分类-"+System.currentTimeMillis() + ".xlsx";
@@ -173,6 +199,8 @@ public class FindABCD {
             assistantResult.setOneLevelType(type);
         }
     }
+
+
 
 
     public static BigDecimal getZValue(String z) {

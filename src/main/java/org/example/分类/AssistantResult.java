@@ -20,6 +20,28 @@ public class AssistantResult {
 
     @ExcelProperty("科目段描述")
     private String subjectName;
+
+        @ExcelProperty("机构名")
+    private String SEGMENT1_NAME;
+        @ExcelProperty("成本中心代码")
+    private String SEGMENT2_NAME;
+        @ExcelProperty("科目代码")
+    private String SEGMENT3_NAME ;
+        @ExcelProperty("子目名称")
+    private String SEGMENT4_NAME;
+        @ExcelProperty("产品段名称")
+    private String SEGMENT5_NAME;
+        @ExcelProperty("地区名称")
+    private String SEGMENT6_NAME;
+        @ExcelProperty("SBU名称")
+    private String SEGMENT7_NAME;
+        @ExcelProperty("ICP名称")
+    private String SEGMENT8_NAME;
+        @ExcelProperty("项目段名称")
+    private String SEGMENT9_NAME;
+        @ExcelProperty("备用段名称")
+    private String SEGMENT10_NAME;
+
     // 匹配字段
     @ColumnWidth(180)
     @ExcelProperty("匹配字段")

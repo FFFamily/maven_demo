@@ -57,12 +57,17 @@ public class ExcelDataUtil {
                 String c = i.getC();
                 String regex = ":(.*?)\\s";
                 Pattern pattern = Pattern.compile(regex);
-                Matcher matcher = pattern.matcher(c);
-                if (matcher.find()) {
-                    String group = matcher.group(1);
-                    String key = a + group;
-                    sourceFileDataList.put(key,i);
+                if (c != null){
+                    Matcher matcher = pattern.matcher(c);
+                    if (matcher.find()) {
+                        String group = matcher.group(1);
+                        String key = a + group;
+                        sourceFileDataList.put(key,i);
+                    }
+                }else {
+                    sourceFileDataList.put(a,i);
                 }
+
             });
         })).sheet(sheetName).doRead();
         return sourceFileDataList;
