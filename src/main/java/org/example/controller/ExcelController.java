@@ -61,7 +61,6 @@ public class ExcelController {
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
         List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null);
         List<OtherInfo3> result1 = new ArrayList<>();
-//        List<OtherInfo3> result2 = new ArrayList<>();
         for (int i = 0; i < realAssistantList.size(); i++) {
             Assistant assistant = realAssistantList.get(i);
             String z = assistant.getZ();
