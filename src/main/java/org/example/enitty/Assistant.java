@@ -39,6 +39,7 @@ public class Assistant {
 
     // 交易对象编码
     private String transactionObjectCode;
-
+    // 编码描述
+    private String rDesc;
 
 }

@@ -60,7 +60,9 @@ public class ExcelController {
     public void findLevel(){
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
         List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null)
-                .stream().filter(item -> item.getE().equals("禹洲物业服务有限公司泉州分公司"))
+                .stream()
+                .filter(item -> item.getE().equals("禹洲物业服务有限公司泉州分公司"))
+//                .filter(item -> item.getRDesc().equals("禹洲物业服务有限公司泉州分公司其他应收款-其他其他---泉州温莎美地CS:CYZ000110:JODV0:CYZ000110"))
                 .collect(Collectors.toList());
         List<OtherInfo3> result1 = new ArrayList<>();
         int size = 0;
@@ -72,14 +74,26 @@ public class ExcelController {
             if (z == null) {
                 continue;
             }
+            // 账户组合描述
             String projectName = assistant.getR();
             List<OtherInfo3> result = findLevelBySystem.doMain(
                     assistant.getZ(),
                     projectName,
                     assistant.getTransactionObjectCode());
-            result1.addAll(result);
+            if (result.size() == 0){
+                // 证明所有的都借贷相互抵消了
+                OtherInfo3 otherInfo3 = new OtherInfo3();
+                otherInfo3.setA(String.valueOf(i));
+                otherInfo3.setZ(projectName);
+                otherInfo3.setZDesc(assistant.getRDesc());
+                result1.add(otherInfo3);
+            }else {
+                int finalI = i;
+                result.forEach(item -> item.setA(String.valueOf(finalI)));
+                result1.addAll(result);
+            }
             size++;
-            if (size == 200){
+            if (size == 20){
                 break;
             }
         }
