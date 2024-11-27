@@ -28,7 +28,7 @@ public class SqlUtil {
         // 年 + 月 + 凭证
         DateTime date = DateUtil.date(rs.getDate("有效日期"));
         int year = date.year();
-        int month = date.month();
+        int month = date.month()+1;
         int code = rs.getInt("单据编号");
         info.setQ(code);
         info.setR(year+"-"+month+"-"+code);
@@ -42,6 +42,7 @@ public class SqlUtil {
         info.setZ(rs.getString("账户组合"));
         info.setZDesc(rs.getString("账户描述"));
         info.setTransactionId(rs.getString("交易对象"));
+        info.setTransactionName(rs.getString("交易对象名称"));
         return info;
     }
 

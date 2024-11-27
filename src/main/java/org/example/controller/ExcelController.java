@@ -67,7 +67,7 @@ public class ExcelController {
         System.out.println("开始时间："+DateUtil.date());
         for (int i = 0; i < realAssistantList.size(); i++) {
             Assistant assistant = realAssistantList.get(i);
-            System.out.println("第"+i+"条，开始"+"共"+realAssistantList.size()+"条：");
+            System.out.println("第"+i+"条，开始"+"共"+realAssistantList.size()+"条");
             String z = assistant.getZ();
             if (z == null) {
                 continue;
@@ -79,7 +79,7 @@ public class ExcelController {
                     assistant.getTransactionObjectCode());
             result1.addAll(result);
             size++;
-            if (size == 100){
+            if (size == 200){
                 break;
             }
         }
