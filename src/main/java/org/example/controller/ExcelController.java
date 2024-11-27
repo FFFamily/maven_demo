@@ -80,7 +80,7 @@ public class ExcelController {
                     assistant.getZ(),
                     projectName,
                     assistant.getTransactionObjectCode());
-            if (result.size() == 0){
+            if (result.isEmpty()){
                 // 证明所有的都借贷相互抵消了
                 OtherInfo3 otherInfo3 = new OtherInfo3();
                 otherInfo3.setA(String.valueOf(i));
