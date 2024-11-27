@@ -282,9 +282,9 @@ public class FindLevel {
         BigDecimal w = item.getW();
         List<OtherInfo3> collect;
         if(findBySql){
-            String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"有效日期\" = ? AND z.\"单据编号\" = ? AND z.\"账户组合\" <> ？ AND z.\"交易对象\" <> ?";
+            String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"有效日期\" = '"+item.getN()+"' AND z.\"单据编号\" = "+item.getQ()+" AND z.\"账户组合\" <> '"+item.getZ()+"' AND z.\"交易对象\" <> "+item.getTransactionId();
             String appendSql = v != null ? " AND z.\"输入贷方\" = " + BigDecimal.ZERO.subtract(v) : " AND z.\"输入借方\" = " + BigDecimal.ZERO.subtract(w);
-            collect = sqlUtil.find(findSql+appendSql,item.getN(),item.getQ(), item.getZ(),item.getTransactionId());
+            collect = sqlUtil.find(findSql+appendSql);
         }else {
             collect = cachedDataList.stream()
                     // 凭证号相等 && 编号不能相等 && 合并字段不相同
