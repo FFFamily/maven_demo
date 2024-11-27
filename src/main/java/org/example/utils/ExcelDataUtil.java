@@ -48,6 +48,7 @@ public class ExcelDataUtil {
                 sourceFileDataList.add(i);
             });
         })).sheet(sheetName).doRead();
+        System.out.println("9月科目辅助余额表 读取完成");
         return sourceFileDataList;
     }
 
@@ -167,6 +168,7 @@ public class ExcelDataUtil {
             assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCode());
             cachedDataList.add(assistant3);
         }
+        System.out.println("解析Assistant完成");
         return cachedDataList;
     }
 

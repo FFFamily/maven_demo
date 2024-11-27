@@ -57,7 +57,7 @@ public class SourceFileData {
     private String SEGMENT10;
     //    @ExcelProperty("备用段名称")
     private String SEGMENT10_NAME;
-    @ExcelProperty("交易对象编码")
+    @ExcelProperty("交易对象ID")
     private String transactionObjectCode;
     @ExcelProperty("交易对象名称")
     private String transactionObjectName;

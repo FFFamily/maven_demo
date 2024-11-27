@@ -58,11 +58,12 @@ public class ExcelController {
     }
     @GetMapping("/findLevel")
     public void findLevel(){
-        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
+        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
         List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null);
         List<OtherInfo3> result1 = new ArrayList<>();
 //        List<OtherInfo3> result2 = new ArrayList<>();
-        for (Assistant assistant : realAssistantList) {
+        for (int i = 0; i < realAssistantList.size(); i++) {
+            Assistant assistant = realAssistantList.get(i);
             String z = assistant.getZ();
             if (z == null) {
                 continue;
@@ -73,11 +74,15 @@ public class ExcelController {
                     projectName,
                     assistant.getTransactionObjectCode());
             result1.addAll(result);
+            if (i == 100){
+                break;
+            }
         }
         String resultFileName = "模版" + System.currentTimeMillis()+".xlsx";
         try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
             WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
             excelWriter.write(result1, writeSheet1);
+            System.out.println(resultFileName+"导出完成");
         }
     }
 

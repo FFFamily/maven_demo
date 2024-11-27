@@ -283,7 +283,7 @@ public class FindLevel {
         List<OtherInfo3> collect;
         if(findBySql){
             String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"有效日期\" = ? AND z.\"单据编号\" = ? AND z.\"账户组合\" <> ？ AND z.\"交易对象\" <> ?";
-            String appendSql = v != null ? "AND z.\"输入贷方\" = " + BigDecimal.ZERO.subtract(v) : "AND z.\"输入借方\" = " + BigDecimal.ZERO.subtract(w);
+            String appendSql = v != null ? " AND z.\"输入贷方\" = " + BigDecimal.ZERO.subtract(v) : " AND z.\"输入借方\" = " + BigDecimal.ZERO.subtract(w);
             collect = sqlUtil.find(findSql+appendSql,item.getN(),item.getQ(), item.getZ(),item.getTransactionId());
         }else {
             collect = cachedDataList.stream()
