@@ -93,7 +93,7 @@ public class ExcelController {
                 result1.addAll(result);
             }
             size++;
-            if (size == 20){
+            if (size == 100){
                 break;
             }
         }
