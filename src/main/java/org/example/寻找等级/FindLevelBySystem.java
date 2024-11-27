@@ -32,7 +32,7 @@ public class FindLevelBySystem {
         }else {
             findStartCollectSql += "' and z.\"交易对象\" IS NULL";
         }
-        List<OtherInfo3> startCollect = sqlUtil.find(findStartCollectSql);
+        List<OtherInfo3> startCollect = sqlUtil.find(findStartCollectSql).stream().peek(item -> findLevel.organizeDataItem(item)).collect(Collectors.toList());
 
         List<OtherInfo3> finalResult;
         finalResult = FindLevel.FindFirstLevel(startCollect,z,originProjectName);

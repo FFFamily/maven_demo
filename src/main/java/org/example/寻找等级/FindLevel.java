@@ -36,7 +36,7 @@ public class FindLevel {
         String fileName2 = "src/main/java/org/example/excel/副本厦门往来清理跟进表-全匹配版 （禹洲泉州）-标识.xlsx";
         EasyExcel.read(fileName1, OtherInfo3.class, new PageReadListener<OtherInfo3>(dataList -> {
             for (OtherInfo3 item : dataList) {
-                organizeDataItem(item);
+                new FindLevel().organizeDataItem(item);
                 cachedDataList.add(item);
             }
         })).sheet().doRead();
@@ -284,7 +284,7 @@ public class FindLevel {
         if(findBySql){
             String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"有效日期\" = TO_DATE('"+item.getN()+"','yyyy-mm-dd hh24:mi:ss') AND z.\"单据编号\" = "+item.getQ()+" AND z.\"账户组合\" <> '"+item.getZ()+"' AND z.\"交易对象\" <> '"+item.getTransactionId()+"'";
             String appendSql = v != null ? " AND z.\"输入贷方\" = " + v : " AND z.\"输入借方\" = " + w;
-            collect = sqlUtil.find(findSql+appendSql);
+            collect = sqlUtil.find(findSql+appendSql).stream().peek(this::organizeDataItem).collect(Collectors.toList());
         }else {
             collect = cachedDataList.stream()
                     // 凭证号相等 && 编号不能相等 && 合并字段不相同
@@ -311,7 +311,7 @@ public class FindLevel {
                     String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE  z.\"账户组合\" = '"+item.getZ()+"'";
                     if (item.getTransactionId() != null){
                         String appendSql = "AND z.\"交易对象\" = '"+item.getTransactionId()+"'";
-                        collect1 = sqlUtil.find(findSql+appendSql);
+                        collect1 = sqlUtil.find(findSql+appendSql).stream().peek(this::organizeDataItem).collect(Collectors.toList());
                     }else {
                         collect1 = sqlUtil.find(findSql);
                     }
@@ -456,7 +456,7 @@ public class FindLevel {
 
 
 
-    public static void organizeDataItem(OtherInfo3 otherInfo3){
+    public void organizeDataItem(OtherInfo3 otherInfo3){
         try {
             // 借方金额
             BigDecimal V = otherInfo3.getV() == null ? null : otherInfo3.getV().equals(BigDecimal.ZERO) ? null : otherInfo3.getV();
