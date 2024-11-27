@@ -290,9 +290,12 @@ public class FindLevel {
                     // 凭证号相等 && 编号不能相等 && 合并字段不相同
                     .filter(temp -> temp.getR().equals(item.getR())
                             && ((v != null && temp.getW() != null && v.compareTo(temp.getW()) == 0) || w != null && temp.getV() != null && w.compareTo(temp.getV()) == 0)
-                            && !temp.getA().equals(item.getA())
+//                            && !temp.getA().equals(item.getA())
 //                        && temp.getX().equals(item.getX())
-                            && !temp.getZ().equals(item.getZ()))
+                            && !temp.getZ().equals(item.getZ())
+                            // TODO 交易对象是否也需要不同
+                            && !Objects.equals(temp.getTransactionId(),item.getTransactionId())
+                    )
                     .collect(Collectors.toList());
 //        }
         List<OtherInfo3> result = new ArrayList<>();

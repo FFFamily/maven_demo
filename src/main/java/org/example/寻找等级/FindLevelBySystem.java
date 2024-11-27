@@ -33,7 +33,8 @@ public class FindLevelBySystem {
 //            findStartCollectSql += "' and z.\"交易对象\" IS NULL";
 //        }
 //        List<OtherInfo3> startCollect = sqlUtil.find(findStartCollectSql).stream().peek(item -> findLevel.organizeDataItem(item)).collect(Collectors.toList());
-        List<OtherInfo3> startCollect = cachedDataList.stream().filter(item -> item.getZ().equals(originProjectName) && item.getTransactionId().equals(code)).collect(Collectors.toList());
+        cachedDataList.forEach(item -> findLevel.organizeDataItem(item));
+        List<OtherInfo3> startCollect = cachedDataList.stream().filter(item -> item.getZ().equals(originProjectName) && Objects.equals(item.getTransactionId(),code)).collect(Collectors.toList());
         List<OtherInfo3> finalResult;
         finalResult = FindLevel.FindFirstLevel(startCollect,z,originProjectName);
         Deque<OtherInfo3> deque = new LinkedList<>();

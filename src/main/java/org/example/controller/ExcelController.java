@@ -73,10 +73,16 @@ public class ExcelController {
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
             System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
+            if (!companyCode.equals("JODV0")){
+                System.out.println("跳过");
+                continue;
+            }
             List<Assistant> realAssistantList = companyMap.get(companyCode);
             List<OtherInfo3> result1 = new ArrayList<>();
-            int size = 0;
             System.out.println("共"+realAssistantList.size()+"条");
+            String findCompanySql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+companyCode+"'";
+            List<OtherInfo3> cachedDataList = sqlUtil.find(findCompanySql);
+            System.out.println("整个公司包含数据量："+cachedDataList.size());
             for (int i = 0; i < realAssistantList.size(); i++) {
                 Assistant assistant = realAssistantList.get(i);
                 String z = assistant.getZ();
@@ -85,8 +91,7 @@ public class ExcelController {
                 }
                 // 账户组合描述
                 String projectName = assistant.getR();
-                String findCompanySql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+companyCode+"'";
-                List<OtherInfo3> cachedDataList = sqlUtil.find(findCompanySql);
+
                 List<OtherInfo3> result = findLevelBySystem.doMain(
                         assistant.getZ(),
                         cachedDataList,
@@ -104,10 +109,6 @@ public class ExcelController {
                     result.forEach(item -> item.setA(String.valueOf(finalI)));
                     result1.addAll(result);
                 }
-                size++;
-                if (size == 100){
-                    break;
-                }
             }
             String resultFileName = "模版-" + companyCode + "-" + System.currentTimeMillis() + ".xlsx";
             try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
@@ -116,6 +117,7 @@ public class ExcelController {
                 System.out.println(resultFileName+"导出完成");
             }
         }
+        System.out.println("结束");
 
     }
 
