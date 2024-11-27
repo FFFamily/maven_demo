@@ -281,11 +281,11 @@ public class FindLevel {
         BigDecimal v = item.getV();
         BigDecimal w = item.getW();
         List<OtherInfo3> collect;
-        if(findBySql){
-            String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"有效日期\" = TO_DATE('"+item.getN()+"','yyyy-mm-dd hh24:mi:ss') AND z.\"单据编号\" = "+item.getQ()+" AND z.\"账户组合\" <> '"+item.getZ()+"' AND z.\"交易对象\" <> '"+item.getTransactionId()+"'";
-            String appendSql = v != null ? " AND z.\"输入贷方\" = " + v : " AND z.\"输入借方\" = " + w;
-            collect = sqlUtil.find(findSql+appendSql).stream().peek(this::organizeDataItem).collect(Collectors.toList());
-        }else {
+//        if(findBySql){
+//            String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"有效日期\" = TO_DATE('"+item.getN()+"','yyyy-mm-dd hh24:mi:ss') AND z.\"单据编号\" = "+item.getQ()+" AND z.\"账户组合\" <> '"+item.getZ()+"' AND z.\"交易对象\" <> '"+item.getTransactionId()+"'";
+//            String appendSql = v != null ? " AND z.\"输入贷方\" = " + v : " AND z.\"输入借方\" = " + w;
+//            collect = sqlUtil.find(findSql+appendSql).stream().peek(this::organizeDataItem).collect(Collectors.toList());
+//        }else {
             collect = cachedDataList.stream()
                     // 凭证号相等 && 编号不能相等 && 合并字段不相同
                     .filter(temp -> temp.getR().equals(item.getR())
@@ -294,7 +294,7 @@ public class FindLevel {
 //                        && temp.getX().equals(item.getX())
                             && !temp.getZ().equals(item.getZ()))
                     .collect(Collectors.toList());
-        }
+//        }
         List<OtherInfo3> result = new ArrayList<>();
         if (collect.isEmpty()) {
         } else {
@@ -307,15 +307,15 @@ public class FindLevel {
             // 往下找下一个之前先添加自己
             for (OtherInfo3 otherInfo3 : collect) {
                 List<OtherInfo3> collect1;
-                if (findBySql){
-                    String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE  z.\"账户组合\" = '"+item.getZ()+"'";
-                    if (item.getTransactionId() != null){
-                        String appendSql = "AND z.\"交易对象\" = '"+item.getTransactionId()+"'";
-                        collect1 = sqlUtil.find(findSql+appendSql).stream().peek(this::organizeDataItem).collect(Collectors.toList());
-                    }else {
-                        collect1 = sqlUtil.find(findSql);
-                    }
-                }else {
+//                if (findBySql){
+//                    String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE  z.\"账户组合\" = '"+item.getZ()+"'";
+//                    if (item.getTransactionId() != null){
+//                        String appendSql = "AND z.\"交易对象\" = '"+item.getTransactionId()+"'";
+//                        collect1 = sqlUtil.find(findSql+appendSql).stream().peek(this::organizeDataItem).collect(Collectors.toList());
+//                    }else {
+//                        collect1 = sqlUtil.find(findSql);
+//                    }
+//                }else {
                      collect1 = cachedDataList.stream()
                             .filter(i -> i.getZ().equals(otherInfo3.getZ()))
                             .sorted((a, b) -> {
@@ -326,7 +326,7 @@ public class FindLevel {
                                 return i;
                             })
                             .collect(Collectors.toList());
-                }
+//                }
 
                 // 先找当前数据借贷抵消的数据
                 List<OtherInfo3> findOne = disSameX(collect1, originProjectName)

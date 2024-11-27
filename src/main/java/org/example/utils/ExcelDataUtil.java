@@ -37,8 +37,6 @@ public class ExcelDataUtil {
                             getValue(i.getSEGMENT8_NAME()) + "." +
                             getValue(i.getSEGMENT9_NAME()) + "." +
                             getValue(i.getSEGMENT10_NAME());
-//                        getValue(i.getTransactionObjectCode()) + "." +
-//                        getValue(i.getTransactionObjectName());
                     String matchFieldCode = getValue(i.getSEGMENT1())  + "." +
                             getValue(i.getSEGMENT2()) + "." +
                             getValue(i.getSEGMENT3()) + "." +
@@ -127,6 +125,7 @@ public class ExcelDataUtil {
                     assistantResult.setTransactionObjectName(transactionObjectName);
                     assistantResult.setField(sourceFileData.getMatchName());
                     BigDecimal money = ExcelDataUtil.getBalance(curr);
+                    assistantResult.setSEGMENT1(sourceFileData.getSEGMENT1());
                     assistantResult.setSEGMENT1_NAME(sourceFileData.getSEGMENT1_NAME());
                     assistantResult.setSEGMENT2_NAME(sourceFileData.getSEGMENT2_NAME());
                     assistantResult.setSEGMENT3_NAME(sourceFileData.getSEGMENT3_NAME());
@@ -175,6 +174,7 @@ public class ExcelDataUtil {
             assistant3.setE(assistantResult.getCompanyName());
             assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCode());
             assistant3.setRDesc(assistantResult.getField());
+            assistant3.setCompanyCode(assistantResult.getSEGMENT1());
             cachedDataList.add(assistant3);
         }
         System.out.println("解析Assistant完成");

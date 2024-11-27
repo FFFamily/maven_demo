@@ -41,5 +41,7 @@ public class Assistant {
     private String transactionObjectCode;
     // 编码描述
     private String rDesc;
+    // 机构代码
+    private String companyCode;
 
 }

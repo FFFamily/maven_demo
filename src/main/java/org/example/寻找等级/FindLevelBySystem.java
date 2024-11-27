@@ -25,15 +25,15 @@ public class FindLevelBySystem {
     private SqlUtil sqlUtil;
     @Resource
     private FindLevel findLevel;
-    public  List<OtherInfo3> doMain(String z, String originProjectName, String code) {
-        String findStartCollectSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"账户组合\" = '"+originProjectName;
-        if (code != null){
-            findStartCollectSql += "' and z.\"交易对象\" = '"+code+"'";
-        }else {
-            findStartCollectSql += "' and z.\"交易对象\" IS NULL";
-        }
-        List<OtherInfo3> startCollect = sqlUtil.find(findStartCollectSql).stream().peek(item -> findLevel.organizeDataItem(item)).collect(Collectors.toList());
-
+    public  List<OtherInfo3> doMain(String z,List<OtherInfo3> cachedDataList, String originProjectName, String code) {
+//        String findStartCollectSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"账户组合\" = '"+originProjectName;
+//        if (code != null){
+//            findStartCollectSql += "' and z.\"交易对象\" = '"+code+"'";
+//        }else {
+//            findStartCollectSql += "' and z.\"交易对象\" IS NULL";
+//        }
+//        List<OtherInfo3> startCollect = sqlUtil.find(findStartCollectSql).stream().peek(item -> findLevel.organizeDataItem(item)).collect(Collectors.toList());
+        List<OtherInfo3> startCollect = cachedDataList.stream().filter(item -> item.getZ().equals(originProjectName) && item.getTransactionId().equals(code)).collect(Collectors.toList());
         List<OtherInfo3> finalResult;
         finalResult = FindLevel.FindFirstLevel(startCollect,z,originProjectName);
         Deque<OtherInfo3> deque = new LinkedList<>();
@@ -56,11 +56,11 @@ public class FindLevelBySystem {
                         String form = parentItem.getS();
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-                            level = findLevel.find(deque,null,parentItem,originProjectName,level,true,true);
+                            level = findLevel.find(deque,cachedDataList,parentItem,originProjectName,level,true,true);
                         }
                     } else {
                         FindLevel.judgeJoin(result,parentItem,no,level);
-                        level = findLevel.find(deque,null,parentItem,originProjectName,level,true,true);
+                        level = findLevel.find(deque,cachedDataList,parentItem,originProjectName,level,true,true);
                     }
                 }
             }

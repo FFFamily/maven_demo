@@ -20,8 +20,9 @@ public class AssistantResult {
 
     @ExcelProperty("科目段描述")
     private String subjectName;
-
-        @ExcelProperty("机构名")
+    @ExcelProperty("机构编码")
+    private String SEGMENT1;
+    @ExcelProperty("机构名")
     private String SEGMENT1_NAME;
         @ExcelProperty("成本中心代码")
     private String SEGMENT2_NAME;

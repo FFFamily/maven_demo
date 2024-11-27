@@ -12,6 +12,7 @@ import org.example.core.entity.SourceFileData;
 import org.example.enitty.Assistant;
 import org.example.enitty.OracleData;
 import org.example.utils.ExcelDataUtil;
+import org.example.utils.SqlUtil;
 import org.example.分类.AssistantResult;
 import org.example.分类.FindABCD;
 import org.example.分类.entity.DraftFormatTemplate;
@@ -41,6 +42,8 @@ public class ExcelController {
     private FindABCD findABCD;
     @Resource
     private FindLevelBySystem findLevelBySystem;
+    @Resource
+    private SqlUtil sqlUtil;
 
     @GetMapping("/demo1")
     public void test1(){
@@ -59,51 +62,61 @@ public class ExcelController {
     @GetMapping("/findLevel")
     public void findLevel(){
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
-        List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null)
-                .stream()
-                .filter(item -> item.getE().equals("禹洲物业服务有限公司泉州分公司"))
+//        List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null)
+//                .stream()
+//                .filter(item -> item.getE().equals("禹洲物业服务有限公司泉州分公司"))
 //                .filter(item -> item.getRDesc().equals("禹洲物业服务有限公司泉州分公司其他应收款-其他其他---泉州温莎美地CS:CYZ000110:JODV0:CYZ000110"))
-                .collect(Collectors.toList());
-        List<OtherInfo3> result1 = new ArrayList<>();
-        int size = 0;
-        System.out.println("开始时间："+DateUtil.date());
-        for (int i = 0; i < realAssistantList.size(); i++) {
-            Assistant assistant = realAssistantList.get(i);
-            System.out.println("第"+i+"条，开始"+"共"+realAssistantList.size()+"条");
-            String z = assistant.getZ();
-            if (z == null) {
-                continue;
+//                .collect(Collectors.toList());
+        Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
+                .stream()
+                // 根据公司分组
+                .collect(Collectors.groupingBy(Assistant::getCompanyCode));
+        for (String companyCode : companyMap.keySet()) {
+            System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
+            List<Assistant> realAssistantList = companyMap.get(companyCode);
+            List<OtherInfo3> result1 = new ArrayList<>();
+            int size = 0;
+            System.out.println("共"+realAssistantList.size()+"条");
+            for (int i = 0; i < realAssistantList.size(); i++) {
+                Assistant assistant = realAssistantList.get(i);
+                String z = assistant.getZ();
+                if (z == null) {
+                    continue;
+                }
+                // 账户组合描述
+                String projectName = assistant.getR();
+                String findCompanySql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+companyCode+"'";
+                List<OtherInfo3> cachedDataList = sqlUtil.find(findCompanySql);
+                List<OtherInfo3> result = findLevelBySystem.doMain(
+                        assistant.getZ(),
+                        cachedDataList,
+                        projectName,
+                        assistant.getTransactionObjectCode());
+                if (result.isEmpty()){
+                    // 证明所有的都借贷相互抵消了
+                    OtherInfo3 otherInfo3 = new OtherInfo3();
+                    otherInfo3.setA(String.valueOf(i));
+                    otherInfo3.setZ(projectName);
+                    otherInfo3.setZDesc(assistant.getRDesc());
+                    result1.add(otherInfo3);
+                }else {
+                    int finalI = i;
+                    result.forEach(item -> item.setA(String.valueOf(finalI)));
+                    result1.addAll(result);
+                }
+                size++;
+                if (size == 100){
+                    break;
+                }
             }
-            // 账户组合描述
-            String projectName = assistant.getR();
-            List<OtherInfo3> result = findLevelBySystem.doMain(
-                    assistant.getZ(),
-                    projectName,
-                    assistant.getTransactionObjectCode());
-            if (result.isEmpty()){
-                // 证明所有的都借贷相互抵消了
-                OtherInfo3 otherInfo3 = new OtherInfo3();
-                otherInfo3.setA(String.valueOf(i));
-                otherInfo3.setZ(projectName);
-                otherInfo3.setZDesc(assistant.getRDesc());
-                result1.add(otherInfo3);
-            }else {
-                int finalI = i;
-                result.forEach(item -> item.setA(String.valueOf(finalI)));
-                result1.addAll(result);
-            }
-            size++;
-            if (size == 100){
-                break;
+            String resultFileName = "模版-" + companyCode + "-" + System.currentTimeMillis() + ".xlsx";
+            try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
+                WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
+                excelWriter.write(result1, writeSheet1);
+                System.out.println(resultFileName+"导出完成");
             }
         }
-        System.out.println("结束："+DateUtil.date());
-        String resultFileName = "模版" + System.currentTimeMillis()+".xlsx";
-        try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
-            WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
-            excelWriter.write(result1, writeSheet1);
-            System.out.println(resultFileName+"导出完成");
-        }
+
     }
 
 
