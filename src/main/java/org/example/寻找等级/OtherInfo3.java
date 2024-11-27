@@ -71,7 +71,8 @@ public class OtherInfo3 {
 //    @ExcelProperty("余额")
 //    private String y;
     @ColumnWidth(50)
-    @ExcelProperty("账户组合")
+//    @ExcelProperty("账户组合")
+    @ExcelProperty("合并段值")
     private String z;
     @ColumnWidth(200)
     @ExcelProperty("账户描述")

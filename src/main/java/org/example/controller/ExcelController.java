@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.example.utils.ExcelDataUtil.getZ;
@@ -40,6 +41,8 @@ public class ExcelController {
     private JdbcTemplate jdbcTemplate;
     @Resource
     private FindABCD findABCD;
+    @Resource
+    private FindLevel findLevel;
     @Resource
     private FindLevelBySystem findLevelBySystem;
     @Resource
@@ -83,6 +86,7 @@ public class ExcelController {
             String findCompanySql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+companyCode+"'";
             List<OtherInfo3> cachedDataList = sqlUtil.find(findCompanySql);
             System.out.println("整个公司包含数据量："+cachedDataList.size());
+            cachedDataList.forEach(item -> findLevel.organizeDataItem(item));
             for (int i = 0; i < realAssistantList.size(); i++) {
                 Assistant assistant = realAssistantList.get(i);
                 String z = assistant.getZ();
@@ -91,12 +95,17 @@ public class ExcelController {
                 }
                 // 账户组合描述
                 String projectName = assistant.getR();
-
-                List<OtherInfo3> result = findLevelBySystem.doMain(
-                        assistant.getZ(),
+                List<OtherInfo3> startCollect = cachedDataList.stream()
+                        .filter(item -> item.getZ().equals(projectName) && Objects.equals(item.getTransactionId(),assistant.getTransactionObjectCode()))
+                        .collect(Collectors.toList());
+                List<OtherInfo3> result = findLevel.doMain(
+                        true,
+                        false,
+                        true,
                         cachedDataList,
-                        projectName,
-                        assistant.getTransactionObjectCode());
+                        startCollect,
+                        assistant.getZ(),
+                        projectName);
                 if (result.isEmpty()){
                     // 证明所有的都借贷相互抵消了
                     OtherInfo3 otherInfo3 = new OtherInfo3();
