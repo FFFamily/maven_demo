@@ -308,8 +308,13 @@ public class FindLevel {
             for (OtherInfo3 otherInfo3 : collect) {
                 List<OtherInfo3> collect1;
                 if (findBySql){
-                    String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE  z.\"账户组合\" == ？ AND z.\"交易对象\" == ?";
-                    collect1 = sqlUtil.find(findSql+ item.getZ(),item.getTransactionId());
+                    String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE  z.\"账户组合\" = '"+item.getZ()+"'";
+                    if (item.getTransactionId() != null){
+                        String appendSql = "AND z.\"交易对象\" = '"+item.getTransactionId()+"'";
+                        collect1 = sqlUtil.find(findSql+appendSql);
+                    }else {
+                        collect1 = sqlUtil.find(findSql);
+                    }
                 }else {
                      collect1 = cachedDataList.stream()
                             .filter(i -> i.getZ().equals(otherInfo3.getZ()))

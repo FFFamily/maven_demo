@@ -13,6 +13,7 @@ public class Assistant {
     private String b;
     private String c;
     private String d;
+    // 机构名称
     private String e;
     private String f;
     private String g;

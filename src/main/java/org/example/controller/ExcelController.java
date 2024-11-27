@@ -61,8 +61,13 @@ public class ExcelController {
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
         List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null);
         List<OtherInfo3> result1 = new ArrayList<>();
+        int size = 0;
         for (int i = 0; i < realAssistantList.size(); i++) {
             Assistant assistant = realAssistantList.get(i);
+            if (!assistant.getE().equals("禹洲物业服务有限公司泉州分公司")){
+                continue;
+            }
+            System.out.println("第"+i+"条，开始"+"共"+realAssistantList.size()+"条："+DateUtil.date());
             String z = assistant.getZ();
             if (z == null) {
                 continue;
@@ -73,7 +78,8 @@ public class ExcelController {
                     projectName,
                     assistant.getTransactionObjectCode());
             result1.addAll(result);
-            if (i == 100){
+            size++;
+            if (size == 100){
                 break;
             }
         }

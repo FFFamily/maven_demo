@@ -165,6 +165,7 @@ public class ExcelDataUtil {
             // 左前缀匹配
             assistant3.setZ(getZ(assistantResult.getMoney()));
             assistant3.setR(assistantResult.getFieldCode());
+            assistant3.setE(assistantResult.getCompanyName());
             assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCode());
             cachedDataList.add(assistant3);
         }
