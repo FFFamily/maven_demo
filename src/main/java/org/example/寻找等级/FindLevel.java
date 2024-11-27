@@ -7,8 +7,10 @@ import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import lombok.Data;
 import org.example.enitty.Assistant;
+import org.example.utils.SqlUtil;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,6 +25,8 @@ public class FindLevel {
      * 每隔5条存储数据库，实际使用中可以100条，然后清理list ，方便内存回收
      */
     private static final int BATCH_COUNT = 80000;
+    @Resource
+    private SqlUtil sqlUtil;
 
 
     public static void main(String[] args) {
@@ -57,6 +61,7 @@ public class FindLevel {
             List<OtherInfo3> result = doMain(
                     true,
                     false,
+                    false,
                     cachedDataList,
                     startCollect,
                     assistant.getZ(),
@@ -78,10 +83,12 @@ public class FindLevel {
 
     public static List<OtherInfo3> doMain(boolean isOpenFindUp,
                                           boolean isFindAll,
+                                          boolean findBySql,
                                           List<OtherInfo3> cachedDataList,
                                           List<OtherInfo3> startCollect,
                                           String z,
                                           String originProjectName) {
+
         List<OtherInfo3> finalResult;
         if (isFindAll){
             finalResult = startCollect;
@@ -108,11 +115,12 @@ public class FindLevel {
                         String form = parentItem.getS();
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-                            level = find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp);
+
+                            level = new FindLevel().find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp,findBySql);
                         }
                     } else {
                         judgeJoin(result,parentItem,no,level);
-                        level = find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp);
+                        level = new FindLevel().find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp,findBySql);
                     }
                 }
             }
@@ -120,7 +128,7 @@ public class FindLevel {
         return result;
     }
 
-    private static void judgeJoin(List<OtherInfo3> result,OtherInfo3 parentItem,String no,Integer level){
+    public static void judgeJoin(List<OtherInfo3> result,OtherInfo3 parentItem,String no,Integer level){
         if (result.isEmpty() || !result.contains(parentItem)){
             parentItem.setLevel(level);
             parentItem.setNo(no);
@@ -149,8 +157,8 @@ public class FindLevel {
         return result;
     }
 
-    public static Integer find(Deque<OtherInfo3> deque, List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originProjectName, int level, boolean isOpenFindUp) {
-        List<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originProjectName, level+1, isOpenFindUp);
+    public  Integer find(Deque<OtherInfo3> deque, List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originProjectName, int level, boolean isOpenFindUp,Boolean findBySql) {
+        List<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originProjectName, level+1, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
             // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
             OtherInfo3 child = childList.get(0);
@@ -256,11 +264,12 @@ public class FindLevel {
     }
 
 
-    private static List<OtherInfo3> doUpFilter(List<OtherInfo3> cachedDataList,
+    private  List<OtherInfo3> doUpFilter(List<OtherInfo3> cachedDataList,
                                                OtherInfo3 item,
                                                String originProjectName,
                                                Integer level,
-                                               boolean isOpenFindUp) {
+                                               boolean isOpenFindUp,
+                                               boolean findBySql) {
         if (!isOpenFindUp) {
             return new ArrayList<>();
         }
@@ -271,14 +280,21 @@ public class FindLevel {
         }
         BigDecimal v = item.getV();
         BigDecimal w = item.getW();
-        List<OtherInfo3> collect = cachedDataList.stream()
-                // 凭证号相等 && 编号不能相等 && 合并字段不相同
-                .filter(temp -> temp.getR().equals(item.getR())
-                        && ((v != null && temp.getW() != null && v.compareTo(temp.getW()) == 0) || w != null && temp.getV() != null && w.compareTo(temp.getV()) == 0)
-                        && !temp.getA().equals(item.getA())
+        List<OtherInfo3> collect;
+        if(findBySql){
+            String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"有效日期\" = ? AND z.\"单据编号\" = ? AND z.\"账户组合\" <> ？ AND z.\"交易对象\" <> ?";
+            String appendSql = v != null ? "AND z.\"输入贷方\" = " + BigDecimal.ZERO.subtract(v) : "AND z.\"输入借方\" = " + BigDecimal.ZERO.subtract(w);
+            collect = sqlUtil.find(findSql+appendSql,item.getN(),item.getQ(), item.getZ(),item.getTransactionId());
+        }else {
+            collect = cachedDataList.stream()
+                    // 凭证号相等 && 编号不能相等 && 合并字段不相同
+                    .filter(temp -> temp.getR().equals(item.getR())
+                            && ((v != null && temp.getW() != null && v.compareTo(temp.getW()) == 0) || w != null && temp.getV() != null && w.compareTo(temp.getV()) == 0)
+                            && !temp.getA().equals(item.getA())
 //                        && temp.getX().equals(item.getX())
-                        && !temp.getZ().equals(item.getZ()))
-                .collect(Collectors.toList());
+                            && !temp.getZ().equals(item.getZ()))
+                    .collect(Collectors.toList());
+        }
         List<OtherInfo3> result = new ArrayList<>();
         if (collect.isEmpty()) {
         } else {
@@ -290,16 +306,23 @@ public class FindLevel {
             List<OtherInfo3> otherInfo3s = new ArrayList<>();
             // 往下找下一个之前先添加自己
             for (OtherInfo3 otherInfo3 : collect) {
-                List<OtherInfo3> collect1 = cachedDataList.stream()
-                        .filter(i -> i.getZ().equals(otherInfo3.getZ()))
-                        .sorted((a, b) -> {
-                            int i = DateUtil.date(a.getN()).toInstant().compareTo(DateUtil.toInstant(b.getN()));
-                            if (i == 0) {
-                                return a.getQ() - b.getQ();
-                            }
-                            return i;
-                        })
-                        .collect(Collectors.toList());
+                List<OtherInfo3> collect1;
+                if (findBySql){
+                    String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE  z.\"账户组合\" == ？ AND z.\"交易对象\" == ?";
+                    collect1 = sqlUtil.find(findSql+ item.getZ(),item.getTransactionId());
+                }else {
+                     collect1 = cachedDataList.stream()
+                            .filter(i -> i.getZ().equals(otherInfo3.getZ()))
+                            .sorted((a, b) -> {
+                                int i = DateUtil.date(a.getN()).toInstant().compareTo(DateUtil.toInstant(b.getN()));
+                                if (i == 0) {
+                                    return a.getQ() - b.getQ();
+                                }
+                                return i;
+                            })
+                            .collect(Collectors.toList());
+                }
+
                 // 先找当前数据借贷抵消的数据
                 List<OtherInfo3> findOne = disSameX(collect1, originProjectName)
                         .stream()

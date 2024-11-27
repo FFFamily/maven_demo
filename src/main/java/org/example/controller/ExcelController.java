@@ -16,6 +16,7 @@ import org.example.分类.AssistantResult;
 import org.example.分类.FindABCD;
 import org.example.分类.entity.DraftFormatTemplate;
 import org.example.寻找等级.FindLevel;
+import org.example.寻找等级.FindLevelBySystem;
 import org.example.寻找等级.OtherInfo3;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +39,8 @@ public class ExcelController {
     private JdbcTemplate jdbcTemplate;
     @Resource
     private FindABCD findABCD;
+    @Resource
+    private FindLevelBySystem findLevelBySystem;
 
     @GetMapping("/demo1")
     public void test1(){
@@ -55,61 +58,26 @@ public class ExcelController {
     }
     @GetMapping("/findLevel")
     public void findLevel(){
-
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
-        List<Assistant> assistantList = new ArrayList<>();
-        sourceFileDataList
-                .stream()
-                .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectCode()))
-                .values()
-                .stream()
-                .reduce(new ArrayList<>(),(prev, curr) ->{
-                    SourceFileData sourceFileData = curr.get(0);
-                    Assistant assistant = new Assistant();
-                    BigDecimal balance = ExcelDataUtil.getBalance(curr);
-                    BigDecimal money = ExcelDataUtil.getMoney(sourceFileData.getSEGMENT3_NAME(),balance);
-                    assistant.setZ(getZ(money));
-                    prev.add(assistant);
-                    return prev;
-                },(l,r) -> l);
-        for (SourceFileData sourceFileData : sourceFileDataList) {
-
-
-        }
-
-        List<OtherInfo3> cachedDataList = new ArrayList<>();
-
-        List<Assistant> realAssistantList = assistantList.stream().skip(1).collect(Collectors.toList());
+        List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null);
         List<OtherInfo3> result1 = new ArrayList<>();
-        List<OtherInfo3> result2 = new ArrayList<>();
+//        List<OtherInfo3> result2 = new ArrayList<>();
         for (Assistant assistant : realAssistantList) {
             String z = assistant.getZ();
             if (z == null) {
                 continue;
             }
             String projectName = assistant.getR();
-            List<OtherInfo3> startCollect = cachedDataList.stream()
-                    .filter(item -> item.getZ().equals(projectName))
-                    .collect(Collectors.toList());
-            List<OtherInfo3> result = FindLevel.doMain(
-                    true,
-                    false,
-                    cachedDataList,
-                    startCollect,
+            List<OtherInfo3> result = findLevelBySystem.doMain(
                     assistant.getZ(),
-                    projectName);
-            if (result.size() == startCollect.size() && startCollect.size() != 1) {
-                result1.addAll(result);
-            } else {
-                result2.addAll(result);
-            }
+                    projectName,
+                    assistant.getTransactionObjectCode());
+            result1.addAll(result);
         }
         String resultFileName = "模版" + System.currentTimeMillis()+".xlsx";
         try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
             WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
-            excelWriter.write(result2, writeSheet1);
-            WriteSheet writeSheet2 = EasyExcel.writerSheet(1, "未能匹配").head(OtherInfo3.class).build();
-            excelWriter.write(result1, writeSheet2);
+            excelWriter.write(result1, writeSheet1);
         }
     }
 

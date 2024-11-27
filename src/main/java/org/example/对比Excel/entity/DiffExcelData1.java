@@ -12,14 +12,14 @@ public class DiffExcelData1 {
     private String d;
     private String e;
     private String f;
-    private String g;
+    private BigDecimal g;
     private String h;
-    private String i;
+    private BigDecimal i;
     private String j;
     // 排序1：辅助核算
     private String k;
-    private String l;
-    private BigDecimal m;
+    private BigDecimal l;
+    private String m;
     private String n;
     private String o;
     private String p;

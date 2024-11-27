@@ -46,66 +46,8 @@ public class FindABCD {
         List<AssistantResult> excelExcelData = new ArrayList<>();
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData(sourceFile,"Sheet1");
         Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
-        List<AssistantResult> dataList = sourceFileDataList
-                .stream()
-                .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectCode()))
-                .values()
-                .stream()
-                .reduce(new ArrayList<>(),(prev, curr) ->{
-                    AssistantResult assistantResult = new AssistantResult();
-                    SourceFileData sourceFileData = curr.get(0);
-                    assistantResult.setCompanyName(sourceFileData.getSEGMENT1_NAME());
-                    assistantResult.setFieldCode(sourceFileData.getMatch());
-                    assistantResult.setSubjectName(sourceFileData.getSEGMENT3_NAME());
-//                    assistantResult.setForm(sourceFileData.getSEGMENT3_NAME());
-                    String transactionObjectCode = sourceFileData.getTransactionObjectCode();
-                    String transactionObjectName = sourceFileData.getTransactionObjectName();
-                    assistantResult.setTransactionObjectCode(transactionObjectCode);
-                    assistantResult.setTransactionObjectName(transactionObjectName);
-                    assistantResult.setField(sourceFileData.getMatchName());
-                    BigDecimal money = ExcelDataUtil.getBalance(curr);
-                    assistantResult.setSEGMENT1_NAME(sourceFileData.getSEGMENT1_NAME());
-                    assistantResult.setSEGMENT2_NAME(sourceFileData.getSEGMENT2_NAME());
-                    assistantResult.setSEGMENT3_NAME(sourceFileData.getSEGMENT3_NAME());
-                    assistantResult.setSEGMENT4_NAME(sourceFileData.getSEGMENT4_NAME());
-                    assistantResult.setSEGMENT5_NAME(sourceFileData.getSEGMENT5_NAME());
-                    assistantResult.setSEGMENT6_NAME(sourceFileData.getSEGMENT6_NAME());
-                    assistantResult.setSEGMENT7_NAME(sourceFileData.getSEGMENT7_NAME());
-                    assistantResult.setSEGMENT8_NAME(sourceFileData.getSEGMENT8_NAME());
-                    assistantResult.setSEGMENT9_NAME(sourceFileData.getSEGMENT9_NAME());
-                    assistantResult.setSEGMENT10_NAME(sourceFileData.getSEGMENT10_NAME());
-                    assistantResult.setMoney(money);
-                    String key;
-                    if (transactionObjectCode != null){
-                        int i = transactionObjectCode.indexOf(":");
-                        if (i != -1){
-                             key = assistantResult.getFieldCode()+transactionObjectCode.substring(i+1)+"."+transactionObjectName;
-                        }else {
-                            key = assistantResult.getFieldCode()+transactionObjectCode;
-                        }
-                    }else {
-                        key = assistantResult.getFieldCode();
-                    }
-                    DraftFormatTemplate draftFormatTemplate = mapping.get(key);
-                    if (draftFormatTemplate != null) {
-                        assistantResult.setIsOrigin(draftFormatTemplate.getO());
-                        assistantResult.setCustomerType(draftFormatTemplate.getT());
-                    }
-                    prev.add(assistantResult);
-                    return prev;
-                },(l,r) -> l);
-
-
-        List<Assistant> cachedDataList = new ArrayList<>();
-        for (AssistantResult assistantResult : dataList) {
-            Assistant assistant3 = new Assistant();
-            BigDecimal money = ExcelDataUtil.getMoney(assistantResult.getSubjectName(),assistantResult.getMoney());
-            assistantResult.setMoney(money);
-            // 左前缀匹配
-            assistant3.setZ(getZ(assistantResult.getMoney()));
-            assistant3.setR(assistantResult.getFieldCode());
-            cachedDataList.add(assistant3);
-        }
+        List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping);
+        List<Assistant> cachedDataList = ExcelDataUtil.covertAssistant(sourceFileDataList,dataList, mapping);
         for (int i = 0; i < dataList.size(); i++) {
             Assistant assistant = cachedDataList.get(i);
             AssistantResult assistantResult = dataList.get(i);
@@ -144,6 +86,7 @@ public class FindABCD {
         List<OtherInfo3> result = FindLevel.doMain(
                 false,
                 isFindAll,
+                false,
                 null,
                 startCollect,
                 assistant.getZ(),

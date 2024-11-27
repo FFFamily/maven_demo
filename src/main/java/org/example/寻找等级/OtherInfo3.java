@@ -74,6 +74,11 @@ public class OtherInfo3 {
     @ExcelProperty("合并段值")
     private String z;
 
+    // 交易对象
+    @ColumnWidth(200)
+    @ExcelProperty("交易对象")
+    private String transactionId;
+
     @ColumnWidth(200)
     @ExcelProperty("最初的合并段值")
     private String originZ;

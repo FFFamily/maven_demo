@@ -3,6 +3,8 @@ package org.example.utils;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import org.example.core.entity.SourceFileData;
+import org.example.enitty.Assistant;
+import org.example.分类.AssistantResult;
 import org.example.分类.entity.DraftFormatTemplate;
 
 import java.math.BigDecimal;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ExcelDataUtil {
     public static List<SourceFileData> getExcelData(String filePath, String sheetName){
@@ -97,6 +100,75 @@ public class ExcelDataUtil {
         return sourceFileDataList;
     }
 
+    public static List<AssistantResult> covertAssistantResult(List<SourceFileData> sourceFileDataList,Map<String, DraftFormatTemplate> mapping){
+        List<AssistantResult> dataList = sourceFileDataList
+                .stream()
+                .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectCode()))
+                .values()
+                .stream()
+                .reduce(new ArrayList<>(),(prev, curr) ->{
+                    AssistantResult assistantResult = new AssistantResult();
+                    SourceFileData sourceFileData = curr.get(0);
+                    assistantResult.setCompanyName(sourceFileData.getSEGMENT1_NAME());
+                    assistantResult.setFieldCode(sourceFileData.getMatch());
+                    assistantResult.setSubjectName(sourceFileData.getSEGMENT3_NAME());
+//                    assistantResult.setForm(sourceFileData.getSEGMENT3_NAME());
+                    String transactionObjectCode = sourceFileData.getTransactionObjectCode();
+                    String transactionObjectName = sourceFileData.getTransactionObjectName();
+                    assistantResult.setTransactionObjectCode(transactionObjectCode);
+                    assistantResult.setTransactionObjectName(transactionObjectName);
+                    assistantResult.setField(sourceFileData.getMatchName());
+                    BigDecimal money = ExcelDataUtil.getBalance(curr);
+                    assistantResult.setSEGMENT1_NAME(sourceFileData.getSEGMENT1_NAME());
+                    assistantResult.setSEGMENT2_NAME(sourceFileData.getSEGMENT2_NAME());
+                    assistantResult.setSEGMENT3_NAME(sourceFileData.getSEGMENT3_NAME());
+                    assistantResult.setSEGMENT4_NAME(sourceFileData.getSEGMENT4_NAME());
+                    assistantResult.setSEGMENT5_NAME(sourceFileData.getSEGMENT5_NAME());
+                    assistantResult.setSEGMENT6_NAME(sourceFileData.getSEGMENT6_NAME());
+                    assistantResult.setSEGMENT7_NAME(sourceFileData.getSEGMENT7_NAME());
+                    assistantResult.setSEGMENT8_NAME(sourceFileData.getSEGMENT8_NAME());
+                    assistantResult.setSEGMENT9_NAME(sourceFileData.getSEGMENT9_NAME());
+                    assistantResult.setSEGMENT10_NAME(sourceFileData.getSEGMENT10_NAME());
+                    assistantResult.setMoney(money);
+                    if (mapping != null){
+                        String key;
+                        if (transactionObjectCode != null){
+                            int i = transactionObjectCode.indexOf(":");
+                            if (i != -1){
+                                key = assistantResult.getFieldCode()+transactionObjectCode.substring(i+1)+"."+transactionObjectName;
+                            }else {
+                                key = assistantResult.getFieldCode()+transactionObjectCode;
+                            }
+                        }else {
+                            key = assistantResult.getFieldCode();
+                        }
+                        DraftFormatTemplate draftFormatTemplate = mapping.get(key);
+                        if (draftFormatTemplate != null) {
+                            assistantResult.setIsOrigin(draftFormatTemplate.getO());
+                            assistantResult.setCustomerType(draftFormatTemplate.getT());
+                        }
+                    }
+                    prev.add(assistantResult);
+                    return prev;
+                },(l,r) -> l);
+        return  dataList;
+    }
+
+    public static List<Assistant> covertAssistant(List<SourceFileData> sourceFileDataList,List<AssistantResult> dataList,Map<String, DraftFormatTemplate> mapping){
+        dataList = dataList == null ? covertAssistantResult(sourceFileDataList, mapping) : dataList;
+        List<Assistant> cachedDataList = new ArrayList<>();
+        for (AssistantResult assistantResult : dataList) {
+            Assistant assistant3 = new Assistant();
+            BigDecimal money = ExcelDataUtil.getMoney(assistantResult.getSubjectName(),assistantResult.getMoney());
+            assistantResult.setMoney(money);
+            // 左前缀匹配
+            assistant3.setZ(getZ(assistantResult.getMoney()));
+            assistant3.setR(assistantResult.getFieldCode());
+            assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCode());
+            cachedDataList.add(assistant3);
+        }
+        return cachedDataList;
+    }
 
 
     private static String getValue(String str){

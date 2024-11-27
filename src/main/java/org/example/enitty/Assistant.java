@@ -1,5 +1,7 @@
 package org.example.enitty;
 
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import lombok.Data;
 
 /**
@@ -33,6 +35,9 @@ public class Assistant {
     private String x;
     private String y;
     private String z;
+
+    // 交易对象编码
+    private String transactionObjectCode;
 
 
 }
