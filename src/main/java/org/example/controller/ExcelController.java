@@ -59,15 +59,15 @@ public class ExcelController {
     @GetMapping("/findLevel")
     public void findLevel(){
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
-        List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null);
+        List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null)
+                .stream().filter(item -> item.getE().equals("禹洲物业服务有限公司泉州分公司"))
+                .collect(Collectors.toList());
         List<OtherInfo3> result1 = new ArrayList<>();
         int size = 0;
+        System.out.println("开始时间："+DateUtil.date());
         for (int i = 0; i < realAssistantList.size(); i++) {
             Assistant assistant = realAssistantList.get(i);
-            if (!assistant.getE().equals("禹洲物业服务有限公司泉州分公司")){
-                continue;
-            }
-            System.out.println("第"+i+"条，开始"+"共"+realAssistantList.size()+"条："+DateUtil.date());
+            System.out.println("第"+i+"条，开始"+"共"+realAssistantList.size()+"条：");
             String z = assistant.getZ();
             if (z == null) {
                 continue;
@@ -83,6 +83,7 @@ public class ExcelController {
                 break;
             }
         }
+        System.out.println("结束："+DateUtil.date());
         String resultFileName = "模版" + System.currentTimeMillis()+".xlsx";
         try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
             WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();

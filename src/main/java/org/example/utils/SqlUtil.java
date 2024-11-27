@@ -24,7 +24,7 @@ public class SqlUtil {
 
     public OtherInfo3 cover(ResultSet rs, int rowNum) throws SQLException {
         OtherInfo3 info = new OtherInfo3();
-        info.setA(String.valueOf(rowNum));
+//        info.setA(String.valueOf(rowNum));
         // 年 + 月 + 凭证
         DateTime date = DateUtil.date(rs.getDate("有效日期"));
         int year = date.year();
@@ -40,6 +40,7 @@ public class SqlUtil {
         // 有借就是 借方向
         info.setX(info.getV() != null ? "借" : "贷");
         info.setZ(rs.getString("账户组合"));
+        info.setZDesc(rs.getString("账户描述"));
         info.setTransactionId(rs.getString("交易对象"));
         return info;
     }

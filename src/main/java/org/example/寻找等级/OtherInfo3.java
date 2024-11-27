@@ -11,14 +11,14 @@ import java.util.Date;
 public class OtherInfo3 {
     // 层级
 //    @ExcelProperty("阶级")
-    @ExcelProperty("编号")
+    @ExcelProperty("排序编号(Excel专属)")
+    private String a;
+    @ExcelProperty("层级编号")
     private String no;
     @ExcelProperty("当前层级")
     private Integer level;
     @ExcelProperty("异常")
     private String errorMsg;
-    @ExcelProperty("编号")
-    private String a;
 //    @ExcelProperty("区域")
 //    private String a;
 //    @ExcelProperty("科目编码")
@@ -53,7 +53,7 @@ public class OtherInfo3 {
 //    private String p;
     @ExcelProperty("凭证编号")
     private Integer q;
-    @ColumnWidth(40)
+    @ColumnWidth(20)
     @ExcelProperty("凭证号规则")
     private String r;
     @ExcelProperty("来源")
@@ -68,19 +68,24 @@ public class OtherInfo3 {
     private BigDecimal w;
     @ExcelProperty("方向")
     private String x;
-//    @ExcelProperty("余额")
-//    private String y;
-    @ColumnWidth(200)
-    @ExcelProperty("合并段值")
+    @ExcelProperty("余额")
+    private String y;
+    @ColumnWidth(50)
+    @ExcelProperty("账户组合")
     private String z;
+    @ColumnWidth(200)
+    @ExcelProperty("账户描述")
+    private String zDesc;
 
     // 交易对象
-    @ColumnWidth(200)
+    @ColumnWidth(20)
     @ExcelProperty("交易对象")
     private String transactionId;
-
-    @ColumnWidth(200)
-    @ExcelProperty("最初的合并段值")
+    @ColumnWidth(20)
+    @ExcelProperty("交易对象名称")
+    private String transactionName;
+    @ColumnWidth(50)
+    @ExcelProperty("最初账户组合")
     private String originZ;
 //    @ExcelProperty("AA")
 //    private String aa;
