@@ -26,8 +26,14 @@ public class FindLevelBySystem {
     @Resource
     private FindLevel findLevel;
     public  List<OtherInfo3> doMain(String z, String originProjectName, String code) {
-        String findStartCollectSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"账户组合\" = '"+originProjectName+"' and z.\"交易对象\" = '"+code+"'";
+        String findStartCollectSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"账户组合\" = '"+originProjectName;
+        if (code != null){
+            findStartCollectSql += "' and z.\"交易对象\" = '"+code+"'";
+        }else {
+            findStartCollectSql += "' and z.\"交易对象\" IS NULL";
+        }
         List<OtherInfo3> startCollect = sqlUtil.find(findStartCollectSql);
+
         List<OtherInfo3> finalResult;
         finalResult = FindLevel.FindFirstLevel(startCollect,z,originProjectName);
         Deque<OtherInfo3> deque = new LinkedList<>();
