@@ -79,4 +79,7 @@ public class AssistantResult {
 
     @ExcelProperty("客商分类")
     private String customerType;
+
+    @ExcelProperty("辅助核算匹配关联字段")
+    private String mergeFile;
 }

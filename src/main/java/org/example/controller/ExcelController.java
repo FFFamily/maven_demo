@@ -58,13 +58,14 @@ public class ExcelController {
     }
     @GetMapping("/findABCD")
     public void findABCD(){
-        findABCD.doFindABDC("src/main/java/org/example/分类/9月科目辅助余额表.xlsx");
+        findABCD.doFindABDC("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx");
     }
     @GetMapping("/findLevel")
     public void findLevel(){
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
+                .filter(item -> item.getCompanyCode().equals("JODV0"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
