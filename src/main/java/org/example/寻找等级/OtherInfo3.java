@@ -68,6 +68,8 @@ public class OtherInfo3 {
     private BigDecimal w;
     @ExcelProperty("方向")
     private String x;
+    @ExcelProperty("余额")
+    private String balanceSum;
 //    @ExcelProperty("余额")
 //    private String y;
     @ColumnWidth(50)

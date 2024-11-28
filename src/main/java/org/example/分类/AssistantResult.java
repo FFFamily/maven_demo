@@ -24,23 +24,23 @@ public class AssistantResult {
     private String SEGMENT1;
     @ExcelProperty("机构名")
     private String SEGMENT1_NAME;
-        @ExcelProperty("成本中心代码")
+    @ExcelProperty("成本中心代码")
     private String SEGMENT2_NAME;
-        @ExcelProperty("科目代码")
+    @ExcelProperty("科目代码")
     private String SEGMENT3_NAME ;
-        @ExcelProperty("子目名称")
+    @ExcelProperty("子目名称")
     private String SEGMENT4_NAME;
-        @ExcelProperty("产品段名称")
+    @ExcelProperty("产品段名称")
     private String SEGMENT5_NAME;
-        @ExcelProperty("地区名称")
+    @ExcelProperty("地区名称")
     private String SEGMENT6_NAME;
-        @ExcelProperty("SBU名称")
+    @ExcelProperty("SBU名称")
     private String SEGMENT7_NAME;
-        @ExcelProperty("ICP名称")
+    @ExcelProperty("ICP名称")
     private String SEGMENT8_NAME;
-        @ExcelProperty("项目段名称")
+    @ExcelProperty("项目段名称")
     private String SEGMENT9_NAME;
-        @ExcelProperty("备用段名称")
+    @ExcelProperty("备用段名称")
     private String SEGMENT10_NAME;
 
     // 匹配字段
@@ -60,7 +60,6 @@ public class AssistantResult {
     @ColumnWidth(20)
     @ExcelProperty("根据1级组成分类")
     private String oneLevelType;
-
     // 交易对象编码
     @ColumnWidth(40)
     @ExcelProperty("交易对象编码")

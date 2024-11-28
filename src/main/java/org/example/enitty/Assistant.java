@@ -29,19 +29,25 @@ public class Assistant {
     private String q;
     private String r;
     private String s;
+    // 来源
     private String t;
     private String u;
     private String v;
     private String w;
     private String x;
     private String y;
+    // 余额
     private String z;
 
     // 交易对象编码
     private String transactionObjectCode;
+    private String transactionObjectName;
     // 编码描述
     private String rDesc;
     // 机构代码
     private String companyCode;
+    // 来源
+    private String form;
+
 
 }

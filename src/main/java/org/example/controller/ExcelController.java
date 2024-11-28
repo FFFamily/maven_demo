@@ -99,10 +99,17 @@ public class ExcelController {
                     // 证明所有的都借贷相互抵消了
                     OtherInfo3 otherInfo3 = new OtherInfo3();
                     otherInfo3.setA(String.valueOf(i));
+                    otherInfo3.setNo("1");
+                    otherInfo3.setLevel(1);
+                    otherInfo3.setS(assistant.getForm());
+                    otherInfo3.setBalanceSum(assistant.getZ());
                     otherInfo3.setZ(projectName);
                     otherInfo3.setZDesc(assistant.getRDesc());
+                    otherInfo3.setTransactionId(assistant.getTransactionObjectCode());
+                    otherInfo3.setTransactionName(assistant.getTransactionObjectName());
+                    otherInfo3.setOriginZ(projectName);
                     result1.add(otherInfo3);
-                }else {
+                } else {
                     int finalI = i;
                     result.forEach(item -> item.setA(String.valueOf(finalI)));
                     result1.addAll(result);

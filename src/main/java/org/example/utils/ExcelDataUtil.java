@@ -173,8 +173,10 @@ public class ExcelDataUtil {
             assistant3.setR(assistantResult.getFieldCode());
             assistant3.setE(assistantResult.getCompanyName());
             assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCode());
+            assistant3.setTransactionObjectName(assistantResult.getTransactionObjectName());
             assistant3.setRDesc(assistantResult.getField());
             assistant3.setCompanyCode(assistantResult.getSEGMENT1());
+            assistant3.setForm(assistantResult.getForm());
             cachedDataList.add(assistant3);
         }
         System.out.println("解析Assistant完成");
