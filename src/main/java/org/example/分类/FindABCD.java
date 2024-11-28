@@ -83,7 +83,7 @@ public class FindABCD {
     }
 
     public static void doFind(List<OtherInfo3> startCollect,Assistant assistant,String projectName,AssistantResult assistantResult,Boolean isFindAll){
-        List<OtherInfo3> result = FindLevel.doMain(
+        List<OtherInfo3> result = new FindLevel().doMain(
                 false,
                 isFindAll,
                 false,

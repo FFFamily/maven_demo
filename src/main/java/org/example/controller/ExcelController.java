@@ -76,10 +76,6 @@ public class ExcelController {
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
             System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
-            if (!companyCode.equals("JODV0")){
-                System.out.println("跳过");
-                continue;
-            }
             List<Assistant> realAssistantList = companyMap.get(companyCode);
             List<OtherInfo3> result1 = new ArrayList<>();
             System.out.println("共"+realAssistantList.size()+"条");
