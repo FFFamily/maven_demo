@@ -44,7 +44,7 @@ public class FindLevel {
                 .sheet("往来清理明细表")
                 .doRead();
         List<Assistant> realAssistantList = assistantList.stream()
-                .filter(item -> "禹洲物业服务有限公司泉州分公司其他应收款-其他其他---泉州温莎美地CS:CYZ000110:JODV0:CYZ000110".equals(item.getR()))
+                .filter(item -> "禹洲物业服务有限公司泉州分公司其他应收款-其他其他---泉州海德堡SS:117483:JODV0:SYZ000012".equals(item.getR()))
 //                .skip(1)
                 .collect(Collectors.toList());
         List<OtherInfo3> result1 = new ArrayList<>();
@@ -115,12 +115,11 @@ public class FindLevel {
                         String form = parentItem.getS();
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-
-                            level = new FindLevel().find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp,findBySql);
+                            level = find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp,findBySql);
                         }
                     } else {
                         judgeJoin(result,parentItem,no,level);
-                        level = new FindLevel().find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp,findBySql);
+                        level = find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp,findBySql);
                     }
                 }
             }
@@ -238,12 +237,12 @@ public class FindLevel {
 
     public static List<OtherInfo3> disSameX(List<OtherInfo3> list, String originProjectName) {
         return list.stream()
-                .sorted((a, b) -> DateUtil.date(b.getN()).toInstant().compareTo(DateUtil.toInstant(a.getN())))
                 .collect(Collectors.groupingBy(OtherInfo3::getR))
                 .entrySet()
                 .stream()
                 .filter(item -> mergeSameX(item.getValue()))
                 .flatMap(item -> item.getValue().stream())
+                .sorted((a, b) -> DateUtil.date(a.getN()).toInstant().compareTo(DateUtil.toInstant(b.getN())))
                 .peek(item -> item.setOriginZ(originProjectName))
                 .collect(Collectors.toList());
     }
@@ -290,6 +289,7 @@ public class FindLevel {
                     // 凭证号相等 && 编号不能相等 && 合并字段不相同
                     .filter(temp -> temp.getR().equals(item.getR())
                             && ((v != null && temp.getW() != null && v.compareTo(temp.getW()) == 0) || w != null && temp.getV() != null && w.compareTo(temp.getV()) == 0)
+                            && !temp.equals(item)
 //                            && !temp.getA().equals(item.getA())
 //                        && temp.getX().equals(item.getX())
                             && !temp.getZ().equals(item.getZ())
@@ -319,6 +319,7 @@ public class FindLevel {
 //                        collect1 = sqlUtil.find(findSql);
 //                    }
 //                }else {
+                // 展开同一凭证号能借贷相抵的项目名称
                      collect1 = cachedDataList.stream()
                             .filter(i -> i.getZ().equals(otherInfo3.getZ()))
                             .sorted((a, b) -> {

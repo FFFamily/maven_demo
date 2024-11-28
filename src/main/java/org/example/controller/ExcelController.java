@@ -44,8 +44,6 @@ public class ExcelController {
     @Resource
     private FindLevel findLevel;
     @Resource
-    private FindLevelBySystem findLevelBySystem;
-    @Resource
     private SqlUtil sqlUtil;
 
     @GetMapping("/demo1")
@@ -65,11 +63,6 @@ public class ExcelController {
     @GetMapping("/findLevel")
     public void findLevel(){
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
-//        List<Assistant> realAssistantList = ExcelDataUtil.covertAssistant(sourceFileDataList,null, null)
-//                .stream()
-//                .filter(item -> item.getE().equals("禹洲物业服务有限公司泉州分公司"))
-//                .filter(item -> item.getRDesc().equals("禹洲物业服务有限公司泉州分公司其他应收款-其他其他---泉州温莎美地CS:CYZ000110:JODV0:CYZ000110"))
-//                .collect(Collectors.toList());
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
                 // 根据公司分组

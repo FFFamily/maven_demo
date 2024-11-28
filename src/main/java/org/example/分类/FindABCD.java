@@ -157,22 +157,19 @@ public class FindABCD {
             BigDecimal upSum = up.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(curr.getV() != null ? curr.getV() : BigDecimal.ZERO).subtract(curr.getW() != null ? curr.getW() : BigDecimal.ZERO), (l, r) -> l);
             if (upSum.compareTo(BigDecimal.ZERO) > 0 && totalSum.compareTo(upSum) <= 0) {
                 // 如果期初余额为正 && 最终余额小于 期初，证明本期发生了扣款
-//                assistantResult.setType("D");
                 return "D";
             } else if (upSum.compareTo(BigDecimal.ZERO) < 0 && totalSum.compareTo(upSum) >= 0) {
                 // 如果期初余额为负 && 最终余额大于 期初，证明本期发生了加款
-//                assistantResult.setType("D");
                 return "D";
             } else if (upSum.compareTo(BigDecimal.ZERO) == 0 && totalSum.compareTo(upSum) == 0){
-//                assistantResult.setType("无法判断");
                 return "无法判断";
             } else {
                 // 期初为0也会到达
-                return findABC(low, assistantResult);
+                return findABC(low);
             }
         } else {
             // 都是本期的
-            return findABC(low, assistantResult);
+            return findABC(low);
         }
     }
 
@@ -180,20 +177,12 @@ public class FindABCD {
     /**
      * 判断是否属于ABC类
      */
-    public static String findABC(List<OtherInfo3> list, AssistantResult assistantResult) {
+    public static String findABC(List<OtherInfo3> list) {
         Map<String, List<OtherInfo3>> collect = list.stream().collect(Collectors.groupingBy(OtherInfo3::getS));
         int systemSize = 0;
         int personalSize = 0;
         // 遍历来源字段
         for (String form : collect.keySet()) {
-//            if (form.equals("物业收费系统") || form.equals("EMS") || form.equals("TMS资金接口") || form.equals("PS人力资源系统") || form.equals("物业ERP")) {
-//                systemSize += 1;
-//            } else if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-//                personalSize += 1;
-//            } else {
-//                assistantResult.setType("E");
-////                throw new RuntimeException("额外的来源类型："+ form);
-//            }
             if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
                 personalSize += 1;
             }else {
@@ -202,19 +191,13 @@ public class FindABCD {
         }
         if (systemSize != 0 && personalSize != 0) {
             // 人工 + 系统
-//            assistantResult.setType("C");
             return "C";
         } else if (systemSize != 0) {
-//            assistantResult.setType("A");
             return "A";
         } else if (personalSize != 0) {
-//            assistantResult.setType("B");
             return "B";
         }else {
-//            assistantResult.setType("所有数据借贷抵消");
             return "所有数据借贷抵消";
         }
     }
-
-
 }
