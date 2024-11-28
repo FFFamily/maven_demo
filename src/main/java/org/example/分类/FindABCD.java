@@ -36,15 +36,9 @@ public class FindABCD {
     @Resource
     private SqlUtil sqlUtil;
 
-    public String getValue(String str){
-        return str == null ? "" : str;
-    }
-
-
-
-    public void doFindABDC(String sourceFile){
+    public void doFindABDC(){
         List<AssistantResult> excelExcelData = new ArrayList<>();
-        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData(sourceFile,"Sheet1");
+        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
         Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
         List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping);
         List<Assistant> cachedDataList = ExcelDataUtil.covertAssistant(sourceFileDataList,dataList, mapping);

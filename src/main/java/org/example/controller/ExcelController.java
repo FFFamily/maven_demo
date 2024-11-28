@@ -58,7 +58,7 @@ public class ExcelController {
     }
     @GetMapping("/findABCD")
     public void findABCD(){
-        findABCD.doFindABDC("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx");
+        findABCD.doFindABDC();
     }
     @GetMapping("/findLevel")
     public void findLevel(){

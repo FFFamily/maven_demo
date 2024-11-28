@@ -61,7 +61,9 @@ public class SourceFileData {
     private String transactionObjectCode;
     @ExcelProperty("交易对象名称")
     private String transactionObjectName;
+    // 编码
     @ExcelProperty("匹配字段")
     private String match;
+    // 名称
     private String matchName;
 }
