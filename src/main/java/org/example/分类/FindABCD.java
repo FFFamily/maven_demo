@@ -32,7 +32,7 @@ import static org.example.utils.ExcelDataUtil.getZ;
 @Service
 public class FindABCD {
     @Resource
-    private JdbcTemplate jdbcTemplate;
+    private FindLevel findLevel;
     @Resource
     private SqlUtil sqlUtil;
 
@@ -69,9 +69,6 @@ public class FindABCD {
             doFind(startCollect,assistant,projectName,assistantResult,true);
             doFind(startCollect,assistant,projectName,assistantResult,false);
             excelExcelData.add(assistantResult);
-//            if (i == 1000){
-//                break;
-//            }
             System.out.println("当前位置："+i +" 一共有： "+dataList.size());
         }
         String resultFileName = "ABCD分类-"+System.currentTimeMillis() + ".xlsx";
@@ -82,8 +79,8 @@ public class FindABCD {
         System.out.println("结束");
     }
 
-    public static void doFind(List<OtherInfo3> startCollect,Assistant assistant,String projectName,AssistantResult assistantResult,Boolean isFindAll){
-        List<OtherInfo3> result = new FindLevel().doMain(
+    public  void doFind(List<OtherInfo3> startCollect,Assistant assistant,String projectName,AssistantResult assistantResult,Boolean isFindAll){
+        List<OtherInfo3> result = findLevel.doMain(
                 false,
                 isFindAll,
                 false,
@@ -125,10 +122,6 @@ public class FindABCD {
 
     public static String findABCD(List<OtherInfo3> result,AssistantResult assistantResult, Assistant assistant) {
         // 通过总账日期进行分类
-//        AssistantResult assistantResult = new AssistantResult();
-//        assistantResult.setField(assistant.getR());
-//        assistantResult.setIndex(assistant.getA());
-//        assistantResult.setMoney(getZValue(assistant.getZ()));
         String z = assistant.getZ();
         // 期初
         List<OtherInfo3> up = new ArrayList<>();
@@ -146,11 +139,8 @@ public class FindABCD {
         });
         // 如果全部都在期初，那么就是归属D类
         if (!up.isEmpty() && low.isEmpty()) {
-//            assistantResult.setIsIncludeUp(1);
-//            assistantResult.setType("D");
             return "D";
         } else if (!up.isEmpty()) {
-//            assistantResult.setIsIncludeUp(1);
             // 最终余额
             BigDecimal totalSum = getZValue(z);
             // 期初余额

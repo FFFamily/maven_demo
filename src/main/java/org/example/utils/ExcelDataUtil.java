@@ -80,6 +80,10 @@ public class ExcelDataUtil {
         return money == null ? "" : money.compareTo(BigDecimal.ZERO) < 0 ? "("+ money +")" : money.toString();
     }
 
+    /**
+     * 不明客商表
+
+     */
     public static Map<String,DraftFormatTemplate> getDraftFormatTemplateExcelData(String filePath, String sheetName){
         Map<String,DraftFormatTemplate> sourceFileDataList = new HashMap<>();
         EasyExcel.read(filePath, DraftFormatTemplate.class, new PageReadListener<DraftFormatTemplate>(dataList -> {
@@ -88,15 +92,22 @@ public class ExcelDataUtil {
                 String a = i.getA().replaceAll("-",".");
                 // 辅助核算字段
                 String c = i.getC();
-                String regex = ":(.*?)\\s";
-                Pattern pattern = Pattern.compile(regex);
+//                String regex = ":(.*?)\\s";
+//                Pattern pattern = Pattern.compile(regex);
                 if (c != null){
-                    Matcher matcher = pattern.matcher(c);
-                    if (matcher.find()) {
-                        String group = matcher.group(1);
-                        String key = a + group;
+                    int startIndex = c.indexOf(":");
+                    int endIndex = c.lastIndexOf(":");
+                    if (startIndex != endIndex){
+                        String key = c.substring(startIndex,endIndex);
                         sourceFileDataList.put(key,i);
                     }
+//                    Matcher matcher = pattern.matcher(c);
+//                    if (matcher.find()) {
+//                        String group = matcher.group(1);
+//                        String key = a + group;
+//                        sourceFileDataList.put(key,i);
+//                    }
+
                 }else {
                     sourceFileDataList.put(a,i);
                 }

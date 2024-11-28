@@ -111,7 +111,10 @@ public class ExcelController {
                     result1.add(otherInfo3);
                 } else {
                     int finalI = i;
-                    result.forEach(item -> item.setA(String.valueOf(finalI)));
+                    result.forEach(item -> {
+                        item.setA(String.valueOf(finalI));
+                        item.setZDesc(assistant.getRDesc());
+                    });
                     result1.addAll(result);
                 }
             }
