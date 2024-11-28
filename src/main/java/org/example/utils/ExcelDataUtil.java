@@ -164,6 +164,7 @@ public class ExcelDataUtil {
                         if (draftFormatTemplate != null) {
                             assistantResult.setIsOrigin(draftFormatTemplate.getO());
                             assistantResult.setCustomerType(draftFormatTemplate.getT());
+                            assistantResult.setMergeFile(draftFormatTemplate.getC());
                         }
                     }
                     prev.add(assistantResult);
