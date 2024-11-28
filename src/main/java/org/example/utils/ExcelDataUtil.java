@@ -24,6 +24,7 @@ public class ExcelDataUtil {
                 if (i.getSEGMENT3_NAME().startsWith("应付账款")
                 || i.getSEGMENT3_NAME().startsWith("预付账款")
                         || i.getSEGMENT3_NAME().startsWith("合同负债")
+                        || i.getSEGMENT3_NAME().startsWith("预收账款")
                         || i.getSEGMENT3_NAME().startsWith("应收账款")
                         || i.getSEGMENT3_NAME().startsWith("其他应付款")
                         || i.getSEGMENT3_NAME().startsWith("其他应收款")){
@@ -185,6 +186,7 @@ public class ExcelDataUtil {
             assistantResult.setMoney(money);
             // 左前缀匹配
             assistant3.setZ(getZ(assistantResult.getMoney()));
+
             assistant3.setR(assistantResult.getFieldCode());
             assistant3.setE(assistantResult.getCompanyName());
             assistant3.setTransactionObjectId(assistantResult.getTransactionObjectId());
@@ -194,6 +196,8 @@ public class ExcelDataUtil {
             assistant3.setCompanyCode(assistantResult.getSEGMENT1());
             assistant3.setForm(assistantResult.getForm());
             cachedDataList.add(assistant3);
+            // 唯一标识：账户组合+交易Id
+            assistant3.setOnlySign(assistant3.getR()+assistant3.getTransactionObjectId());
         }
         System.out.println("解析Assistant完成");
         return cachedDataList;

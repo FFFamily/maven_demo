@@ -87,13 +87,13 @@ public class FindLevel {
                                           List<OtherInfo3> cachedDataList,
                                           List<OtherInfo3> startCollect,
                                           String z,
-                                          String originProjectName) {
+                                          String originCode) {
 
         List<OtherInfo3> finalResult;
         if (isFindAll){
             finalResult = startCollect;
         }else {
-            finalResult = FindFirstLevel(startCollect,z,originProjectName);
+            finalResult = FindFirstLevel(startCollect,z,originCode);
         }
         Deque<OtherInfo3> deque = new LinkedList<>();
         List<OtherInfo3> result = new ArrayList<>();
@@ -115,11 +115,11 @@ public class FindLevel {
                         String form = parentItem.getS();
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-                            level = find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp,findBySql);
+                            level = find(deque,cachedDataList,parentItem,originCode,level,isOpenFindUp,findBySql);
                         }
                     } else {
                         judgeJoin(result,parentItem,no,level);
-                        level = find(deque,cachedDataList,parentItem,originProjectName,level,isOpenFindUp,findBySql);
+                        level = find(deque,cachedDataList,parentItem,originCode,level,isOpenFindUp,findBySql);
                     }
                 }
             }
@@ -135,11 +135,11 @@ public class FindLevel {
         }
     }
 
-    public static List<OtherInfo3> FindFirstLevel(List<OtherInfo3> startCollect, String z, String originProjectName){
+    public static List<OtherInfo3> FindFirstLevel(List<OtherInfo3> startCollect, String z, String originCode){
         // 解析金额
         BigDecimal balance = covertZToBalance(z);
         // 消除同一凭证能够借贷相抵的数据
-        List<OtherInfo3> sortedStartCollect = disSameX(startCollect, originProjectName);
+        List<OtherInfo3> sortedStartCollect = disSameX(startCollect, originCode);
         // 先找一下能够直接借贷相抵的数据
         FindFirstListResult firstListResult = findFirstList(z, balance, sortedStartCollect);
         List<OtherInfo3> otherInfo3s =firstListResult.getOtherInfo3s();
@@ -156,8 +156,8 @@ public class FindLevel {
         return result;
     }
 
-    public  Integer find(Deque<OtherInfo3> deque, List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originProjectName, int level, boolean isOpenFindUp,Boolean findBySql) {
-        List<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originProjectName, level+1, isOpenFindUp,findBySql);
+    public  Integer find(Deque<OtherInfo3> deque, List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
+        List<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originCode, level+1, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
             // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
             OtherInfo3 child = childList.get(0);
@@ -235,7 +235,7 @@ public class FindLevel {
         return result;
     }
 
-    public static List<OtherInfo3> disSameX(List<OtherInfo3> list, String originProjectName) {
+    public static List<OtherInfo3> disSameX(List<OtherInfo3> list, String originCode) {
         return list.stream()
                 .collect(Collectors.groupingBy(OtherInfo3::getR))
                 .entrySet()
@@ -243,7 +243,7 @@ public class FindLevel {
                 .filter(item -> mergeSameX(item.getValue()))
                 .flatMap(item -> item.getValue().stream())
                 .sorted((a, b) -> DateUtil.date(a.getN()).toInstant().compareTo(DateUtil.toInstant(b.getN())))
-                .peek(item -> item.setOriginZ(originProjectName))
+                .peek(item -> item.setOriginZ(originCode))
                 .collect(Collectors.toList());
     }
 
@@ -265,7 +265,7 @@ public class FindLevel {
 
     private  List<OtherInfo3> doUpFilter(List<OtherInfo3> cachedDataList,
                                                OtherInfo3 item,
-                                               String originProjectName,
+                                               String originCode,
                                                Integer level,
                                                boolean isOpenFindUp,
                                                boolean findBySql) {
@@ -292,9 +292,10 @@ public class FindLevel {
                             && !temp.equals(item)
 //                            && !temp.getA().equals(item.getA())
 //                        && temp.getX().equals(item.getX())
-                            && !temp.getZ().equals(item.getZ())
+//                            && !temp.getZ().equals(item.getZ())
+                                    && !temp.getOnlySign().equals(item.getOnlySign())
                             // TODO 交易对象是否也需要不同
-                            && ((temp.getTransactionId() == null && item.getTransactionId() == null ) || !Objects.equals(temp.getTransactionId(),item.getTransactionId()))
+//                            && ((temp.getTransactionId() == null && item.getTransactionId() == null ) || !Objects.equals(temp.getTransactionId(),item.getTransactionId()))
                     )
                     .collect(Collectors.toList());
 //        }
@@ -321,7 +322,8 @@ public class FindLevel {
 //                }else {
                 // 展开同一凭证号能借贷相抵的项目名称
                      collect1 = cachedDataList.stream()
-                            .filter(i -> i.getZ().equals(otherInfo3.getZ()))
+//                            .filter(i -> i.getZ().equals(otherInfo3.getZ()))
+                             .filter(i -> i.getOnlySign().equals(otherInfo3.getOnlySign()))
                             .sorted((a, b) -> {
                                 int i = DateUtil.date(a.getN()).toInstant().compareTo(DateUtil.toInstant(b.getN()));
                                 if (i == 0) {
@@ -333,11 +335,12 @@ public class FindLevel {
 //                }
 
                 // 先找当前数据借贷抵消的数据
-                List<OtherInfo3> findOne = disSameX(collect1, originProjectName)
+                List<OtherInfo3> findOne = disSameX(collect1, originCode)
                         .stream()
                         .filter(i ->
                                 (otherInfo3.getV() != null && otherInfo3.getV().equals(i.getW())) || (otherInfo3.getW() != null && otherInfo3.getW().equals(i.getV()))
-                                        && !otherInfo3.getZ().equals(item.getZ())
+//                                        && !otherInfo3.getZ().equals(item.getZ())
+                                        && !otherInfo3.getOnlySign().equals(item.getOnlySign())
                         )
                         .collect(Collectors.toList());
                 List<OtherInfo3> otherInfo3Sup = new ArrayList<>();
@@ -352,13 +355,13 @@ public class FindLevel {
                         otherInfo3Sup = FindFirstLevel(
                                 collect1.subList(0, indexOf),
                                 otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString(),
-                                originProjectName
+                                originCode
                         );
                         if (otherInfo3Sup.isEmpty() && indexOf != (collect1.size() - 1)) {
                             otherInfo3Slow = FindFirstLevel(
                                     collect1.subList(indexOf + 1, collect1.size()),
                                     otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString(),
-                                    originProjectName
+                                    originCode
                             );
                         }
                     } else {
@@ -368,7 +371,7 @@ public class FindLevel {
                     otherInfo3Sup = FindFirstLevel(
                             findOne.stream().skip((long) findOne.size() - 1).collect(Collectors.toList()),
                             otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString(),
-                            originProjectName
+                            originCode
                     );
                 }
                 otherInfo3s.addAll(otherInfo3Sup.isEmpty() ? otherInfo3Slow : otherInfo3Sup);

@@ -45,6 +45,8 @@ public class OtherInfo3 {
 //    private String l;
 //    @ExcelProperty("客商")
 //    private String m;
+    @ExcelProperty("唯一标识")
+    private String onlySign;
     @ExcelProperty("总账日期")
     private Date n;
 //    @ExcelProperty("会计科目")

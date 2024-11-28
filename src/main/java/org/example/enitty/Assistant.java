@@ -39,6 +39,8 @@ public class Assistant {
     private String y;
     // 余额
     private String z;
+    // 唯一标识
+    private String onlySign;
 
     // 交易对象编码
     private String transactionObjectId;

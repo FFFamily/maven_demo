@@ -43,6 +43,7 @@ public class SqlUtil {
         info.setZDesc(rs.getString("账户描述"));
         info.setTransactionId(rs.getString("交易对象"));
         info.setTransactionName(rs.getString("交易对象名称"));
+        info.setOnlySign(info.getZ()+info.getTransactionId());
         return info;
     }
 
