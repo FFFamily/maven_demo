@@ -66,6 +66,7 @@ public class ExcelController {
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
                 .filter(item -> item.getCompanyCode().equals("JODV0"))
+                .filter(item -> item.getR().equals("JODV0.0.1221990101.99.0.0.0.0.30012439.0"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {

@@ -27,6 +27,7 @@ public class Assistant {
     private String o;
     private String p;
     private String q;
+    // 科目段编码
     private String r;
     private String s;
     // 来源
@@ -43,7 +44,7 @@ public class Assistant {
     private String transactionObjectId;
     private String transactionObjectCode;
     private String transactionObjectName;
-    // 编码描述
+    // 编码描述（科目段描述）
     private String rDesc;
     // 机构代码
     private String companyCode;

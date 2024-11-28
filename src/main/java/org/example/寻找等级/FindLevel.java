@@ -44,7 +44,7 @@ public class FindLevel {
                 .sheet("往来清理明细表")
                 .doRead();
         List<Assistant> realAssistantList = assistantList.stream()
-                .filter(item -> "禹洲物业服务有限公司泉州分公司其他应收款-其他其他---泉州海德堡SS:117483:JODV0:SYZ000012".equals(item.getR()))
+                .filter(item -> "禹洲物业服务有限公司泉州分公司其他应收款-其他其他---泉州温莎美地CS:CYZ000110:JODV0:CYZ000110".equals(item.getR()))
 //                .skip(1)
                 .collect(Collectors.toList());
         List<OtherInfo3> result1 = new ArrayList<>();
