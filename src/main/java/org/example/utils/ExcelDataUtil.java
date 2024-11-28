@@ -2,8 +2,8 @@ package org.example.utils;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
-import org.example.core.entity.SourceFileData;
 import org.example.enitty.Assistant;
+import org.example.enitty.SourceFileData;
 import org.example.分类.AssistantResult;
 import org.example.分类.entity.DraftFormatTemplate;
 

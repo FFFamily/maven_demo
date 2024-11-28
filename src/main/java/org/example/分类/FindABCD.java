@@ -5,8 +5,8 @@ import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import org.example.core.entity.SourceFileData;
 import org.example.enitty.Assistant;
+import org.example.enitty.SourceFileData;
 import org.example.utils.SqlUtil;
 import org.example.寻找等级.FindLevel;
 import org.example.寻找等级.OtherInfo3;
@@ -38,7 +38,7 @@ public class FindABCD {
 
     public void doFindABDC(){
         List<AssistantResult> excelExcelData = new ArrayList<>();
-        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
+        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
         List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping);
         List<Assistant> cachedDataList = ExcelDataUtil.covertAssistant(sourceFileDataList,dataList, mapping);

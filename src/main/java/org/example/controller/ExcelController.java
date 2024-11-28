@@ -8,9 +8,9 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.util.ListUtils;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import org.example.core.entity.SourceFileData;
 import org.example.enitty.Assistant;
 import org.example.enitty.OracleData;
+import org.example.enitty.SourceFileData;
 import org.example.utils.ExcelDataUtil;
 import org.example.utils.SqlUtil;
 import org.example.分类.AssistantResult;
@@ -62,7 +62,7 @@ public class ExcelController {
     }
     @GetMapping("/findLevel")
     public void findLevel(){
-        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表2.xlsx","Sheet1");
+        List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
                 .filter(item -> item.getCompanyCode().equals("JODV0"))
