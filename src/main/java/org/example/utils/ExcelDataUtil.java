@@ -120,7 +120,7 @@ public class ExcelDataUtil {
     public static List<AssistantResult> covertAssistantResult(List<SourceFileData> sourceFileDataList,Map<String, DraftFormatTemplate> mapping){
         List<AssistantResult> dataList = sourceFileDataList
                 .stream()
-                .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectCode()))
+                .collect(Collectors.groupingBy(i -> i.getMatch() + "."+ i.getTransactionObjectId()))
                 .values()
                 .stream()
                 .reduce(new ArrayList<>(),(prev, curr) ->{
@@ -130,8 +130,10 @@ public class ExcelDataUtil {
                     assistantResult.setFieldCode(sourceFileData.getMatch());
                     assistantResult.setSubjectName(sourceFileData.getSEGMENT3_NAME());
 //                    assistantResult.setForm(sourceFileData.getSEGMENT3_NAME());
+                    String transactionObjectId = sourceFileData.getTransactionObjectId();
                     String transactionObjectCode = sourceFileData.getTransactionObjectCode();
                     String transactionObjectName = sourceFileData.getTransactionObjectName();
+                    assistantResult.setTransactionObjectId(transactionObjectId);
                     assistantResult.setTransactionObjectCode(transactionObjectCode);
                     assistantResult.setTransactionObjectName(transactionObjectName);
                     assistantResult.setField(sourceFileData.getMatchName());
@@ -151,9 +153,10 @@ public class ExcelDataUtil {
                     if (mapping != null){
                         String key;
                         if (transactionObjectCode != null){
-                            int i = transactionObjectCode.indexOf(":");
-                            if (i != -1){
-                                key = assistantResult.getFieldCode()+transactionObjectCode.substring(i+1);
+                            int startIndex = transactionObjectCode.indexOf(":");
+                            int endIndex = transactionObjectCode.lastIndexOf(":");
+                            if (startIndex != -1 && startIndex != endIndex){
+                                key = assistantResult.getFieldCode()+transactionObjectCode.substring(startIndex+1,endIndex-1);
                             }else {
                                 key = assistantResult.getFieldCode()+transactionObjectCode;
                             }
@@ -184,6 +187,7 @@ public class ExcelDataUtil {
             assistant3.setZ(getZ(assistantResult.getMoney()));
             assistant3.setR(assistantResult.getFieldCode());
             assistant3.setE(assistantResult.getCompanyName());
+            assistant3.setTransactionObjectId(assistantResult.getTransactionObjectId());
             assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCode());
             assistant3.setTransactionObjectName(assistantResult.getTransactionObjectName());
             assistant3.setRDesc(assistantResult.getField());

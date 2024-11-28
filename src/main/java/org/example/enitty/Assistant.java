@@ -40,6 +40,7 @@ public class Assistant {
     private String z;
 
     // 交易对象编码
+    private String transactionObjectId;
     private String transactionObjectCode;
     private String transactionObjectName;
     // 编码描述

@@ -86,7 +86,7 @@ public class ExcelController {
                 // 账户组合描述
                 String projectName = assistant.getR();
                 List<OtherInfo3> startCollect = cachedDataList.stream()
-                        .filter(item -> item.getZ().equals(projectName) && Objects.equals(item.getTransactionId(),assistant.getTransactionObjectCode()))
+                        .filter(item -> item.getZ().equals(projectName) && Objects.equals(item.getTransactionId(),assistant.getTransactionObjectId()))
                         .collect(Collectors.toList());
                 List<OtherInfo3> result = findLevel.doMain(
                         true,
@@ -106,7 +106,7 @@ public class ExcelController {
                     otherInfo3.setBalanceSum(assistant.getZ());
                     otherInfo3.setZ(projectName);
                     otherInfo3.setZDesc(assistant.getRDesc());
-                    otherInfo3.setTransactionId(assistant.getTransactionObjectCode());
+                    otherInfo3.setTransactionId(assistant.getTransactionObjectId());
                     otherInfo3.setTransactionName(assistant.getTransactionObjectName());
                     otherInfo3.setOriginZ(projectName);
                     result1.add(otherInfo3);

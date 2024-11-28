@@ -62,6 +62,10 @@ public class AssistantResult {
     private String oneLevelType;
     // 交易对象编码
     @ColumnWidth(40)
+    @ExcelProperty("交易对象Id")
+    private String transactionObjectId;
+    // 交易对象编码
+    @ColumnWidth(40)
     @ExcelProperty("交易对象编码")
     private String transactionObjectCode;
     // 交易对象编码名称
