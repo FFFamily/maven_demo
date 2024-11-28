@@ -98,7 +98,7 @@ public class ExcelDataUtil {
                     int startIndex = c.indexOf(":");
                     int endIndex = c.lastIndexOf(":");
                     if (startIndex != endIndex){
-                        String key = c.substring(startIndex,endIndex);
+                        String key = a+ c.substring(startIndex+1,endIndex-1);
                         sourceFileDataList.put(key,i);
                     }
 //                    Matcher matcher = pattern.matcher(c);
@@ -153,7 +153,7 @@ public class ExcelDataUtil {
                         if (transactionObjectCode != null){
                             int i = transactionObjectCode.indexOf(":");
                             if (i != -1){
-                                key = assistantResult.getFieldCode()+transactionObjectCode.substring(i+1)+"."+transactionObjectName;
+                                key = assistantResult.getFieldCode()+transactionObjectCode.substring(i+1);
                             }else {
                                 key = assistantResult.getFieldCode()+transactionObjectCode;
                             }
