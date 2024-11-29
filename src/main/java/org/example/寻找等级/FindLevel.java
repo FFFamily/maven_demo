@@ -172,6 +172,7 @@ public class FindLevel {
         for (int i1 = 0; i1 < childList.size(); i1++) {
             OtherInfo3 child = childList.get(i1);
             child.setNo(parentItem.getNo() + "-" + (i1 + 1));
+//            child.setOriginZ(originCode);
             deque.add(child);
         }
         return level;
@@ -243,19 +244,24 @@ public class FindLevel {
                 .filter(item -> mergeSameX(item.getValue()))
                 .flatMap(item -> item.getValue().stream())
                 .sorted((a, b) -> DateUtil.date(a.getN()).toInstant().compareTo(DateUtil.toInstant(b.getN())))
-                .peek(item -> item.setOriginZ(originCode))
+//                .peek(item -> item.setOriginZ(originCode))
                 .collect(Collectors.toList());
     }
 
     private static boolean mergeSameX(List<OtherInfo3> list) {
         // 拿到相同方向的
-        Map<String, List<OtherInfo3>> XMap = list.stream().collect(Collectors.groupingBy(OtherInfo3::getX));
-        Set<String> keySet = XMap.keySet();
-        if (keySet.size() != 1) {
-            // 证明有多种方向,直接放行
-            return true;
-        }
-        return XMap.get(keySet.toArray()[0]).stream().reduce(BigDecimal.ZERO, (prev, curr) -> {
+//        Map<String, List<OtherInfo3>> XMap = list.stream().collect(Collectors.groupingBy(OtherInfo3::getX));
+//        Set<String> keySet = XMap.keySet();
+//        if (keySet.size() != 1) {
+//            // 证明有多种方向,直接放行
+//            return true;
+//        }
+//        return XMap.get(keySet.toArray()[0]).stream().reduce(BigDecimal.ZERO, (prev, curr) -> {
+//            prev = prev.add(curr.getV() == null ? BigDecimal.ZERO : curr.getV().equals(BigDecimal.ZERO.stripTrailingZeros()) ? BigDecimal.ZERO : curr.getV());
+//            prev = prev.subtract(curr.getW() == null ? BigDecimal.ZERO : curr.getW().equals(BigDecimal.ZERO) ? BigDecimal.ZERO : curr.getW());
+//            return prev;
+//        }, (l, r) -> l).compareTo(BigDecimal.ZERO) != 0;
+        return list.stream().reduce(BigDecimal.ZERO, (prev, curr) -> {
             prev = prev.add(curr.getV() == null ? BigDecimal.ZERO : curr.getV().equals(BigDecimal.ZERO.stripTrailingZeros()) ? BigDecimal.ZERO : curr.getV());
             prev = prev.subtract(curr.getW() == null ? BigDecimal.ZERO : curr.getW().equals(BigDecimal.ZERO) ? BigDecimal.ZERO : curr.getW());
             return prev;

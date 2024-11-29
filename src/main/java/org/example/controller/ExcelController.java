@@ -66,7 +66,8 @@ public class ExcelController {
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
                 .filter(item -> item.getCompanyCode().equals("JODV0"))
-                .filter(item -> item.getR().equals("JODV0.0.1221990101.99.0.0.0.0.30012439.0"))
+                .filter(item -> item.getR().equals("JODV0.0.1221130101.0202.999999.0.2006.0.30012445.0"))
+                .filter(item -> item.getTransactionObjectId().equals("SS:51937926"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
@@ -98,7 +99,7 @@ public class ExcelController {
                         cachedDataList,
                         startCollect,
                         assistant.getZ(),
-                        projectName);
+                        onlySign);
                 if (result.isEmpty()){
                     // 证明所有的都借贷相互抵消了
                     OtherInfo3 otherInfo3 = new OtherInfo3();
@@ -118,6 +119,10 @@ public class ExcelController {
                     result.forEach(item -> {
                         item.setA(String.valueOf(finalI));
                         item.setZDesc(assistant.getRDesc());
+                        item.setTransactionCode(assistant.getTransactionObjectCode().replace(":","S:"));
+
+                        item.setMergeValue(item.getZ().replaceAll("\\.","-") + item.getTransactionCode());
+                        item.setOriginZ(projectName);
                     });
                     result1.addAll(result);
                 }

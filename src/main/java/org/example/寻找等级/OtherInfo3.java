@@ -75,8 +75,8 @@ public class OtherInfo3 {
 //    @ExcelProperty("余额")
 //    private String y;
     @ColumnWidth(50)
-//    @ExcelProperty("账户组合")
-    @ExcelProperty("合并段值")
+    @ExcelProperty("账户组合")
+//    @ExcelProperty("合并段值")
     private String z;
     @ColumnWidth(200)
     @ExcelProperty("账户描述")
@@ -87,8 +87,14 @@ public class OtherInfo3 {
     @ExcelProperty("交易对象")
     private String transactionId;
     @ColumnWidth(20)
+    @ExcelProperty("交易对象编码")
+    private String transactionCode;
+    @ColumnWidth(20)
     @ExcelProperty("交易对象名称")
     private String transactionName;
+    @ColumnWidth(50)
+    @ExcelProperty("合并段")
+    private String mergeValue;
     @ColumnWidth(50)
     @ExcelProperty("最初账户组合")
     private String originZ;
