@@ -131,6 +131,7 @@ public class ExcelController {
                         item.setZCopy(zCopy);
                         item.setMergeValue(zCopy + item.getTransactionCodeCopy());
                         item.setOriginZ(projectName);
+                        item.setOriginZCopy(projectName.replaceAll("\\.","-"));
                     });
                     result1.addAll(result);
                 }

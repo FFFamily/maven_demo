@@ -78,6 +78,12 @@ public class OtherInfo3 {
     @ExcelProperty("账户组合")
 //    @ExcelProperty("合并段值")
     private String z;
+
+    @ColumnWidth(50)
+    @ExcelProperty("账户组合(已处理)")
+//    @ExcelProperty("合并段值")
+    private String zCopy;
+
     @ColumnWidth(200)
     @ExcelProperty("账户描述")
     private String zDesc;
@@ -96,16 +102,15 @@ public class OtherInfo3 {
     @ExcelProperty("交易对象编码(已处理)")
     private String transactionCodeCopy;
     @ColumnWidth(50)
-    @ExcelProperty("账户组合(已处理)")
-//    @ExcelProperty("合并段值")
-    private String zCopy;
+    @ExcelProperty("最初账户组合")
+    private String originZ;
+    @ColumnWidth(50)
+    @ExcelProperty("最初账户组合(已处理)")
+    private String originZCopy;
 
     @ColumnWidth(50)
     @ExcelProperty("合并段")
     private String mergeValue;
-    @ColumnWidth(50)
-    @ExcelProperty("最初账户组合")
-    private String originZ;
 //    @ExcelProperty("AA")
 //    private String aa;
 //    @ExcelProperty("AB")
