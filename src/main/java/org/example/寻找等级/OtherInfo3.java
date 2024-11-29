@@ -92,6 +92,14 @@ public class OtherInfo3 {
     @ColumnWidth(20)
     @ExcelProperty("交易对象名称")
     private String transactionName;
+    @ColumnWidth(20)
+    @ExcelProperty("交易对象编码(已处理)")
+    private String transactionCodeCopy;
+    @ColumnWidth(50)
+    @ExcelProperty("账户组合(已处理)")
+//    @ExcelProperty("合并段值")
+    private String zCopy;
+
     @ColumnWidth(50)
     @ExcelProperty("合并段")
     private String mergeValue;

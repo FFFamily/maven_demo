@@ -88,6 +88,7 @@ public class ExcelController {
                 // 账户组合描述
                 String projectName = assistant.getR();
                 String onlySign = assistant.getOnlySign();
+
                 List<OtherInfo3> startCollect = cachedDataList.stream()
                         .filter(item -> item.getOnlySign().equals(onlySign))
 //                        .filter(item -> item.getZ().equals(projectName) && Objects.equals(item.getTransactionId(),assistant.getTransactionObjectId()))
@@ -119,9 +120,16 @@ public class ExcelController {
                     result.forEach(item -> {
                         item.setA(String.valueOf(finalI));
                         item.setZDesc(assistant.getRDesc());
-                        item.setTransactionCode(assistant.getTransactionObjectCode().replace(":","S:"));
-
-                        item.setMergeValue(item.getZ().replaceAll("\\.","-") + item.getTransactionCode());
+                        String transactionObjectCode = assistant.getTransactionObjectCode();
+                        String replace = transactionObjectCode.replace(":", "S:");
+                        // 源-交易对象编码
+                        item.setTransactionCode(transactionObjectCode);
+                        // 处理-交易对象编码
+                        item.setTransactionCodeCopy(replace);
+                        // 处理-账户组合
+                        String zCopy = item.getZ().replaceAll("\\.","-");
+                        item.setZCopy(zCopy);
+                        item.setMergeValue(zCopy + item.getTransactionCodeCopy());
                         item.setOriginZ(projectName);
                     });
                     result1.addAll(result);
@@ -135,7 +143,6 @@ public class ExcelController {
             }
         }
         System.out.println("结束");
-
     }
 
 
