@@ -121,11 +121,11 @@ public class ExcelController {
                         item.setA(String.valueOf(finalI));
                         item.setZDesc(assistant.getRDesc());
                         String transactionObjectCode = assistant.getTransactionObjectCode();
-                        String replace = transactionObjectCode.replace(":", "S:");
+                        String assistantTransactionObjectCodeCopy = assistant.getTransactionObjectCodeCopy();
                         // 源-交易对象编码
                         item.setTransactionCode(transactionObjectCode);
                         // 处理-交易对象编码
-                        item.setTransactionCodeCopy(replace);
+                        item.setTransactionCodeCopy(assistantTransactionObjectCodeCopy);
                         // 处理-账户组合
                         String zCopy = item.getZ().replaceAll("\\.","-");
                         item.setZCopy(zCopy);

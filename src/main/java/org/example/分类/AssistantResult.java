@@ -72,6 +72,10 @@ public class AssistantResult {
     @ColumnWidth(40)
     @ExcelProperty("交易对象编码名称")
     private String transactionObjectName;
+    @ColumnWidth(40)
+    @ExcelProperty("交易对象编码处理")
+    private String transactionObjectCodeCopy;
+
     private Integer isIncludeUp;
 
     @ColumnWidth(40)

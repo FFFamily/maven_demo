@@ -134,9 +134,11 @@ public class ExcelDataUtil {
                     String transactionObjectId = sourceFileData.getTransactionObjectId();
                     String transactionObjectCode = sourceFileData.getTransactionObjectCode();
                     String transactionObjectName = sourceFileData.getTransactionObjectName();
+                    String transactionObjectCodeCopy = sourceFileData.getTransactionObjectCodeCopy();
                     assistantResult.setTransactionObjectId(transactionObjectId);
                     assistantResult.setTransactionObjectCode(transactionObjectCode);
                     assistantResult.setTransactionObjectName(transactionObjectName);
+                    assistantResult.setTransactionObjectCodeCopy(transactionObjectCodeCopy);
                     assistantResult.setField(sourceFileData.getMatchName());
                     BigDecimal money = ExcelDataUtil.getBalance(curr);
                     assistantResult.setSEGMENT1(sourceFileData.getSEGMENT1());
@@ -192,6 +194,7 @@ public class ExcelDataUtil {
             assistant3.setTransactionObjectId(assistantResult.getTransactionObjectId());
             assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCode());
             assistant3.setTransactionObjectName(assistantResult.getTransactionObjectName());
+            assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCodeCopy());
             assistant3.setRDesc(assistantResult.getField());
             assistant3.setCompanyCode(assistantResult.getSEGMENT1());
             assistant3.setForm(assistantResult.getForm());
