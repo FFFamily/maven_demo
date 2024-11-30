@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.example.utils.ExcelDataUtil.getDraftFormatTemplateExcelData;
@@ -41,7 +38,8 @@ public class FindABCD {
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
         List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping)
-                .stream().filter(item -> "".equals(item.getFieldCode()) && "".equals(item.getTransactionObjectId()))
+                .stream()
+                .filter(item -> "NPXS0.0.1123160101.0.999999.0.0.0.30013389.0".equals(item.getFieldCode()) && Objects.equals(null,item.getTransactionObjectId()))
                 .collect(Collectors.toList());
         List<Assistant> cachedDataList = ExcelDataUtil.covertAssistant(sourceFileDataList,dataList, mapping);
         for (int i = 0; i < dataList.size(); i++) {
@@ -60,6 +58,7 @@ public class FindABCD {
                 sql +=  "and z.\"交易对象\" is null";
             }
             List<OtherInfo3> startCollect = sqlUtil.find(sql);
+            startCollect.forEach(item -> findLevel.organizeDataItem(item));
             String form = startCollect.stream().map(OtherInfo3::getS).distinct().collect(Collectors.joining("、"));
             assistantResult.setForm(form);
             doFind(startCollect,assistant,projectName,assistantResult,true);
