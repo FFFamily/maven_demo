@@ -99,7 +99,10 @@ public class FindLevel {
         List<OtherInfo3> result = new ArrayList<>();
         for (int i = 0; i < finalResult.size(); i++) {
             OtherInfo3 otherInfo3 = finalResult.get(i);
-            int level = 1;
+//            int level = 1;
+            otherInfo3.setLevel(1);
+            otherInfo3.setNo(String.valueOf(1));
+            // 遍历一级
             deque.push(otherInfo3);
             // 准备进行迭代遍历
             while (!deque.isEmpty()){
@@ -108,18 +111,27 @@ public class FindLevel {
                 for (int dequeIndex = 0; dequeIndex < dequeSize; dequeIndex++) {
                     OtherInfo3 parentItem = deque.poll();
                     assert parentItem != null;
+                    int level = parentItem.getLevel();
                     String no = parentItem.getNo() == null ? String.valueOf(i+1) : parentItem.getNo();
-                    parentItem.setLevel(level);
+//                    parentItem.setLevel(level);
                     if (level == 1) {
                         judgeJoin(result,parentItem,no,level);
                         String form = parentItem.getS();
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-                            level = find(deque,cachedDataList,parentItem,originCode,level,isOpenFindUp,findBySql);
+                            List<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
+//                            if (!childList.isEmpty()){
+//                                level+=1;
+//                            }
+                            pushChild(childList,parentItem,deque,level);
                         }
                     } else {
                         judgeJoin(result,parentItem,no,level);
-                        level = find(deque,cachedDataList,parentItem,originCode,level,isOpenFindUp,findBySql);
+                        List<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
+//                        if (!childList.isEmpty()) {
+//                            level+=1;
+//                        }
+                        pushChild(childList,parentItem,deque,level);
                     }
                 }
             }
@@ -156,26 +168,41 @@ public class FindLevel {
         return result;
     }
 
-    public  Integer find(Deque<OtherInfo3> deque, List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
+    public  List<OtherInfo3> find(List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
         List<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originCode, level+1, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
             // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
             OtherInfo3 child = childList.get(0);
             if (child.getR().equals(parentItem.getR()) && (child.getV() != null ? child.getV().equals(parentItem.getW()) : child.getW().equals(parentItem.getV()))) {
                 // 如果凭证一样 && 借贷相抵
-                return level;
+                return new ArrayList<>();
             }
         }
-        if (!childList.isEmpty()){
-            level+=1;
+        return childList;
+//        if (!childList.isEmpty()){
+//            level+=1;
+//        }
+//        pushChild(childList,parentItem,deque);
+//        return level;
+    }
+
+    public void pushChild(List<OtherInfo3> childList,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){
+        if (deque.isEmpty()){
+            // 如果有值，证明可能是上一级
+            for (int i1 = childList.size()-1; i1 > 0; i1--) {
+                OtherInfo3 child = childList.get(i1);
+                child.setNo(parentItem.getNo() + "-" + (i1 + 1));
+                child.setLevel(parentLevel+1);
+                deque.push(child);
+            }
+        }else {
+            for (int i1 = 0; i1 < childList.size(); i1++) {
+                OtherInfo3 child = childList.get(i1);
+                child.setNo(parentItem.getNo() + "-" + (i1 + 1));
+                child.setLevel(parentLevel+1);
+                deque.add(child);
+            }
         }
-        for (int i1 = 0; i1 < childList.size(); i1++) {
-            OtherInfo3 child = childList.get(i1);
-            child.setNo(parentItem.getNo() + "-" + (i1 + 1));
-//            child.setOriginZ(originCode);
-            deque.add(child);
-        }
-        return level;
     }
 
     @Data
