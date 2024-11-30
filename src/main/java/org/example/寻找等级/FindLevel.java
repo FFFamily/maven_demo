@@ -187,7 +187,7 @@ public class FindLevel {
     }
 
     public void pushChild(List<OtherInfo3> childList,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){
-        if (deque.isEmpty()){
+        if (!deque.isEmpty()){
             // 如果有值，证明可能是上一级
             for (int i1 = childList.size()-1; i1 > 0; i1--) {
                 OtherInfo3 child = childList.get(i1);
