@@ -79,8 +79,12 @@ public class AssistantResult {
     private Integer isIncludeUp;
 
     @ColumnWidth(40)
-    @ExcelProperty("来源汇总")
+    @ExcelProperty("所有来源汇总")
     private String form;
+
+    @ColumnWidth(40)
+    @ExcelProperty("1级来源汇总")
+    private String oneLevelForm;
 
     @ExcelProperty("是否合同范围内")
     private String isOrigin;

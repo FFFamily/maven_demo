@@ -61,7 +61,9 @@ public class FindABCD {
             String form = startCollect.stream().map(OtherInfo3::getS).distinct().collect(Collectors.joining("、"));
             assistantResult.setForm(form);
             doFind(startCollect,assistant,projectName,assistantResult,true);
-            doFind(startCollect,assistant,projectName,assistantResult,false);
+            List<OtherInfo3> oneLevel = doFind(startCollect, assistant, projectName, assistantResult, false);
+            String oneLevelForm = oneLevel.stream().map(OtherInfo3::getS).distinct().collect(Collectors.joining("、"));
+            assistantResult.setOneLevelForm(oneLevelForm);
             excelExcelData.add(assistantResult);
             System.out.println("当前位置："+i +" 一共有： "+dataList.size());
         }
@@ -73,7 +75,7 @@ public class FindABCD {
         System.out.println("结束");
     }
 
-    public  void doFind(List<OtherInfo3> startCollect,Assistant assistant,String projectName,AssistantResult assistantResult,Boolean isFindAll){
+    public  List<OtherInfo3> doFind(List<OtherInfo3> startCollect,Assistant assistant,String projectName,AssistantResult assistantResult,Boolean isFindAll){
         List<OtherInfo3> result = findLevel.doMain(
                 false,
                 isFindAll,
@@ -95,6 +97,7 @@ public class FindABCD {
         }else {
             assistantResult.setOneLevelType(type);
         }
+        return result;
     }
 
 
