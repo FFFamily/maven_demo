@@ -57,16 +57,16 @@ public class SourceFileData {
     private String SEGMENT10;
     //    @ExcelProperty("备用段名称")
     private String SEGMENT10_NAME;
-    @ExcelProperty("交易对象ID")
+//    @ExcelProperty("交易对象ID")
     private String transactionObjectId;
-    @ExcelProperty("交易对象编码")
+//    @ExcelProperty("交易对象编码")
     private String transactionObjectCode;
-    @ExcelProperty("交易对象名称")
+//    @ExcelProperty("交易对象名称")
     private String transactionObjectName;
-    @ExcelProperty("交易对象编码处理")
+//    @ExcelProperty("交易对象编码处理")
     private String transactionObjectCodeCopy;
     // 编码
-    @ExcelProperty("匹配字段")
+//    @ExcelProperty("匹配字段")
     private String match;
     // 名称
     private String matchName;

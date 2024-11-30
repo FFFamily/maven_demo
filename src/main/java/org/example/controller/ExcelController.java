@@ -65,9 +65,9 @@ public class ExcelController {
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
-                .filter(item -> item.getCompanyCode().equals("JODV0"))
-                .filter(item -> item.getR().equals("JODV0.0.1221130101.0202.999999.0.2006.0.30012445.0"))
-                .filter(item -> item.getTransactionObjectId().equals("SS:51937926"))
+//                .filter(item -> item.getCompanyCode().equals("JODV0"))
+//                .filter(item -> item.getR().equals("JODV0.0.1221990101.0501.0.0.0.0.30013293.0"))
+//                .filter(item -> item.getTransactionObjectId().equals("SS:51937926"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
@@ -126,17 +126,18 @@ public class ExcelController {
                         item.setTransactionCode(transactionObjectCode);
                         // 处理-交易对象编码
                         item.setTransactionCodeCopy(assistantTransactionObjectCodeCopy);
-                        // 处理-账户组合
-                        String zCopy = item.getZ().replaceAll("\\.","-");
-                        item.setZCopy(zCopy);
-                        item.setMergeValue(zCopy + item.getTransactionCodeCopy());
                         item.setOriginZ(projectName);
                         item.setOriginZCopy(projectName.replaceAll("\\.","-"));
+                        // 处理-账户组合
+                        String zCopy = item.getOriginZCopy().replaceAll("\\.","-");
+                        item.setZCopy(zCopy);
+                        item.setMergeValue(zCopy + (item.getTransactionCodeCopy() == null ? "" : item.getTransactionCodeCopy()));
                     });
                     result1.addAll(result);
                 }
             }
-            String resultFileName = "模版-" + companyCode + "-" + System.currentTimeMillis() + ".xlsx";
+            Assistant assistant = companyMap.get(companyCode).get(0);
+            String resultFileName = "模版-" + assistant.getE() + "-" + System.currentTimeMillis() + ".xlsx";
             try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
                 WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
                 excelWriter.write(result1, writeSheet1);

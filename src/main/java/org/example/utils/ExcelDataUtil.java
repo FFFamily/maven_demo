@@ -194,7 +194,7 @@ public class ExcelDataUtil {
             assistant3.setTransactionObjectId(assistantResult.getTransactionObjectId());
             assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCode());
             assistant3.setTransactionObjectName(assistantResult.getTransactionObjectName());
-            assistant3.setTransactionObjectCode(assistantResult.getTransactionObjectCodeCopy());
+            assistant3.setTransactionObjectCodeCopy(assistantResult.getTransactionObjectCodeCopy());
             assistant3.setRDesc(assistantResult.getField());
             assistant3.setCompanyCode(assistantResult.getSEGMENT1());
             assistant3.setForm(assistantResult.getForm());
