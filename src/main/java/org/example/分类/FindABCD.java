@@ -40,7 +40,9 @@ public class FindABCD {
         List<AssistantResult> excelExcelData = new ArrayList<>();
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
-        List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping);
+        List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping)
+                .stream().filter(item -> "".equals(item.getFieldCode()) && "".equals(item.getTransactionObjectId()))
+                .collect(Collectors.toList());
         List<Assistant> cachedDataList = ExcelDataUtil.covertAssistant(sourceFileDataList,dataList, mapping);
         for (int i = 0; i < dataList.size(); i++) {
             Assistant assistant = cachedDataList.get(i);
@@ -52,10 +54,10 @@ public class FindABCD {
             }
             String projectName = assistant.getR();
             String sql =  "select * from ZDPROD_EXPDP_20241120 z where z.\"账户组合\" = '" + assistantResult.getFieldCode()+"'";
-            if (assistantResult.getTransactionObjectName() != null) {
-                sql +=  "and z.\"交易对象名称\" like '" + assistantResult.getTransactionObjectName() +"%'";
+            if (assistantResult.getTransactionObjectId() != null) {
+                sql +=  "and z.\"交易对象\" = '" + assistantResult.getTransactionObjectId() +"'";
             }else {
-                sql +=  "and z.\"交易对象名称\" is null";
+                sql +=  "and z.\"交易对象\" is null";
             }
             List<OtherInfo3> startCollect = sqlUtil.find(sql);
             String form = startCollect.stream().map(OtherInfo3::getS).distinct().collect(Collectors.joining("、"));
