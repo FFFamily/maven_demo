@@ -57,11 +57,11 @@ public class FindLevelBySystem {
                         String form = parentItem.getS();
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-                            level = findLevel.find(deque,cachedDataList,parentItem,originProjectName,level,true,true);
+                             findLevel.find(cachedDataList,parentItem,originProjectName,level,true,true);
                         }
                     } else {
                         FindLevel.judgeJoin(result,parentItem,no,level);
-                        level = findLevel.find(deque,cachedDataList,parentItem,originProjectName,level,true,true);
+                        findLevel.find(cachedDataList,parentItem,originProjectName,level,true,true);
                     }
                 }
             }

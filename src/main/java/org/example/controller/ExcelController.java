@@ -68,9 +68,9 @@ public class ExcelController {
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
-                .filter(item -> item.getCompanyCode().equals("BFWW0"))
-                .filter(item -> item.getR().equals("BFWW0.0.2202520101.0.0.0.0.YLBJ0.30012463.0"))
-                .filter(item -> item.getTransactionObjectId().equals("SS:51795993"))
+//                .filter(item -> item.getCompanyCode().equals("BVEI0"))
+//                .filter(item -> item.getR().equals("BVEI0.0.2202520101.0.0.0.0.0.30017786.0"))
+//                .filter(item -> item.getTransactionObjectId().equals("SS:51795993"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
