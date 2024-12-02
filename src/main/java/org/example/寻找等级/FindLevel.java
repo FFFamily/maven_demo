@@ -119,12 +119,12 @@ public class FindLevel {
                         String form = parentItem.getS();
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-                            List<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
+                            Set<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
                             pushChild(childList,parentItem,deque,level);
                         }
                     } else {
                         judgeJoin(result,parentItem,no,level);
-                        List<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
+                        Set<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
                         pushChild(childList,parentItem,deque,level);
                     }
                 }
@@ -162,14 +162,17 @@ public class FindLevel {
         return result;
     }
 
-    public  List<OtherInfo3> find(List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
-        List<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originCode, level+1, isOpenFindUp,findBySql);
+    public  Set<OtherInfo3> find(List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
+        Set<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originCode, level+1, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
             // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
-            OtherInfo3 child = childList.get(0);
+//            OtherInfo3 child = childList.get(0);
+            Iterator<OtherInfo3> iterator = childList.iterator();
+            OtherInfo3 child = iterator.next();
             if (child.getR().equals(parentItem.getR()) && (child.getV() != null ? child.getV().equals(parentItem.getW()) : child.getW().equals(parentItem.getV()))) {
                 // 如果凭证一样 && 借贷相抵
-                return new ArrayList<>();
+//                return new ArrayList<>();
+                return new HashSet<>();
             }
         }
         return childList;
@@ -180,7 +183,8 @@ public class FindLevel {
 //        return level;
     }
 
-    public void pushChild(List<OtherInfo3> childList,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){
+    public void pushChild(Set<OtherInfo3> childSet,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){
+        List<OtherInfo3> childList = childSet.stream().collect(Collectors.toList());
         if (!deque.isEmpty()){
             // 如果有值，证明可能是上一级
             for (int i1 = childList.size()-1; i1 > 0; i1--) {
@@ -290,19 +294,21 @@ public class FindLevel {
     }
 
 
-    private  List<OtherInfo3> doUpFilter(List<OtherInfo3> cachedDataList,
+    private  Set<OtherInfo3> doUpFilter(List<OtherInfo3> cachedDataList,
                                                OtherInfo3 item,
                                                String originCode,
                                                Integer level,
                                                boolean isOpenFindUp,
                                                boolean findBySql) {
         if (!isOpenFindUp) {
-            return new ArrayList<>();
+//            return new ArrayList<>();
+            return new HashSet<>();
         }
         if (level > 10) {
             // 级别超过10次
             item.setErrorMsg("循环超过10次");
-            return new ArrayList<>();
+//            return new ArrayList<>();
+            return new HashSet<>();
         }
         BigDecimal v = item.getV();
         BigDecimal w = item.getW();
@@ -326,7 +332,7 @@ public class FindLevel {
                     )
                     .collect(Collectors.toList());
 //        }
-        List<OtherInfo3> result = new ArrayList<>();
+        Set<OtherInfo3> result = new HashSet<>();
         if (collect.isEmpty()) {
         } else {
             if (collect.size() > 1) {
@@ -334,7 +340,7 @@ public class FindLevel {
                 return result;
             }
             // 同一凭证下，借贷需要抵消的数据
-            Set<OtherInfo3> otherInfo3s = new HashSet<>();
+            List<OtherInfo3> otherInfo3s = new ArrayList<>();
             // 往下找下一个之前先添加自己
             for (OtherInfo3 otherInfo3 : collect) {
                 List<OtherInfo3> collect1;
