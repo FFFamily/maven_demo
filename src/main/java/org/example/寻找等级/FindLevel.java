@@ -334,7 +334,7 @@ public class FindLevel {
                 return result;
             }
             // 同一凭证下，借贷需要抵消的数据
-            List<OtherInfo3> otherInfo3s = new ArrayList<>();
+            Set<OtherInfo3> otherInfo3s = new HashSet<>();
             // 往下找下一个之前先添加自己
             for (OtherInfo3 otherInfo3 : collect) {
                 List<OtherInfo3> collect1;
