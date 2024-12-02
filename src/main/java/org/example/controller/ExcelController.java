@@ -17,7 +17,6 @@ import org.example.分类.AssistantResult;
 import org.example.分类.FindABCD;
 import org.example.分类.entity.DraftFormatTemplate;
 import org.example.寻找等级.FindLevel;
-import org.example.寻找等级.FindLevelBySystem;
 import org.example.寻找等级.OtherInfo3;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,6 +79,7 @@ public class ExcelController {
             System.out.println("共"+realAssistantList.size()+"条");
             String findCompanySql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+companyCode+"'";
             List<OtherInfo3> cachedDataList = sqlUtil.find(findCompanySql);
+            // TODO 读取旧系统的明细数据
             System.out.println("整个公司包含数据量："+cachedDataList.size());
             cachedDataList.forEach(item -> findLevel.organizeDataItem(item));
             for (int i = 0; i < realAssistantList.size(); i++) {

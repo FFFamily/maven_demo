@@ -120,17 +120,11 @@ public class FindLevel {
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
                             List<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
-//                            if (!childList.isEmpty()){
-//                                level+=1;
-//                            }
                             pushChild(childList,parentItem,deque,level);
                         }
                     } else {
                         judgeJoin(result,parentItem,no,level);
                         List<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
-//                        if (!childList.isEmpty()) {
-//                            level+=1;
-//                        }
                         pushChild(childList,parentItem,deque,level);
                     }
                 }
