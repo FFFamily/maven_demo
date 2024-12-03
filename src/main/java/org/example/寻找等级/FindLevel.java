@@ -122,7 +122,7 @@ public class FindLevel {
             OtherInfo3 otherInfo3 = finalResult.get(i);
 //            int level = 1;
             otherInfo3.setLevel(1);
-            otherInfo3.setNo(String.valueOf(i));
+            otherInfo3.setNo(String.valueOf(i+1));
             // 遍历一级
             deque.push(otherInfo3);
             // 准备进行迭代遍历

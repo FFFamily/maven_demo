@@ -218,7 +218,7 @@ public class ExcelDataUtil {
 
     public static List<OtherInfo3> getOldExcel(){
         List<OtherInfo3> data = new ArrayList<>();
-        EasyExcel.read("", OldExcelTemplate.class, new PageReadListener<OldExcelTemplate>(dataList -> {
+        EasyExcel.read("src/main/java/org/example/excel/朗逸物业NCC序时簿.xlsx", OldExcelTemplate.class, new PageReadListener<OldExcelTemplate>(dataList -> {
             for (OldExcelTemplate oldExcelTemplate : dataList) {
                 OtherInfo3 otherInfo3 = new OtherInfo3();
                 String year = oldExcelTemplate.getA();
@@ -251,7 +251,7 @@ public class ExcelDataUtil {
                 otherInfo3.setNccAssistantCode(oldExcelTemplate.getG());
                 data.add(otherInfo3);
             }
-        })).sheet().headRowNumber(1).doRead();
+        })).sheet("朗逸物业NCC序时簿").headRowNumber(1).doRead();
         return data;
     }
 

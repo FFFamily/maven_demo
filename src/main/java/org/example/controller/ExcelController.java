@@ -67,7 +67,7 @@ public class ExcelController {
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
-//                .filter(item -> item.getCompanyCode().equals("BVEI0"))
+                .filter(item -> item.getCompanyCode().equals("WCRC0"))
 //                .filter(item -> item.getR().equals("BVEI0.0.2241240101.16.0.0.0.0.30017786.0"))
 //                .filter(item -> item.getTransactionObjectId().equals("CS:13630154"))
                 // 根据公司分组
@@ -80,7 +80,7 @@ public class ExcelController {
             String findCompanySql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+companyCode+"'";
             List<OtherInfo3> cachedDataList = sqlUtil.find(findCompanySql);
             // TODO 读取旧系统的明细数据
-            List<OtherInfo3> oldCachedDataList = ExcelDataUtil.getOldExcel("", "朗逸物业NCC序时簿");
+            List<OtherInfo3> oldCachedDataList = ExcelDataUtil.getOldExcel();
             System.out.println("整个公司包含数据量："+cachedDataList.size());
             cachedDataList.forEach(item -> findLevel.organizeDataItem(item));
             for (int i = 0; i < realAssistantList.size(); i++) {
