@@ -236,9 +236,9 @@ public class FindLevel {
         List<MappingNccToFmsExcel> nccCodeList = mappingNccToFmsExcels.getOrDefault(code + "." + childCode,new ArrayList<>());
         if (nccCodeList.size() > 1){
             parentItem.setErrorMsg(appendErrorMsg(parentItem.getErrorMsg(),"旧系统存在多科目映射"));
-            parentItem.setNccProjectCode(nccCodeList.stream().map(MappingNccToFmsExcel::getD).collect(Collectors.joining("、")));
             return;
         }
+        parentItem.setNccProjectCode(nccCodeList.stream().map(MappingNccToFmsExcel::getD).collect(Collectors.joining("、")));
         // 拿到NCC项目段
         MappingProjectExcel mappingProjectExcel = mappingProjectExcels.getOrDefault(projectCode,new MappingProjectExcel());
         String nccProjectName = mappingProjectExcel.getA();
