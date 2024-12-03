@@ -251,7 +251,7 @@ public class ExcelDataUtil {
                 otherInfo3.setNccAssistantCode(oldExcelTemplate.getG());
                 data.add(otherInfo3);
             }
-        })).sheet().doRead();
+        })).sheet().headRowNumber(1).doRead();
         return data;
     }
 
