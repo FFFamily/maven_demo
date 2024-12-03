@@ -82,12 +82,12 @@ public class FindLevel {
     }
 
     public  List<OtherInfo3> doMain(boolean isOpenFindUp,
-                                          boolean isFindAll,
-                                          boolean findBySql,
-                                          List<OtherInfo3> cachedDataList,
-                                          List<OtherInfo3> startCollect,
-                                          String z,
-                                          String originCode) {
+                                    boolean isFindAll,
+                                    boolean findBySql,
+                                    List<OtherInfo3> cachedDataList,
+                                    List<OtherInfo3> startCollect,
+                                    String z,
+                                    String originCode) {
 
         List<OtherInfo3> finalResult;
         if (isFindAll){
@@ -187,7 +187,7 @@ public class FindLevel {
         List<OtherInfo3> childList = childSet.stream().collect(Collectors.toList());
         if (!deque.isEmpty()){
             // 如果有值，证明可能是上一级
-            for (int i1 = childList.size()-1; i1 > 0; i1--) {
+            for (int i1 = childList.size()-1; i1 >= 0; i1--) {
                 OtherInfo3 child = childList.get(i1);
                 child.setNo(parentItem.getNo() + "-" + (i1 + 1));
                 child.setLevel(parentLevel+1);
@@ -295,11 +295,11 @@ public class FindLevel {
 
 
     private  Set<OtherInfo3> doUpFilter(List<OtherInfo3> cachedDataList,
-                                               OtherInfo3 item,
-                                               String originCode,
-                                               Integer level,
-                                               boolean isOpenFindUp,
-                                               boolean findBySql) {
+                                        OtherInfo3 item,
+                                        String originCode,
+                                        Integer level,
+                                        boolean isOpenFindUp,
+                                        boolean findBySql) {
         if (!isOpenFindUp) {
 //            return new ArrayList<>();
             return new HashSet<>();
@@ -318,19 +318,19 @@ public class FindLevel {
 //            String appendSql = v != null ? " AND z.\"输入贷方\" = " + v : " AND z.\"输入借方\" = " + w;
 //            collect = sqlUtil.find(findSql+appendSql).stream().peek(this::organizeDataItem).collect(Collectors.toList());
 //        }else {
-            collect = cachedDataList.stream()
-                    // 凭证号相等 && 编号不能相等 && 合并字段不相同
-                    .filter(temp -> temp.getR().equals(item.getR())
-                            && ((v != null && temp.getW() != null && v.compareTo(temp.getW()) == 0) || w != null && temp.getV() != null && w.compareTo(temp.getV()) == 0)
-                            && !temp.equals(item)
+        collect = cachedDataList.stream()
+                // 凭证号相等 && 编号不能相等 && 合并字段不相同
+                .filter(temp -> temp.getR().equals(item.getR())
+                                && ((v != null && temp.getW() != null && v.compareTo(temp.getW()) == 0) || w != null && temp.getV() != null && w.compareTo(temp.getV()) == 0)
+                                && !temp.equals(item)
 //                            && !temp.getA().equals(item.getA())
 //                        && temp.getX().equals(item.getX())
 //                            && !temp.getZ().equals(item.getZ())
-                                    && !temp.getOnlySign().equals(item.getOnlySign())
-                            // TODO 交易对象是否也需要不同
+                                && !temp.getOnlySign().equals(item.getOnlySign())
+                        // TODO 交易对象是否也需要不同
 //                            && ((temp.getTransactionId() == null && item.getTransactionId() == null ) || !Objects.equals(temp.getTransactionId(),item.getTransactionId()))
-                    )
-                    .collect(Collectors.toList());
+                )
+                .collect(Collectors.toList());
 //        }
         Set<OtherInfo3> result = new HashSet<>();
         if (collect.isEmpty()) {
@@ -354,26 +354,26 @@ public class FindLevel {
 //                    }
 //                }else {
                 // 展开同一凭证号能借贷相抵的项目名称
-                     collect1 = cachedDataList.stream()
+                collect1 = cachedDataList.stream()
 //                            .filter(i -> i.getZ().equals(otherInfo3.getZ()))
-                             .filter(i -> i.getOnlySign().equals(otherInfo3.getOnlySign()))
-                            .sorted((a, b) -> {
-                                int i = DateUtil.date(a.getN()).toInstant().compareTo(DateUtil.toInstant(b.getN()));
-                                if (i == 0) {
-                                    return a.getQ() - b.getQ();
-                                }
-                                return i;
-                            })
-                            .collect(Collectors.toList());
+                        .filter(i -> i.getOnlySign().equals(otherInfo3.getOnlySign()))
+                        .sorted((a, b) -> {
+                            int i = DateUtil.date(a.getN()).toInstant().compareTo(DateUtil.toInstant(b.getN()));
+                            if (i == 0) {
+                                return a.getQ() - b.getQ();
+                            }
+                            return i;
+                        })
+                        .collect(Collectors.toList());
 //                }
 
                 // 先找当前数据借贷抵消的数据
                 List<OtherInfo3> findOne = disSameX(collect1, originCode)
                         .stream()
                         .filter(i ->
-                                (otherInfo3.getV() != null && otherInfo3.getV().equals(i.getW())) || (otherInfo3.getW() != null && otherInfo3.getW().equals(i.getV()))
+                                        (otherInfo3.getV() != null && otherInfo3.getV().equals(i.getW())) || (otherInfo3.getW() != null && otherInfo3.getW().equals(i.getV()))
 //                                        && !otherInfo3.getZ().equals(item.getZ())
-                                        && !otherInfo3.getOnlySign().equals(item.getOnlySign())
+                                                && !otherInfo3.getOnlySign().equals(item.getOnlySign())
                         )
                         .collect(Collectors.toList());
                 List<OtherInfo3> otherInfo3Sup = new ArrayList<>();

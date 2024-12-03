@@ -68,8 +68,8 @@ public class ExcelController {
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
 //                .filter(item -> item.getCompanyCode().equals("BVEI0"))
-//                .filter(item -> item.getR().equals("BVEI0.0.2202520101.0.0.0.0.0.30017786.0"))
-//                .filter(item -> item.getTransactionObjectId().equals("SS:51795993"))
+//                .filter(item -> item.getR().equals("BVEI0.0.2241240101.16.0.0.0.0.30017786.0"))
+//                .filter(item -> item.getTransactionObjectId().equals("CS:13630154"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
