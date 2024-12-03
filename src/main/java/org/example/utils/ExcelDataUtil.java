@@ -1,17 +1,22 @@
 package org.example.utils;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.read.listener.PageReadListener;
+import com.alibaba.excel.read.metadata.ReadSheet;
 import org.example.enitty.Assistant;
 import org.example.enitty.SourceFileData;
 import org.example.分类.AssistantResult;
 import org.example.分类.entity.DraftFormatTemplate;
+import org.example.寻找等级.OtherInfo3;
+import org.example.寻找等级.old_excel.MappingCustomerExcel;
+import org.example.寻找等级.old_excel.MappingNccToFmsExcel;
+import org.example.寻找等级.old_excel.MappingProjectExcel;
+import org.example.寻找等级.old_excel.OldExcelTemplate;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -210,4 +215,81 @@ public class ExcelDataUtil {
     private static String getValue(String str){
         return str == null ? "" : str;
     }
+
+    public static List<OtherInfo3> getOldExcel(String path,String sheet){
+        List<OtherInfo3> data = new ArrayList<>();
+        EasyExcel.read(path, OldExcelTemplate.class, new PageReadListener<OldExcelTemplate>(dataList -> {
+            for (OldExcelTemplate oldExcelTemplate : dataList) {
+                OtherInfo3 otherInfo3 = new OtherInfo3();
+                String year = oldExcelTemplate.getA();
+                String month = oldExcelTemplate.getB();
+                String day = oldExcelTemplate.getC();
+                String dateStr = year+"-"+month+"-"+day;
+                // 总账日期
+                otherInfo3.setN(DateUtil.parse(dateStr));
+                // 凭证号
+                otherInfo3.setQ(oldExcelTemplate.getE());
+                // 拼接凭证号
+                otherInfo3.setR(year+"-"+month+otherInfo3.getQ());
+                // TODO 来源
+                // 借
+                otherInfo3.setV(oldExcelTemplate.getL());
+                // 贷
+                otherInfo3.setW(oldExcelTemplate.getN());
+                // TODO 余额
+                String regex = "(?<=：)[^【】]+";
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(oldExcelTemplate.getG());
+                // 唯一标识
+                otherInfo3.setOnlySign(oldExcelTemplate.getF());
+                while (matcher.find()) {
+                    otherInfo3.setOnlySign(otherInfo3.getOnlySign()+"-"+matcher.group().trim());
+                }
+                // ncc 科目
+                otherInfo3.setNccProjectCode(oldExcelTemplate.getF());
+                // ncc 辅助核算
+                otherInfo3.setNccAssistantCode(oldExcelTemplate.getG());
+                data.add(otherInfo3);
+            }
+        }));
+        return data;
+    }
+
+    public static void findMappingNccToFmsExcel(HashMap<String,List<MappingNccToFmsExcel>> mappingNccToFmsExcelHashMap,
+                                                                      HashMap<String, MappingCustomerExcel> mappingCustomerExcelHashMap,
+                                                                      HashMap<String, MappingProjectExcel> mappingProjectExcels
+                                                                      ){
+        // 写法1
+        try (ExcelReader excelReader = EasyExcel.read("src/main/java/org/example/utils/朗逸物业映射关系.xlsx").build()) {
+            // 这里为了简单 所以注册了 同样的head 和Listener 自己使用功能必须不同的Listener
+            ReadSheet readSheet1 = EasyExcel.readSheet(0).head(MappingNccToFmsExcel.class).registerReadListener(new PageReadListener<MappingNccToFmsExcel>(dataList -> {
+                for (MappingNccToFmsExcel mappingNccToFmsExcel : dataList) {
+                    String j = mappingNccToFmsExcel.getJ();
+                    String k = mappingNccToFmsExcel.getK();
+                    String key = j+"."+k;
+                    List<MappingNccToFmsExcel> list = mappingNccToFmsExcelHashMap.getOrDefault(key, new ArrayList<>());
+                    list.add(mappingNccToFmsExcel);
+                    mappingNccToFmsExcelHashMap.put(key,list);
+                }
+            })).build();
+            ReadSheet readSheet2 =
+                    EasyExcel.readSheet(1).head(MappingCustomerExcel.class).registerReadListener(new PageReadListener<MappingCustomerExcel>(dataList -> {
+                        for (MappingCustomerExcel mappingNccToFmsExcel : dataList) {
+                            String key = mappingNccToFmsExcel.getB();
+                            mappingCustomerExcelHashMap.put(key,mappingNccToFmsExcel);
+                        }
+                    })).build();
+            ReadSheet readSheet3 =
+                    EasyExcel.readSheet(2).head(MappingProjectExcel.class).registerReadListener(new PageReadListener<MappingProjectExcel>(dataList -> {
+                        for (MappingProjectExcel mappingNccToFmsExcel : dataList) {
+                            String key = mappingNccToFmsExcel.getC();
+                            mappingProjectExcels.put(key,mappingNccToFmsExcel);
+                        }
+                    })).build();
+            // 这里注意 一定要把sheet1 sheet2 一起传进去，不然有个问题就是03版的excel 会读取多次，浪费性能
+            excelReader.read(readSheet1, readSheet2,readSheet3);
+        }
+
+    }
+
 }

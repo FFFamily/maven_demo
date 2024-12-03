@@ -7,12 +7,19 @@ import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import lombok.Data;
 import org.example.enitty.Assistant;
+import org.example.utils.ExcelDataUtil;
 import org.example.utils.SqlUtil;
+import org.example.寻找等级.old_excel.MappingCustomerExcel;
+import org.example.寻找等级.old_excel.MappingNccToFmsExcel;
+import org.example.寻找等级.old_excel.MappingProjectExcel;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +32,18 @@ public class FindLevel {
      * 每隔5条存储数据库，实际使用中可以100条，然后清理list ，方便内存回收
      */
     private static final int BATCH_COUNT = 80000;
+    HashMap<String,List<MappingNccToFmsExcel>> mappingNccToFmsExcels;
+    HashMap<String,MappingProjectExcel> mappingProjectExcels;
+    HashMap<String, MappingCustomerExcel> mappingCustomerExcelHashMap;
+
+    @PostConstruct
+    public void init(){
+        mappingNccToFmsExcels = new HashMap<>();
+        mappingProjectExcels = new HashMap<>();
+        mappingCustomerExcelHashMap = new HashMap<>();
+        ExcelDataUtil.findMappingNccToFmsExcel(mappingNccToFmsExcels,mappingCustomerExcelHashMap,mappingProjectExcels);
+    }
+
     @Resource
     private SqlUtil sqlUtil;
 
@@ -62,6 +81,7 @@ public class FindLevel {
                     true,
                     false,
                     false,
+                    new ArrayList<>(),
                     cachedDataList,
                     startCollect,
                     assistant.getZ(),
@@ -84,6 +104,7 @@ public class FindLevel {
     public  List<OtherInfo3> doMain(boolean isOpenFindUp,
                                     boolean isFindAll,
                                     boolean findBySql,
+                                    List<OtherInfo3> oldCachedDataList,
                                     List<OtherInfo3> cachedDataList,
                                     List<OtherInfo3> startCollect,
                                     String z,
@@ -118,12 +139,12 @@ public class FindLevel {
                         String form = parentItem.getS();
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-                            Set<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
+                            Set<OtherInfo3> childList = find(oldCachedDataList,cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
                             pushChild(childList,parentItem,deque,level);
                         }
                     } else {
                         judgeJoin(result,parentItem,no,level);
-                        Set<OtherInfo3> childList = find(cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
+                        Set<OtherInfo3> childList = find(oldCachedDataList,cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
                         pushChild(childList,parentItem,deque,level);
                     }
                 }
@@ -161,7 +182,8 @@ public class FindLevel {
         return result;
     }
 
-    public  Set<OtherInfo3> find(List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
+    public  Set<OtherInfo3> find(List<OtherInfo3> oldCachedDataList,List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
+        List<OtherInfo3> list = cachedDataList == null ? oldCachedDataList : cachedDataList;
         Set<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originCode, level+1, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
             // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
@@ -174,13 +196,67 @@ public class FindLevel {
         }else if (childList.isEmpty()){
             // 如果没办法找到子类，那么就去老系统找
             // 朗基逻辑
-            // 拿到账户组合进行拆分
-            String[] z = parentItem.getZ().split("\\.");
-
-
-
+            if (parentItem.getJournalExplanation().contains("期初数据导入")
+            || parentItem.getJournalExplanation().contains("发生额数据导入")){
+                findNccLangJi(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
+            }
         }
         return childList;
+    }
+
+    public void findNccLangJi(List<OtherInfo3> oldCachedDataList,Set<OtherInfo3> childList,OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql){
+        // 拿到账户组合进行拆分
+        String[] z = parentItem.getZ().split("\\.");
+        // 科目段
+        String code = z[2];
+        // 子目段
+        String childCode = z[3];
+        // 项目段
+        String projectCode = z[9];
+        // 交易对象编码
+        String transactionCode = parentItem.getTransactionCode();
+        String regex = "(?<=:)[^:]+(?=:)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(transactionCode);
+        String customerCode;
+        if (matcher.find()) {
+            // 找到客商编码
+            customerCode = matcher.group();
+        }else {
+            customerCode = null;
+        }
+        // 先去老系统重找对应的数据
+        // 新系统的数据可能由老系统的几笔构成
+        // 通过科目段+子目段找到 NCC 的 科目段
+        List<MappingNccToFmsExcel> nccCodeList = mappingNccToFmsExcels.get(code + "." + childCode);
+        if (nccCodeList.size() > 1){
+            parentItem.setErrorMsg(parentItem.getErrorMsg() + "、旧系统科目段无法映射");
+        }
+        MappingProjectExcel mappingProjectExcel = mappingProjectExcels.get(projectCode);
+        // 拿到NCC项目段
+        String nccProjectName = mappingProjectExcel.getA();
+        MappingCustomerExcel mappingCustomerExcel = mappingCustomerExcelHashMap.get(customerCode);
+        // 供应商名称
+        String customerName = mappingCustomerExcel.getC();
+        // NCC 科目段
+        String nccCode = nccCodeList.get(0).getD();
+        List<OtherInfo3> nccBalanceList = OldFindLevel.findList(oldCachedDataList, nccCode, nccProjectName, customerName,parentItem.getV(),parentItem.getW());
+        // ncc 余额
+        BigDecimal nccSum = nccBalanceList.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(getBigDecimalValue(curr.getV())).subtract(getBigDecimalValue(curr.getW())), (l, r) -> l);
+        // FMS 余额
+        BigDecimal fmsSum = getBigDecimalValue(parentItem.getV()).subtract(getBigDecimalValue(parentItem.getW()));
+        if (nccSum.compareTo(fmsSum) == 0){
+            // 余额相等证明找到了
+            // 校验余额是否一致
+            for (OtherInfo3 otherInfo3 : nccBalanceList) {
+                Set<OtherInfo3> oldChild = find(oldCachedDataList, null, otherInfo3, originCode, level, isOpenFindUp, findBySql);
+                childList.addAll(oldChild);
+            }
+        }
+    }
+
+    public BigDecimal getBigDecimalValue(BigDecimal number){
+        return number == null ? BigDecimal.ZERO : number;
     }
 
     public void pushChild(Set<OtherInfo3> childSet,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){

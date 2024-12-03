@@ -87,7 +87,6 @@ public class OtherInfo3 {
     @ColumnWidth(200)
     @ExcelProperty("账户描述")
     private String zDesc;
-
     // 交易对象
     @ColumnWidth(20)
     @ExcelProperty("交易对象")
@@ -109,12 +108,18 @@ public class OtherInfo3 {
     private String originZCopy;
 
     @ColumnWidth(50)
+    @ExcelProperty("NCC科目段")
+    private String nccProjectCode;
+    @ColumnWidth(50)
+    @ExcelProperty("NCC辅助核算段")
+    private String nccAssistantCode;
+
+    @ColumnWidth(50)
+    @ExcelProperty("日记账说明")
+    private String journalExplanation;
+
+
+    @ColumnWidth(50)
     @ExcelProperty("合并段")
     private String mergeValue;
-//    @ExcelProperty("AA")
-//    private String aa;
-//    @ExcelProperty("AB")
-//    private String ab;
-
-
 }
