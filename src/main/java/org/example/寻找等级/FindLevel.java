@@ -215,6 +215,7 @@ public class FindLevel {
         String projectCode = z[8];
         // 交易对象编码
         String transactionCode = parentItem.getTransactionCode();
+
         String customerCode;
         if (transactionCode != null){
             String regex = "(?<=:)[^:]+(?=:)";
@@ -234,16 +235,21 @@ public class FindLevel {
         // 通过科目段+子目段找到 NCC 的 科目段
         List<MappingNccToFmsExcel> nccCodeList = mappingNccToFmsExcels.getOrDefault(code + "." + childCode,new ArrayList<>());
         if (nccCodeList.size() > 1){
-            parentItem.setErrorMsg(parentItem.getErrorMsg() + "、旧系统科目段无法映射");
+            parentItem.setErrorMsg(appendErrorMsg(parentItem.getErrorMsg(),"旧系统存在多科目映射"));
+            parentItem.setNccProjectCode(nccCodeList.stream().map(MappingNccToFmsExcel::getD).collect(Collectors.joining("、")));
+            return;
         }
-        MappingProjectExcel mappingProjectExcel = mappingProjectExcels.getOrDefault(projectCode,new MappingProjectExcel());
         // 拿到NCC项目段
+        MappingProjectExcel mappingProjectExcel = mappingProjectExcels.getOrDefault(projectCode,new MappingProjectExcel());
         String nccProjectName = mappingProjectExcel.getA();
-        MappingCustomerExcel mappingCustomerExcel = mappingCustomerExcelHashMap.getOrDefault(customerCode,new MappingCustomerExcel());
         // 供应商名称
+        MappingCustomerExcel mappingCustomerExcel = mappingCustomerExcelHashMap.getOrDefault(customerCode,new MappingCustomerExcel());
         String customerName = mappingCustomerExcel.getC();
+        parentItem.setNccAssistantCode(appendErrorMsg(nccProjectName,customerName));
         // NCC 科目段
         String nccCode = nccCodeList.isEmpty() ? null : nccCodeList.get(0).getD();
+        parentItem.setNccProjectCode(nccCode);
+        // 去老系统找对应的值
         List<OtherInfo3> nccBalanceList = OldFindLevel.findList(oldCachedDataList, nccCode, nccProjectName, customerName,parentItem.getV(),parentItem.getW());
         // ncc 余额
         BigDecimal nccSum = nccBalanceList.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(getBigDecimalValue(curr.getV())).subtract(getBigDecimalValue(curr.getW())), (l, r) -> l);
@@ -263,6 +269,9 @@ public class FindLevel {
         return number == null ? BigDecimal.ZERO : number;
     }
 
+    public String appendErrorMsg(String msg,String appendMsg){
+        return msg == null ? appendMsg : msg + "、" + appendMsg;
+    }
     public void pushChild(Set<OtherInfo3> childSet,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){
         List<OtherInfo3> childList = new ArrayList<>(childSet);
         if (!deque.isEmpty()){

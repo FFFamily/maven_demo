@@ -26,8 +26,8 @@ public class OldFindLevel {
         // 通过映射找到对应的旧系统的数据
         return  list.stream().filter(item ->
                 item.getNccProjectCode().equals(nccCode)
-                        && (item.getNccAssistantCode().contains(nccProjectName) && item.getNccAssistantCode().contains(customerName))
-//                        && ((v != null && v.equals(item.getV())) || (w != null && w.equals(item.getW())))
+                        && ((nccProjectName == null || item.getNccAssistantCode().contains(nccProjectName))
+                        && (customerName == null || item.getNccAssistantCode().contains(customerName)))
         ).collect(Collectors.toList());
     }
 
