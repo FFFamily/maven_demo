@@ -216,9 +216,9 @@ public class ExcelDataUtil {
         return str == null ? "" : str;
     }
 
-    public static List<OtherInfo3> getOldExcel(String path,String sheet){
+    public static List<OtherInfo3> getOldExcel(){
         List<OtherInfo3> data = new ArrayList<>();
-        EasyExcel.read(path, OldExcelTemplate.class, new PageReadListener<OldExcelTemplate>(dataList -> {
+        EasyExcel.read("", OldExcelTemplate.class, new PageReadListener<OldExcelTemplate>(dataList -> {
             for (OldExcelTemplate oldExcelTemplate : dataList) {
                 OtherInfo3 otherInfo3 = new OtherInfo3();
                 String year = oldExcelTemplate.getA();
@@ -251,7 +251,7 @@ public class ExcelDataUtil {
                 otherInfo3.setNccAssistantCode(oldExcelTemplate.getG());
                 data.add(otherInfo3);
             }
-        }));
+        })).sheet().doRead();
         return data;
     }
 
