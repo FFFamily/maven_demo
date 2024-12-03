@@ -245,10 +245,8 @@ public class FindLevel {
         // 供应商名称
         MappingCustomerExcel mappingCustomerExcel = mappingCustomerExcelHashMap.getOrDefault(customerCode,new MappingCustomerExcel());
         String customerName = mappingCustomerExcel.getC();
-        parentItem.setNccAssistantCode(appendErrorMsg(nccProjectName,customerName));
         // NCC 科目段
         String nccCode = nccCodeList.isEmpty() ? null : nccCodeList.get(0).getD();
-        parentItem.setNccProjectCode(nccCode);
         // 去老系统找对应的值
         List<OtherInfo3> nccBalanceList = OldFindLevel.findList(oldCachedDataList, nccCode, nccProjectName, customerName,parentItem.getV(),parentItem.getW());
         // ncc 余额
@@ -257,6 +255,8 @@ public class FindLevel {
         BigDecimal fmsSum = getBigDecimalValue(parentItem.getV()).subtract(getBigDecimalValue(parentItem.getW()));
         if (nccSum.compareTo(fmsSum) == 0){
             // 余额相等证明找到了
+            parentItem.setNccAssistantCode(appendErrorMsg(nccProjectName,customerName));
+            parentItem.setNccProjectCode(nccCode);
             // 校验余额是否一致
             for (OtherInfo3 otherInfo3 : nccBalanceList) {
                 Set<OtherInfo3> oldChild = find(oldCachedDataList, null, otherInfo3, originCode, level, isOpenFindUp, findBySql);
@@ -269,8 +269,12 @@ public class FindLevel {
         return number == null ? BigDecimal.ZERO : number;
     }
 
-    public String appendErrorMsg(String msg,String appendMsg){
-        return msg == null ? appendMsg : msg + "、" + appendMsg;
+    public String appendErrorMsg(String msg,String... appendMsg){
+        if (msg == null){
+            return String.join("、",appendMsg);
+        }else {
+            return msg + "、" + String.join("、",appendMsg);
+        }
     }
     public void pushChild(Set<OtherInfo3> childSet,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){
         List<OtherInfo3> childList = new ArrayList<>(childSet);
