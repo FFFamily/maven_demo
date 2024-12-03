@@ -101,7 +101,7 @@ public class FindLevel {
             OtherInfo3 otherInfo3 = finalResult.get(i);
 //            int level = 1;
             otherInfo3.setLevel(1);
-            otherInfo3.setNo(String.valueOf(1));
+            otherInfo3.setNo(String.valueOf(i));
             // 遍历一级
             deque.push(otherInfo3);
             // 准备进行迭代遍历
@@ -113,7 +113,6 @@ public class FindLevel {
                     assert parentItem != null;
                     int level = parentItem.getLevel();
                     String no = parentItem.getNo() == null ? String.valueOf(i+1) : parentItem.getNo();
-//                    parentItem.setLevel(level);
                     if (level == 1) {
                         judgeJoin(result,parentItem,no,level);
                         String form = parentItem.getS();
@@ -166,25 +165,26 @@ public class FindLevel {
         Set<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originCode, level+1, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
             // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
-//            OtherInfo3 child = childList.get(0);
             Iterator<OtherInfo3> iterator = childList.iterator();
             OtherInfo3 child = iterator.next();
             if (child.getR().equals(parentItem.getR()) && (child.getV() != null ? child.getV().equals(parentItem.getW()) : child.getW().equals(parentItem.getV()))) {
                 // 如果凭证一样 && 借贷相抵
-//                return new ArrayList<>();
                 return new HashSet<>();
             }
+        }else if (childList.isEmpty()){
+            // 如果没办法找到子类，那么就去老系统找
+            // 朗基逻辑
+            // 拿到账户组合进行拆分
+            String[] z = parentItem.getZ().split("\\.");
+
+
+
         }
         return childList;
-//        if (!childList.isEmpty()){
-//            level+=1;
-//        }
-//        pushChild(childList,parentItem,deque);
-//        return level;
     }
 
     public void pushChild(Set<OtherInfo3> childSet,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){
-        List<OtherInfo3> childList = childSet.stream().collect(Collectors.toList());
+        List<OtherInfo3> childList = new ArrayList<>(childSet);
         if (!deque.isEmpty()){
             // 如果有值，证明可能是上一级
             for (int i1 = childList.size()-1; i1 >= 0; i1--) {

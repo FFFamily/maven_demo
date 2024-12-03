@@ -17,8 +17,6 @@ public class OldExcelUtil {
 
     /**
      *
-     * @param oldExcelTemplate
-     * @return
      */
     public OtherInfo3 covert(OldExcelTemplate oldExcelTemplate){
         OtherInfo3 otherInfo3 = new OtherInfo3();
