@@ -216,6 +216,10 @@ public class ExcelDataUtil {
         return str == null ? "" : str;
     }
 
+    public static void main(String[] args) {
+        getOldExcel();
+    }
+
     public static List<OtherInfo3> getOldExcel(){
         List<OtherInfo3> data = new ArrayList<>();
         EasyExcel.read("src/main/java/org/example/excel/朗逸物业NCC序时簿.xlsx", OldExcelTemplate.class, new PageReadListener<OldExcelTemplate>(dataList -> {
@@ -251,7 +255,7 @@ public class ExcelDataUtil {
                 otherInfo3.setNccAssistantCode(oldExcelTemplate.getG());
                 data.add(otherInfo3);
             }
-        })).sheet("朗逸物业NCC序时簿").headRowNumber(1).doRead();
+        })).sheet("朗逸物业NCC序时簿").doRead();
         return data;
     }
 
