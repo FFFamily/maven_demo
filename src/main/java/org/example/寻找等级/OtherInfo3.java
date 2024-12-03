@@ -19,6 +19,8 @@ public class OtherInfo3 {
     private Integer level;
     @ExcelProperty("异常")
     private String errorMsg;
+    @ExcelProperty("公司名称")
+    private String companyName;
 //    @ExcelProperty("区域")
 //    private String a;
 //    @ExcelProperty("科目编码")

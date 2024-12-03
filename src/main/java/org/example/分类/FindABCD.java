@@ -7,6 +7,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.enitty.Assistant;
 import org.example.enitty.SourceFileData;
+import org.example.utils.CompanyTypeConstant;
 import org.example.utils.SqlUtil;
 import org.example.寻找等级.FindLevel;
 import org.example.寻找等级.OtherInfo3;
@@ -37,10 +38,10 @@ public class FindABCD {
         List<AssistantResult> excelExcelData = new ArrayList<>();
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
-        List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping)
-                .stream()
-                .filter(item -> "NPXS0.0.1123160101.0.999999.0.0.0.30013389.0".equals(item.getFieldCode()) && Objects.equals(null,item.getTransactionObjectId()))
-                .collect(Collectors.toList());
+        List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping);
+//                .stream()
+//                .filter(item -> "NPXS0.0.1123160101.0.999999.0.0.0.30013389.0".equals(item.getFieldCode()) && Objects.equals(null,item.getTransactionObjectId()))
+//                .collect(Collectors.toList());
         List<Assistant> cachedDataList = ExcelDataUtil.covertAssistant(sourceFileDataList,dataList, mapping);
         for (int i = 0; i < dataList.size(); i++) {
             Assistant assistant = cachedDataList.get(i);
@@ -128,12 +129,32 @@ public class FindABCD {
         List<OtherInfo3> low = new ArrayList<>();
         result.forEach(item -> {
             Date time = item.getN();
-            Date date = DateUtil.parse("2022-04-30", "yyyy-MM-dd");
-            if (DateUtil.date(time).toInstant().compareTo(date.toInstant()) <= 0) {
+            String companyName = item.getCompanyName();
+            String type = CompanyTypeConstant.mapping.get(companyName);
+            Date date;
+            if (type.equals("禹洲物业")){
                 // 时间 在 2022年4月30日之前
-                up.add(item);
-            } else {
-                low.add(item);
+                date = DateUtil.parse("2023-05-01", "yyyy-MM-dd");
+                if (DateUtil.date(time).toInstant().compareTo(date.toInstant()) <= 0) {
+                    up.add(item);
+                } else {
+                    low.add(item);
+                }
+            }else if (type.equals("朗基物业")){
+                // 日记账说明
+                String journalExplanation = item.getJournalExplanation();
+                if (journalExplanation.contains("期初数据导入") || journalExplanation.contains("发生额数据导入")){
+                    up.add(item);
+                }else {
+                    low.add(item);
+                }
+            }else if (type.equals("中南物业")){
+                date = DateUtil.parse("2023-07-01", "yyyy-MM-dd");
+                if (DateUtil.date(time).toInstant().compareTo(date.toInstant()) <= 0) {
+                    up.add(item);
+                } else {
+                    low.add(item);
+                }
             }
         });
         // 如果全部都在期初，那么就是归属D类
