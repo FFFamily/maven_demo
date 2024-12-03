@@ -212,34 +212,38 @@ public class FindLevel {
         // 子目段
         String childCode = z[3];
         // 项目段
-        String projectCode = z[9];
+        String projectCode = z[8];
         // 交易对象编码
         String transactionCode = parentItem.getTransactionCode();
-        String regex = "(?<=:)[^:]+(?=:)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(transactionCode);
         String customerCode;
-        if (matcher.find()) {
-            // 找到客商编码
-            customerCode = matcher.group();
+        if (transactionCode != null){
+            String regex = "(?<=:)[^:]+(?=:)";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(transactionCode);
+            if (matcher.find()) {
+                // 找到客商编码
+                customerCode = matcher.group();
+            }else {
+                customerCode = null;
+            }
         }else {
             customerCode = null;
         }
         // 先去老系统重找对应的数据
         // 新系统的数据可能由老系统的几笔构成
         // 通过科目段+子目段找到 NCC 的 科目段
-        List<MappingNccToFmsExcel> nccCodeList = mappingNccToFmsExcels.get(code + "." + childCode);
+        List<MappingNccToFmsExcel> nccCodeList = mappingNccToFmsExcels.getOrDefault(code + "." + childCode,new ArrayList<>());
         if (nccCodeList.size() > 1){
             parentItem.setErrorMsg(parentItem.getErrorMsg() + "、旧系统科目段无法映射");
         }
-        MappingProjectExcel mappingProjectExcel = mappingProjectExcels.get(projectCode);
+        MappingProjectExcel mappingProjectExcel = mappingProjectExcels.getOrDefault(projectCode,new MappingProjectExcel());
         // 拿到NCC项目段
         String nccProjectName = mappingProjectExcel.getA();
-        MappingCustomerExcel mappingCustomerExcel = mappingCustomerExcelHashMap.get(customerCode);
+        MappingCustomerExcel mappingCustomerExcel = mappingCustomerExcelHashMap.getOrDefault(customerCode,new MappingCustomerExcel());
         // 供应商名称
         String customerName = mappingCustomerExcel.getC();
         // NCC 科目段
-        String nccCode = nccCodeList.get(0).getD();
+        String nccCode = nccCodeList.isEmpty() ? null : nccCodeList.get(0).getD();
         List<OtherInfo3> nccBalanceList = OldFindLevel.findList(oldCachedDataList, nccCode, nccProjectName, customerName,parentItem.getV(),parentItem.getW());
         // ncc 余额
         BigDecimal nccSum = nccBalanceList.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(getBigDecimalValue(curr.getV())).subtract(getBigDecimalValue(curr.getW())), (l, r) -> l);

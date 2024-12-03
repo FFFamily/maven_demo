@@ -280,6 +280,9 @@ public class ExcelDataUtil {
                     EasyExcel.readSheet(1).head(MappingCustomerExcel.class).registerReadListener(new PageReadListener<MappingCustomerExcel>(dataList -> {
                         for (MappingCustomerExcel mappingNccToFmsExcel : dataList) {
                             String key = mappingNccToFmsExcel.getB();
+                            if (key == null){
+                                continue;
+                            }
                             mappingCustomerExcelHashMap.put(key,mappingNccToFmsExcel);
                         }
                     })).build();
@@ -287,6 +290,9 @@ public class ExcelDataUtil {
                     EasyExcel.readSheet(2).head(MappingProjectExcel.class).registerReadListener(new PageReadListener<MappingProjectExcel>(dataList -> {
                         for (MappingProjectExcel mappingNccToFmsExcel : dataList) {
                             String key = mappingNccToFmsExcel.getC();
+                            if (key == null){
+                                continue;
+                            }
                             mappingProjectExcels.put(key,mappingNccToFmsExcel);
                         }
                     })).build();
