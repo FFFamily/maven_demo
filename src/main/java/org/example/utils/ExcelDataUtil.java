@@ -259,9 +259,9 @@ public class ExcelDataUtil {
         return data;
     }
 
-    public static void findMappingNccToFmsExcel(HashMap<String,List<MappingNccToFmsExcel>> mappingNccToFmsExcelHashMap,
+    public static void findMappingNccToFmsExcel(HashMap<String,Set<MappingNccToFmsExcel>> mappingNccToFmsExcelHashMap,
                                                                       HashMap<String, MappingCustomerExcel> mappingCustomerExcelHashMap,
-                                                                      HashMap<String, MappingProjectExcel> mappingProjectExcels
+                                                                      HashMap<String, Set<MappingProjectExcel>> mappingProjectExcels
                                                                       ){
         // 写法1
         try (ExcelReader excelReader = EasyExcel.read("src/main/java/org/example/utils/朗逸物业映射关系.xlsx").build()) {
@@ -271,7 +271,7 @@ public class ExcelDataUtil {
                     String j = mappingNccToFmsExcel.getJ();
                     String k = mappingNccToFmsExcel.getK();
                     String key = j+"."+k;
-                    List<MappingNccToFmsExcel> list = mappingNccToFmsExcelHashMap.getOrDefault(key, new ArrayList<>());
+                    Set<MappingNccToFmsExcel> list = mappingNccToFmsExcelHashMap.getOrDefault(key, new HashSet<>());
                     list.add(mappingNccToFmsExcel);
                     mappingNccToFmsExcelHashMap.put(key,list);
                 }
@@ -293,7 +293,9 @@ public class ExcelDataUtil {
                             if (key == null){
                                 continue;
                             }
-                            mappingProjectExcels.put(key,mappingNccToFmsExcel);
+                            Set<MappingProjectExcel> list = mappingProjectExcels.getOrDefault(key, new HashSet<>());
+                            list.add(mappingNccToFmsExcel);
+                            mappingProjectExcels.put(key,list);
                         }
                     })).build();
             // 这里注意 一定要把sheet1 sheet2 一起传进去，不然有个问题就是03版的excel 会读取多次，浪费性能

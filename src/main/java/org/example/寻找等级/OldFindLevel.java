@@ -20,9 +20,7 @@ public class OldFindLevel {
     public static List<OtherInfo3> findList(List<OtherInfo3> list,
                                             String nccCode,
                                             String nccProjectName,
-                                            String customerName,
-                                            BigDecimal v,
-                                            BigDecimal w){
+                                            String customerName){
         // 通过映射找到对应的旧系统的数据
         return  list.stream().filter(item ->
                 item.getNccProjectCode().equals(nccCode)

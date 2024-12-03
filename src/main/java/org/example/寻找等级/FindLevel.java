@@ -32,8 +32,8 @@ public class FindLevel {
      * 每隔5条存储数据库，实际使用中可以100条，然后清理list ，方便内存回收
      */
     private static final int BATCH_COUNT = 80000;
-    HashMap<String,List<MappingNccToFmsExcel>> mappingNccToFmsExcels;
-    HashMap<String,MappingProjectExcel> mappingProjectExcels;
+    HashMap<String,Set<MappingNccToFmsExcel>> mappingNccToFmsExcels;
+    HashMap<String,Set<MappingProjectExcel>> mappingProjectExcels;
     HashMap<String, MappingCustomerExcel> mappingCustomerExcelHashMap;
 
     @PostConstruct
@@ -114,7 +114,7 @@ public class FindLevel {
         if (isFindAll){
             finalResult = startCollect;
         }else {
-            finalResult = FindFirstLevel(startCollect,z,originCode);
+            finalResult = FindFirstLevel(startCollect,z);
         }
         Deque<OtherInfo3> deque = new LinkedList<>();
         List<OtherInfo3> result = new ArrayList<>();
@@ -161,11 +161,11 @@ public class FindLevel {
         }
     }
 
-    public static List<OtherInfo3> FindFirstLevel(List<OtherInfo3> startCollect, String z, String originCode){
+    public static List<OtherInfo3> FindFirstLevel(List<OtherInfo3> startCollect, String z){
         // 解析金额
         BigDecimal balance = covertZToBalance(z);
         // 消除同一凭证能够借贷相抵的数据
-        List<OtherInfo3> sortedStartCollect = disSameX(startCollect, originCode);
+        List<OtherInfo3> sortedStartCollect = disSameX(startCollect);
         // 先找一下能够直接借贷相抵的数据
         FindFirstListResult firstListResult = findFirstList(z, balance, sortedStartCollect);
         List<OtherInfo3> otherInfo3s =firstListResult.getOtherInfo3s();
@@ -184,7 +184,7 @@ public class FindLevel {
 
     public  Set<OtherInfo3> find(List<OtherInfo3> oldCachedDataList,List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
         List<OtherInfo3> list = cachedDataList == null ? oldCachedDataList : cachedDataList;
-        Set<OtherInfo3> childList = doUpFilter(cachedDataList, parentItem, originCode, level+1, isOpenFindUp,findBySql);
+        Set<OtherInfo3> childList = doUpFilter(list, parentItem, originCode, level+1, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
             // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
             Iterator<OtherInfo3> iterator = childList.iterator();
@@ -215,7 +215,6 @@ public class FindLevel {
         String projectCode = z[8];
         // 交易对象编码
         String transactionCode = parentItem.getTransactionCode();
-
         String customerCode;
         if (transactionCode != null){
             String regex = "(?<=:)[^:]+(?=:)";
@@ -233,36 +232,48 @@ public class FindLevel {
         // 先去老系统重找对应的数据
         // 新系统的数据可能由老系统的几笔构成
         // 通过科目段+子目段找到 NCC 的 科目段
-        List<MappingNccToFmsExcel> nccCodeList = mappingNccToFmsExcels.getOrDefault(code + "." + childCode,new ArrayList<>());
-        if (nccCodeList.size() > 1){
-            parentItem.setErrorMsg(appendErrorMsg(parentItem.getErrorMsg(),"旧系统存在多科目映射"));
-            return;
-        }
+        Set<MappingNccToFmsExcel> nccCodeList = mappingNccToFmsExcels.getOrDefault(code + "." + childCode,new HashSet<>());
         parentItem.setNccProjectCode(nccCodeList.stream().map(MappingNccToFmsExcel::getD).collect(Collectors.joining("、")));
         // 拿到NCC项目段
-        MappingProjectExcel mappingProjectExcel = mappingProjectExcels.getOrDefault(projectCode,new MappingProjectExcel());
-        String nccProjectName = mappingProjectExcel.getA();
+        Set<MappingProjectExcel> mappingProjectExcel = mappingProjectExcels.getOrDefault(projectCode,new HashSet<>());
         // 供应商名称
         MappingCustomerExcel mappingCustomerExcel = mappingCustomerExcelHashMap.getOrDefault(customerCode,new MappingCustomerExcel());
         String customerName = mappingCustomerExcel.getC();
-        // NCC 科目段
-        String nccCode = nccCodeList.isEmpty() ? null : nccCodeList.get(0).getD();
-        // 去老系统找对应的值
-        List<OtherInfo3> nccBalanceList = OldFindLevel.findList(oldCachedDataList, nccCode, nccProjectName, customerName,parentItem.getV(),parentItem.getW());
+        List<OtherInfo3> collectNccBalanceList = new ArrayList<>();
+        // 遍历科目段
+        for (MappingNccToFmsExcel mappingNccToFmsExcel : nccCodeList) {
+            // 遍历 项目段
+            for (MappingProjectExcel projectExcel : mappingProjectExcel) {
+                // NCC 科目段
+                String nccCode = mappingNccToFmsExcel.getD();
+                // NCC 项目段
+                String nccProjectName = projectExcel.getA();
+                // 拼接辅助核算
+                parentItem.setNccAssistantCode(appendErrorMsg(parentItem.getNccProjectCode(),nccProjectName));
+                // 去老系统找对应的值
+                List<OtherInfo3> nccBalanceList = OldFindLevel.findList(oldCachedDataList, nccCode, nccProjectName, customerName);
+                collectNccBalanceList.addAll(nccBalanceList);
+            }
+        }
         // ncc 余额
-        BigDecimal nccSum = nccBalanceList.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(getBigDecimalValue(curr.getV())).subtract(getBigDecimalValue(curr.getW())), (l, r) -> l);
+        BigDecimal nccSum = collectNccBalanceList.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(getBigDecimalValue(curr.getV())).subtract(getBigDecimalValue(curr.getW())), (l, r) -> l);
         // FMS 余额
         BigDecimal fmsSum = getBigDecimalValue(parentItem.getV()).subtract(getBigDecimalValue(parentItem.getW()));
+        // 借贷相抵
         if (nccSum.compareTo(fmsSum) == 0){
+            // 找一级的余额组成
+            List<OtherInfo3> otherInfo3s = FindFirstLevel(collectNccBalanceList, getZ(nccSum));
             // 余额相等证明找到了
-            parentItem.setNccAssistantCode(appendErrorMsg(nccProjectName,customerName));
-            parentItem.setNccProjectCode(nccCode);
             // 校验余额是否一致
-            for (OtherInfo3 otherInfo3 : nccBalanceList) {
+            for (OtherInfo3 otherInfo3 : otherInfo3s) {
                 Set<OtherInfo3> oldChild = find(oldCachedDataList, null, otherInfo3, originCode, level, isOpenFindUp, findBySql);
                 childList.addAll(oldChild);
             }
         }
+    }
+
+    public static String getZ(BigDecimal money){
+        return money == null ? "" : money.compareTo(BigDecimal.ZERO) < 0 ? "("+ money +")" : money.toString();
     }
 
     public BigDecimal getBigDecimalValue(BigDecimal number){
@@ -354,7 +365,7 @@ public class FindLevel {
         return result;
     }
 
-    public static List<OtherInfo3> disSameX(List<OtherInfo3> list, String originCode) {
+    public static List<OtherInfo3> disSameX(List<OtherInfo3> list) {
         return list.stream()
                 .collect(Collectors.groupingBy(OtherInfo3::getR))
                 .entrySet()
@@ -437,15 +448,6 @@ public class FindLevel {
             // 往下找下一个之前先添加自己
             for (OtherInfo3 otherInfo3 : collect) {
                 List<OtherInfo3> collect1;
-//                if (findBySql){
-//                    String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE  z.\"账户组合\" = '"+item.getZ()+"'";
-//                    if (item.getTransactionId() != null){
-//                        String appendSql = "AND z.\"交易对象\" = '"+item.getTransactionId()+"'";
-//                        collect1 = sqlUtil.find(findSql+appendSql).stream().peek(this::organizeDataItem).collect(Collectors.toList());
-//                    }else {
-//                        collect1 = sqlUtil.find(findSql);
-//                    }
-//                }else {
                 // 展开同一凭证号能借贷相抵的项目名称
                 collect1 = cachedDataList.stream()
 //                            .filter(i -> i.getZ().equals(otherInfo3.getZ()))
@@ -461,7 +463,7 @@ public class FindLevel {
 //                }
 
                 // 先找当前数据借贷抵消的数据
-                List<OtherInfo3> findOne = disSameX(collect1, originCode)
+                List<OtherInfo3> findOne = disSameX(collect1)
                         .stream()
                         .filter(i ->
                                         (otherInfo3.getV() != null && otherInfo3.getV().equals(i.getW())) || (otherInfo3.getW() != null && otherInfo3.getW().equals(i.getV()))
@@ -480,14 +482,12 @@ public class FindLevel {
                     if (collect1Sum.compareTo(BigDecimal.ZERO) == 0) {
                         otherInfo3Sup = FindFirstLevel(
                                 collect1.subList(0, indexOf),
-                                otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString(),
-                                originCode
+                                otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString()
                         );
                         if (otherInfo3Sup.isEmpty() && indexOf != (collect1.size() - 1)) {
                             otherInfo3Slow = FindFirstLevel(
                                     collect1.subList(indexOf + 1, collect1.size()),
-                                    otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString(),
-                                    originCode
+                                    otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString()
                             );
                         }
                     } else {
@@ -496,8 +496,7 @@ public class FindLevel {
                 } else {
                     otherInfo3Sup = FindFirstLevel(
                             findOne.stream().skip((long) findOne.size() - 1).collect(Collectors.toList()),
-                            otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString(),
-                            originCode
+                            otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString()
                     );
                 }
                 otherInfo3s.addAll(otherInfo3Sup.isEmpty() ? otherInfo3Slow : otherInfo3Sup);
