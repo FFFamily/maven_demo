@@ -128,10 +128,7 @@ public class FindLevel {
         List<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
         // 余额相等证明找到了
         // 校验余额是否一致
-        for (OtherInfo3 otherInfo3 : otherInfo3s) {
-            Set<OtherInfo3> oldChild = find(oldCachedDataList, null, otherInfo3, originCode, level, isOpenFindUp, findBySql);
-            childList.addAll(oldChild);
-        }
+        childList.addAll(otherInfo3s);
     }
 
 
