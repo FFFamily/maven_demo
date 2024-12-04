@@ -53,7 +53,10 @@ public class TestDemo {
             String findCompanySql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+companyCode+"'";
             List<OtherInfo3> cachedDataList = sqlUtil.find(findCompanySql);
             System.out.println("整个公司包含数据量："+cachedDataList.size());
-            cachedDataList.forEach(LevelUtil::organizeDataItem);
+            cachedDataList.forEach(item -> {
+                LevelUtil.organizeDataItem(item);
+                item.setSystemForm("新系统");
+            });
             for (int i = 0; i < realAssistantList.size(); i++) {
                 Assistant assistant = realAssistantList.get(i);
                 String z = assistant.getZ();

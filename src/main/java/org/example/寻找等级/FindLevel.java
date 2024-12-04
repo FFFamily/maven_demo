@@ -126,6 +126,7 @@ public class FindLevel {
                               Boolean findBySql){
         // 找一级的余额组成
         List<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
+        otherInfo3s.forEach(item -> item.setSystemForm("老系统"));
         // 余额相等证明找到了
         // 校验余额是否一致
         childList.addAll(otherInfo3s);
