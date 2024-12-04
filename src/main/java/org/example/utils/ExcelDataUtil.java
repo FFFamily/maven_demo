@@ -243,11 +243,13 @@ public class ExcelDataUtil {
                 // TODO 余额
                 String regex = "(?<=：)[^【】]+";
                 Pattern pattern = Pattern.compile(regex);
-                Matcher matcher = pattern.matcher(oldExcelTemplate.getI());
                 // 唯一标识
                 otherInfo3.setOnlySign(oldExcelTemplate.getG());
-                while (matcher.find()) {
-                    otherInfo3.setOnlySign(otherInfo3.getOnlySign()+"-"+matcher.group().trim());
+                if (oldExcelTemplate.getI() != null){
+                    Matcher matcher = pattern.matcher(oldExcelTemplate.getI());
+                    while (matcher.find()) {
+                        otherInfo3.setOnlySign(otherInfo3.getOnlySign()+"-"+matcher.group().trim());
+                    }
                 }
                 // ncc 科目
                 otherInfo3.setNccProjectCode(oldExcelTemplate.getG());
