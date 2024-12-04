@@ -61,10 +61,8 @@ public class TestDemo {
                 // 账户组合描述
                 String projectName = assistant.getR();
                 String onlySign = assistant.getOnlySign();
-
                 List<OtherInfo3> startCollect = cachedDataList.stream()
                         .filter(item -> item.getOnlySign().equals(onlySign))
-//                        .filter(item -> item.getZ().equals(projectName) && Objects.equals(item.getTransactionId(),assistant.getTransactionObjectId()))
                         .collect(Collectors.toList());
                 List<OtherInfo3> result = findLevel.doMain(
                         true,

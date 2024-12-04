@@ -95,7 +95,9 @@ public class ExcelController {
 
                 List<OtherInfo3> startCollect = cachedDataList.stream()
                         .filter(item -> item.getOnlySign().equals(onlySign))
-//                        .filter(item -> item.getZ().equals(projectName) && Objects.equals(item.getTransactionId(),assistant.getTransactionObjectId()))
+                        .peek(item -> {
+                            item.setTransactionCode(assistant.getTransactionObjectCode());
+                        })
                         .collect(Collectors.toList());
                 List<OtherInfo3> result = findLevel.doMain(
                         true,
