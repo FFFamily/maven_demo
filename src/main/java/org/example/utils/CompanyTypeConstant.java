@@ -11,8 +11,11 @@ import org.example.寻找等级.old_excel.OldExcelTemplate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-@Data
+
 public class CompanyTypeConstant {
+    public static final String LANG_JI = "朗基物业";
+    public static final String ZHONG_NAN = "中南物业";
+    public static final String YU_ZHOU = "禹洲物业";
    ;
 
     public static HashMap<String,String> mapping = new HashMap<>();

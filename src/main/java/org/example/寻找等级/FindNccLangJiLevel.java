@@ -29,7 +29,7 @@ public class FindNccLangJiLevel {
     }
 
 
-    public List<OtherInfo3> findNccLangJiList(List<OtherInfo3> oldCachedDataList,
+    public Set<OtherInfo3> findNccLangJiList(List<OtherInfo3> oldCachedDataList,
                               Set<OtherInfo3> childList,
                               OtherInfo3 parentItem,
                               String originCode,
@@ -82,7 +82,7 @@ public class FindNccLangJiLevel {
                 // 拼接辅助核算
                 parentItem.setNccAssistantCode(CommonUtil.appendErrorMsg(parentItem.getNccProjectCode(),nccProjectName));
                 // 去老系统找对应的值
-                List<OtherInfo3> nccBalanceList = OldFindLevel.findList(oldCachedDataList, nccCode, nccProjectName, customerName);
+                List<OtherInfo3> nccBalanceList = findList(oldCachedDataList, nccCode, nccProjectName, customerName);
                 collectNccBalanceList.addAll(nccBalanceList);
             }
         }
@@ -94,11 +94,25 @@ public class FindNccLangJiLevel {
         if (nccSum.compareTo(fmsSum) == 0){
             // 找一级的余额组成
             // 余额相等证明找到了
-            return LevelUtil.FindFirstLevel(collectNccBalanceList, CommonUtil.getZ(nccSum));
+            return new HashSet<>(LevelUtil.FindFirstLevel(collectNccBalanceList, CommonUtil.getZ(nccSum)));
         }else {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
     }
 
+    /**
+     * 根据新系统的找到老系统中一一对应的余额组成
+     */
+    public static List<OtherInfo3> findList(List<OtherInfo3> list,
+                                            String nccCode,
+                                            String nccProjectName,
+                                            String customerName){
+        // 通过映射找到对应的旧系统的数据
+        return  list.stream().filter(item ->
+                item.getNccProjectCode().equals(nccCode)
+                        && ((nccProjectName == null || (item.getNccAssistantCode() != null && item.getNccAssistantCode().contains(nccProjectName)))
+                        && (customerName == null || (item.getNccAssistantCode() != null && item.getNccAssistantCode().contains(customerName))))
+        ).collect(Collectors.toList());
+    }
 
 }

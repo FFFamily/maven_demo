@@ -7,10 +7,7 @@ import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import lombok.Data;
 import org.example.enitty.Assistant;
-import org.example.utils.CommonUtil;
-import org.example.utils.ExcelDataUtil;
-import org.example.utils.LevelUtil;
-import org.example.utils.SqlUtil;
+import org.example.utils.*;
 import org.example.寻找等级.old_excel.MappingCustomerExcel;
 import org.example.寻找等级.old_excel.MappingNccToFmsExcel;
 import org.example.寻找等级.old_excel.MappingProjectExcel;
@@ -106,18 +103,27 @@ public class FindLevel {
             }
         }else if (childList.isEmpty() && isOpenFindUp){
             // 如果没办法找到子类，那么就去老系统找
-            // 朗基逻辑
-            if (parentItem.getJournalExplanation() != null && (
-                    parentItem.getJournalExplanation().contains("期初数据导入")
-                            || parentItem.getJournalExplanation().contains("发生额数据导入")
-                    )){
-                findNccLangJi(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
+            // 通过公司名称判断是哪个系统
+            String companyName = parentItem.getCompanyName();
+            String companyType = CompanyTypeConstant.mapping.get(companyName);
+            if (companyType.equals(CompanyTypeConstant.LANG_JI)){
+                // 朗基逻辑
+                if (parentItem.getJournalExplanation() != null && (
+                        parentItem.getJournalExplanation().contains("期初数据导入")
+                                || parentItem.getJournalExplanation().contains("发生额数据导入")
+                )){
+                    return findNccLangJi(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
+                }
+            }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
+                // 禹州逻辑
+                    
             }
+
         }
         return childList;
     }
 
-    public void findNccLangJi(List<OtherInfo3> oldCachedDataList,
+    public Set<OtherInfo3> findNccLangJi(List<OtherInfo3> oldCachedDataList,
                               Set<OtherInfo3> childList,
                               OtherInfo3 parentItem,
                               String originCode,
@@ -125,11 +131,11 @@ public class FindLevel {
                               boolean isOpenFindUp,
                               Boolean findBySql){
         // 找一级的余额组成
-        List<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
+        Set<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
         otherInfo3s.forEach(item -> item.setSystemForm("老系统"));
         // 余额相等证明找到了
         // 校验余额是否一致
-        childList.addAll(otherInfo3s);
+        return otherInfo3s;
     }
 
 

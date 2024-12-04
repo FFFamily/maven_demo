@@ -14,20 +14,7 @@ import java.util.stream.Collectors;
  */
 public class OldFindLevel {
 
-    /**
-     * 根据新系统的找到老系统中一一对应的余额组成
-     */
-    public static List<OtherInfo3> findList(List<OtherInfo3> list,
-                                            String nccCode,
-                                            String nccProjectName,
-                                            String customerName){
-        // 通过映射找到对应的旧系统的数据
-        return  list.stream().filter(item ->
-                item.getNccProjectCode().equals(nccCode)
-                        && ((nccProjectName == null || item.getNccAssistantCode().contains(nccProjectName))
-                        && (customerName == null || item.getNccAssistantCode().contains(customerName)))
-        ).collect(Collectors.toList());
-    }
+
 
 
 
