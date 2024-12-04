@@ -33,6 +33,8 @@ public class TestDemo {
     private SqlUtil sqlUtil;
     @Test
     void findLevel() {
+        // TODO 读取旧系统的明细数据
+        List<OtherInfo3> oldCachedDataList = ExcelDataUtil.getOldExcel();
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
@@ -41,8 +43,7 @@ public class TestDemo {
                 .filter(item -> item.getTransactionObjectId().equals("SS:71683924"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
-        // TODO 读取旧系统的明细数据
-        List<OtherInfo3> oldCachedDataList = ExcelDataUtil.getOldExcel();
+
         for (String companyCode : companyMap.keySet()) {
             System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
             List<Assistant> realAssistantList = companyMap.get(companyCode);
