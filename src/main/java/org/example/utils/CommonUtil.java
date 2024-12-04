@@ -18,4 +18,7 @@ public class CommonUtil {
     public static String getZ(BigDecimal money){
         return money == null ? "" : money.compareTo(BigDecimal.ZERO) < 0 ? "("+ money +")" : money.toString();
     }
+    public static String getX(BigDecimal v,BigDecimal w){
+        return v != null ? "借" : w != null ? "贷" : null;
+    }
 }

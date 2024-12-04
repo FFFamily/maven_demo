@@ -240,6 +240,7 @@ public class ExcelDataUtil {
                 otherInfo3.setV(oldExcelTemplate.getL());
                 // 贷
                 otherInfo3.setW(oldExcelTemplate.getN());
+                otherInfo3.setX(CommonUtil.getX(otherInfo3.getV(),otherInfo3.getW()));
                 // TODO 余额
                 String regex = "(?<=：)[^【】]+";
                 Pattern pattern = Pattern.compile(regex);
