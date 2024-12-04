@@ -63,6 +63,9 @@ public class TestDemo {
                 String onlySign = assistant.getOnlySign();
                 List<OtherInfo3> startCollect = cachedDataList.stream()
                         .filter(item -> item.getOnlySign().equals(onlySign))
+                        .peek(item -> {
+                            item.setTransactionCode(assistant.getTransactionObjectCode());
+                        })
                         .collect(Collectors.toList());
                 List<OtherInfo3> result = findLevel.doMain(
                         true,
