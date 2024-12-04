@@ -234,7 +234,7 @@ public class ExcelDataUtil {
                 // 总账日期
                 otherInfo3.setN(DateUtil.parse(dateStr));
                 // 凭证号
-                otherInfo3.setQ(oldExcelTemplate.getE());
+                otherInfo3.setQ(oldExcelTemplate.getD());
                 // 拼接凭证号
                 otherInfo3.setR(year+"-"+month+otherInfo3.getQ());
                 // TODO 来源
@@ -310,7 +310,6 @@ public class ExcelDataUtil {
             // 这里注意 一定要把sheet1 sheet2 一起传进去，不然有个问题就是03版的excel 会读取多次，浪费性能
             excelReader.read(readSheet1, readSheet2,readSheet3);
         }
-
     }
 
 }

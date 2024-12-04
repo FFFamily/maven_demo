@@ -17,7 +17,7 @@ public class OldExcelTemplate {
     // 日
     private String c;
     // 凭证号
-    private String d;
+    private Integer d;
     // 分录号
     private Integer e;
     // 科目编码
