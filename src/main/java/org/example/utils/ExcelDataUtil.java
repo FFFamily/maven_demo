@@ -246,7 +246,7 @@ public class ExcelDataUtil {
                 Pattern pattern = Pattern.compile(regex);
                 // 唯一标识
                 otherInfo3.setOnlySign(oldExcelTemplate.getG());
-                if (oldExcelTemplate.getI() != null){
+                if (oldExcelTemplate.getI() != null) {
                     Matcher matcher = pattern.matcher(oldExcelTemplate.getI());
                     while (matcher.find()) {
                         otherInfo3.setOnlySign(otherInfo3.getOnlySign()+"-"+matcher.group().trim());
