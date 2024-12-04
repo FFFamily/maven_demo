@@ -275,7 +275,9 @@ public class ExcelDataUtil {
                     String k = mappingNccToFmsExcel.getK();
                     String key = j+"."+k;
                     Set<MappingNccToFmsExcel> list = mappingNccToFmsExcelHashMap.getOrDefault(key, new HashSet<>());
-                    list.add(mappingNccToFmsExcel);
+                    if (list.stream().noneMatch(item -> item.getD().equals(mappingNccToFmsExcel.getD()))){
+                        list.add(mappingNccToFmsExcel);
+                    }
                     mappingNccToFmsExcelHashMap.put(key,list);
                 }
             })).build();
@@ -297,7 +299,9 @@ public class ExcelDataUtil {
                                 continue;
                             }
                             Set<MappingProjectExcel> list = mappingProjectExcels.getOrDefault(key, new HashSet<>());
-                            list.add(mappingNccToFmsExcel);
+                            if (list.stream().noneMatch(item -> item.getA().equals(mappingNccToFmsExcel.getA()))){
+                                list.add(mappingNccToFmsExcel);
+                            }
                             mappingProjectExcels.put(key,list);
                         }
                     })).build();
