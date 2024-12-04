@@ -29,13 +29,7 @@ public class FindNccLangJiLevel {
     }
 
 
-    public Set<OtherInfo3> findNccLangJiList(List<OtherInfo3> oldCachedDataList,
-                              Set<OtherInfo3> childList,
-                              OtherInfo3 parentItem,
-                              String originCode,
-                              int level,
-                              boolean isOpenFindUp,
-                              Boolean findBySql){
+    public Set<OtherInfo3> findNccLangJiList(List<OtherInfo3> oldCachedDataList, OtherInfo3 parentItem){
         // 拿到账户组合进行拆分
         String[] z = parentItem.getZ().split("\\.");
         // 科目段

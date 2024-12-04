@@ -112,32 +112,29 @@ public class FindLevel {
                         parentItem.getJournalExplanation().contains("期初数据导入")
                                 || parentItem.getJournalExplanation().contains("发生额数据导入")
                 )){
-                    return findNccLangJi(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
+                    return findNccLangJi(oldCachedDataList,parentItem);
                 }
             }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
                 // 禹州逻辑
-                    
+
             }
 
         }
         return childList;
     }
 
-    public Set<OtherInfo3> findNccLangJi(List<OtherInfo3> oldCachedDataList,
-                              Set<OtherInfo3> childList,
-                              OtherInfo3 parentItem,
-                              String originCode,
-                              int level,
-                              boolean isOpenFindUp,
-                              Boolean findBySql){
+    public Set<OtherInfo3> findNccLangJi(List<OtherInfo3> oldCachedDataList, OtherInfo3 parentItem){
         // 找一级的余额组成
-        Set<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
+        Set<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(oldCachedDataList,parentItem);
         otherInfo3s.forEach(item -> item.setSystemForm("老系统"));
         // 余额相等证明找到了
         // 校验余额是否一致
         return otherInfo3s;
     }
 
+    public Set<OtherInfo3> findNccYuZhou(List<OtherInfo3> oldCachedDataList, OtherInfo3 parentItem){
+        return null;
+    }
 
     public void pushChild(Set<OtherInfo3> childSet,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){
         List<OtherInfo3> childList = new ArrayList<>(childSet);

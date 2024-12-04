@@ -222,13 +222,15 @@ public class ExcelDataUtil {
 
     public static List<OtherInfo3> getOldExcel(){
         List<OtherInfo3> data = new ArrayList<>();
-        EasyExcel.read("src/main/java/org/example/excel/朗逸物业NCC序时簿.xlsx", OldExcelTemplate.class, new PageReadListener<OldExcelTemplate>(dataList -> {
+        EasyExcel.read("src/main/java/org/example/excel/lang_ji/成都朗逸物业服务有限公司.xlsx", OldExcelTemplate.class, new PageReadListener<OldExcelTemplate>(dataList -> {
             for (OldExcelTemplate oldExcelTemplate : dataList) {
                 OtherInfo3 otherInfo3 = new OtherInfo3();
                 String year = oldExcelTemplate.getA();
                 String month = oldExcelTemplate.getB();
                 String day = oldExcelTemplate.getC();
                 String dateStr = year+"-"+month+"-"+day;
+                // 公司
+                otherInfo3.setCompanyName("成都朗逸物业服务有限公司");
                 // 总账日期
                 otherInfo3.setN(DateUtil.parse(dateStr));
                 // 凭证号
