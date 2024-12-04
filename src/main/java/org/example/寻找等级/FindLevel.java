@@ -107,8 +107,10 @@ public class FindLevel {
         }else if (childList.isEmpty() && isOpenFindUp){
             // 如果没办法找到子类，那么就去老系统找
             // 朗基逻辑
-            if (parentItem.getJournalExplanation().contains("期初数据导入")
-            || parentItem.getJournalExplanation().contains("发生额数据导入")){
+            if (parentItem.getJournalExplanation() != null && (
+                    parentItem.getJournalExplanation().contains("期初数据导入")
+                            || parentItem.getJournalExplanation().contains("发生额数据导入")
+                    )){
                 findNccLangJi(oldCachedDataList,childList,parentItem,originCode,level,isOpenFindUp,findBySql);
             }
         }
