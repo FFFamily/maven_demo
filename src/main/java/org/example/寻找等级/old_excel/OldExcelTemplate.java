@@ -22,10 +22,10 @@ public class OldExcelTemplate {
     private Integer e;
     // 科目编码
     private String f;
+    private String g;
     // 辅助项
     // 客商辅助核算
     // 项目名称辅助核算
-    private String g;
     private String h;
     private String i;
     private String j;

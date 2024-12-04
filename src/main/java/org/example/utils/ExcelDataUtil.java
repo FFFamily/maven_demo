@@ -243,16 +243,16 @@ public class ExcelDataUtil {
                 // TODO 余额
                 String regex = "(?<=：)[^【】]+";
                 Pattern pattern = Pattern.compile(regex);
-                Matcher matcher = pattern.matcher(oldExcelTemplate.getG());
+                Matcher matcher = pattern.matcher(oldExcelTemplate.getI());
                 // 唯一标识
-                otherInfo3.setOnlySign(oldExcelTemplate.getF());
+                otherInfo3.setOnlySign(oldExcelTemplate.getG());
                 while (matcher.find()) {
                     otherInfo3.setOnlySign(otherInfo3.getOnlySign()+"-"+matcher.group().trim());
                 }
                 // ncc 科目
-                otherInfo3.setNccProjectCode(oldExcelTemplate.getF());
+                otherInfo3.setNccProjectCode(oldExcelTemplate.getG());
                 // ncc 辅助核算
-                otherInfo3.setNccAssistantCode(oldExcelTemplate.getG());
+                otherInfo3.setNccAssistantCode(oldExcelTemplate.getI());
                 data.add(otherInfo3);
             }
         })).sheet("朗逸物业NCC序时簿").doRead();
