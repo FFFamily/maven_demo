@@ -12,6 +12,7 @@ import org.example.enitty.Assistant;
 import org.example.enitty.OracleData;
 import org.example.enitty.SourceFileData;
 import org.example.utils.ExcelDataUtil;
+import org.example.utils.LevelUtil;
 import org.example.utils.SqlUtil;
 import org.example.分类.AssistantResult;
 import org.example.分类.FindABCD;
@@ -82,7 +83,7 @@ public class ExcelController {
             // TODO 读取旧系统的明细数据
             List<OtherInfo3> oldCachedDataList = ExcelDataUtil.getOldExcel();
             System.out.println("整个公司包含数据量："+cachedDataList.size());
-            cachedDataList.forEach(item -> findLevel.organizeDataItem(item));
+            cachedDataList.forEach(LevelUtil::organizeDataItem);
             for (int i = 0; i < realAssistantList.size(); i++) {
                 Assistant assistant = realAssistantList.get(i);
                 String z = assistant.getZ();

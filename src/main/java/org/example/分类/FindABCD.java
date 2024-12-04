@@ -8,6 +8,7 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.enitty.Assistant;
 import org.example.enitty.SourceFileData;
 import org.example.utils.CompanyTypeConstant;
+import org.example.utils.LevelUtil;
 import org.example.utils.SqlUtil;
 import org.example.寻找等级.FindLevel;
 import org.example.寻找等级.OtherInfo3;
@@ -59,7 +60,7 @@ public class FindABCD {
                 sql +=  "and z.\"交易对象\" is null";
             }
             List<OtherInfo3> startCollect = sqlUtil.find(sql);
-            startCollect.forEach(item -> findLevel.organizeDataItem(item));
+            startCollect.forEach(LevelUtil::organizeDataItem);
             String form = startCollect.stream().map(OtherInfo3::getS).distinct().collect(Collectors.joining("、"));
             assistantResult.setForm(form);
             doFind(startCollect,assistant,projectName,assistantResult,true);

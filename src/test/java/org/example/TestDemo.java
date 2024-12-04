@@ -7,6 +7,7 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.enitty.Assistant;
 import org.example.enitty.SourceFileData;
 import org.example.utils.ExcelDataUtil;
+import org.example.utils.LevelUtil;
 import org.example.utils.SqlUtil;
 import org.example.分类.FindABCD;
 import org.example.寻找等级.FindLevel;
@@ -35,6 +36,7 @@ public class TestDemo {
     void findLevel() {
         // TODO 读取旧系统的明细数据
         List<OtherInfo3> oldCachedDataList = ExcelDataUtil.getOldExcel();
+        oldCachedDataList.forEach(LevelUtil::organizeDataItem);
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
@@ -43,7 +45,6 @@ public class TestDemo {
                 .filter(item -> item.getTransactionObjectId().equals("SS:71683924"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
-
         for (String companyCode : companyMap.keySet()) {
             System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
             List<Assistant> realAssistantList = companyMap.get(companyCode);
@@ -52,7 +53,7 @@ public class TestDemo {
             String findCompanySql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+companyCode+"'";
             List<OtherInfo3> cachedDataList = sqlUtil.find(findCompanySql);
             System.out.println("整个公司包含数据量："+cachedDataList.size());
-            cachedDataList.forEach(item -> findLevel.organizeDataItem(item));
+            cachedDataList.forEach(LevelUtil::organizeDataItem);
             for (int i = 0; i < realAssistantList.size(); i++) {
                 Assistant assistant = realAssistantList.get(i);
                 String z = assistant.getZ();
