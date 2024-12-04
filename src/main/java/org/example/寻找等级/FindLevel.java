@@ -193,7 +193,7 @@ public class FindLevel {
                 // 如果凭证一样 && 借贷相抵
                 return new HashSet<>();
             }
-        }else if (childList.isEmpty()){
+        }else if (childList.isEmpty() && isOpenFindUp){
             // 如果没办法找到子类，那么就去老系统找
             // 朗基逻辑
             if (parentItem.getJournalExplanation().contains("期初数据导入")

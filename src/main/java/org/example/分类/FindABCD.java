@@ -40,7 +40,7 @@ public class FindABCD {
         Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
         List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping);
 //                .stream()
-//                .filter(item -> "NPXS0.0.1123160101.0.999999.0.0.0.30013389.0".equals(item.getFieldCode()) && Objects.equals(null,item.getTransactionObjectId()))
+//                .filter(item -> "NPXS0.0.2241990101.34.0.0.0.0.30013387.0".equals(item.getFieldCode()) && Objects.equals("CS:12901000",item.getTransactionObjectId()))
 //                .collect(Collectors.toList());
         List<Assistant> cachedDataList = ExcelDataUtil.covertAssistant(sourceFileDataList,dataList, mapping);
         for (int i = 0; i < dataList.size(); i++) {
