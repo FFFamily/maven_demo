@@ -260,7 +260,7 @@ public class ExcelDataUtil {
                 otherInfo3.setNccAssistantCode(oldExcelTemplate.getI());
                 data.add(otherInfo3);
             }
-        })).sheet("朗逸物业NCC序时簿").doRead();
+        })).sheet("朗逸物业NCC序时簿").headRowNumber(2).doRead();
         return data;
     }
 

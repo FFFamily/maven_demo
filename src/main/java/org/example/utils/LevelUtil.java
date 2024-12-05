@@ -241,6 +241,7 @@ public class LevelUtil {
             }
             otherInfo3.setV(V);
             otherInfo3.setW(W);
+
         } catch (Exception e) {
             System.out.println("解析出现异常,当前解析对象为：" + otherInfo3);
             throw e;

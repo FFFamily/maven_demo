@@ -117,6 +117,9 @@ public class OtherInfo3 {
     @ColumnWidth(50)
     @ExcelProperty("NCC辅助核算段")
     private String nccAssistantCode;
+    @ColumnWidth(50)
+    @ExcelProperty("禹洲科目余额表匹配")
+    private String nccYZBalanceMatch;
 
     @ColumnWidth(50)
     @ExcelProperty("日记账说明")

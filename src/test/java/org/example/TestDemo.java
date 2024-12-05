@@ -6,6 +6,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.enitty.Assistant;
 import org.example.enitty.SourceFileData;
+import org.example.utils.CommonUtil;
 import org.example.utils.ExcelDataUtil;
 import org.example.utils.LevelUtil;
 import org.example.utils.SqlUtil;
@@ -24,10 +25,6 @@ import java.util.stream.Collectors;
 
 @SpringBootTest
 public class TestDemo {
-    @Resource
-    private JdbcTemplate jdbcTemplate;
-    @Resource
-    private FindABCD findABCD;
     @Resource
     private FindLevel findLevel;
     @Resource

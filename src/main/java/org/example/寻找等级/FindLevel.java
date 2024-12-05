@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 public class FindLevel {
     @Resource
     private FindNccLangJiLevel findNccLangJiLevel;
+    @Resource
+    private FindNccYuZhouLevel findNccYuZhouLevel;
 
     public  List<OtherInfo3> doMain(boolean isOpenFindUp,
                                     boolean isFindAll,
@@ -116,9 +118,13 @@ public class FindLevel {
                 }
             }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
                 // 禹州逻辑
+                return findNccYuZhouLevel.findNccYuZhouList(parentItem);
+            }else if (companyType.equals(CompanyTypeConstant.ZHONG_NAN)){
+                // 中南
 
+            }else {
+                throw new RuntimeException("不存在的公司类型");
             }
-
         }
         return childList;
     }
@@ -132,9 +138,6 @@ public class FindLevel {
         return otherInfo3s;
     }
 
-    public Set<OtherInfo3> findNccYuZhou(List<OtherInfo3> oldCachedDataList, OtherInfo3 parentItem){
-        return null;
-    }
 
     public void pushChild(Set<OtherInfo3> childSet,OtherInfo3 parentItem,Deque<OtherInfo3> deque,Integer parentLevel){
         List<OtherInfo3> childList = new ArrayList<>(childSet);
