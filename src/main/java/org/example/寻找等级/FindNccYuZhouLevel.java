@@ -4,9 +4,8 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.read.metadata.ReadSheet;
-import org.example.utils.CommonUtil;
+import org.example.utils.OldExcelDataUtil;
 import org.example.寻找等级.old_excel.yu_zhou.CompanyMappingExcel;
-import org.example.寻找等级.old_excel.yu_zhou.OldYZExcelTemplate;
 import org.example.寻找等级.old_excel.yu_zhou.YZProjectCodeMappingExcel;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +24,9 @@ public class FindNccYuZhouLevel {
     @PostConstruct
     public void init(){
         // 读取excel
-        getYZOldExcel();
+        oldYZData = OldExcelDataUtil.getOldExcel("src/main/java/org/example/excel/禹洲/2021年科目辅助余额表.xlsx", "新的工作表-公司原表");
         companyMappingExcelHashMap = new HashMap<>();
+        yzProjectCodeMappingExcelHashMap = new HashMap<>();
         // 写法1
         try (ExcelReader excelReader = EasyExcel.read("src/main/java/org/example/utils/禹洲映射关系.xlsx").build()) {
             ReadSheet readSheet1 = EasyExcel.readSheet(0).head(CompanyMappingExcel.class).registerReadListener(new PageReadListener<CompanyMappingExcel>(dataList -> {
@@ -81,36 +81,13 @@ public class FindNccYuZhouLevel {
         for (YZProjectCodeMappingExcel code : codeSet) {
             for (CompanyMappingExcel company : companyset) {
                 String key = code.getB()+company.getB()+ balance;
-                List<OtherInfo3> collect = oldYZData.stream().filter(item -> Objects.equals(item.getNccYZBalanceMatch(), key)).collect(Collectors.toList());
-                // TODO 万一匹配到多个了怎么办
-                result.addAll(collect);
+//                List<OtherInfo3> collect = oldYZData.stream().filter(item -> Objects.equals(item.getNccYZBalanceMatch(), key)).collect(Collectors.toList());
+//                // TODO 万一匹配到多个了怎么办
+//                result.addAll(collect);
+
             }
         }
         return result;
     }
 
-
-
-    public void getYZOldExcel(){
-        EasyExcel.read("src/main/java/org/example/excel/禹洲/2021年科目辅助余额表.xlsx", OldYZExcelTemplate.class, new PageReadListener<OldYZExcelTemplate>(dataList -> {
-            for (OldYZExcelTemplate oldExcelTemplate : dataList) {
-                OtherInfo3 otherInfo3 = new OtherInfo3();
-                String b = oldExcelTemplate.getB();
-                String[] split = b.split("\\\\");
-                String subjectName = split[2];
-                // 余额
-                BigDecimal money = oldExcelTemplate.getL();
-                // ncc 科目编码
-                String nccProjectCode = oldExcelTemplate.getA();
-                // 机构
-                Integer nccCompanyName = oldExcelTemplate.getD();
-                if (subjectName.startsWith("应付账款") || subjectName.startsWith("其他应付款") || subjectName.startsWith("合同负债")){
-                    money = BigDecimal.ZERO.subtract(money);
-                }
-                otherInfo3.setNccYZBalanceMatch(nccProjectCode+nccCompanyName+money);
-                oldYZData.add(otherInfo3);
-            }
-        })).sheet("新的工作表-公司原表").doRead();
-        System.out.println("读取禹洲旧系统数据完成");
-    }
 }
