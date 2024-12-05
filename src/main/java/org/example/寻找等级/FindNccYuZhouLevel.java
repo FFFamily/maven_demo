@@ -63,7 +63,7 @@ public class FindNccYuZhouLevel {
      * @param parentItem 新系统明细
      * @return
      */
-    public Set<OtherInfo3> findNccYuZhouList(OtherInfo3 parentItem){
+    public Set<OtherInfo3> findNccYuZhouList(List<OtherInfo3> oldYuZhouDataList,OtherInfo3 parentItem){
         String z = parentItem.getZ();
         String[] split = z.split("\\.");
         // 新系统 科目编码

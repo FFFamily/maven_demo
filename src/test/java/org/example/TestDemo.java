@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class TestDemo {
                     otherInfo3.setNo("1");
                     otherInfo3.setLevel(1);
                     otherInfo3.setS(assistant.getForm());
-                    otherInfo3.setBalanceSum(assistant.getZ());
+                    otherInfo3.setBalanceSum(new BigDecimal(assistant.getZ()));
                     otherInfo3.setZ(projectName);
                     otherInfo3.setZDesc(assistant.getRDesc());
                     otherInfo3.setTransactionId(assistant.getTransactionObjectId());

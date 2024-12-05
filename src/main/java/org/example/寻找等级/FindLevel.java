@@ -89,6 +89,15 @@ public class FindLevel {
             parentItem.setLevel(level);
             parentItem.setNo(no);
             result.add(parentItem);
+            // 计算余额
+            OtherInfo3 lastOne = result.get(result.size()-1);
+            BigDecimal lastBalance;
+            if (lastOne.getBalanceSum() == null){
+                lastBalance = BigDecimal.ZERO;
+            }else {
+                lastBalance = lastOne.getBalanceSum();
+            }
+            parentItem.setBalanceSum(lastBalance.add(CommonUtil.getBigDecimalValue(parentItem.getV()).subtract(CommonUtil.getBigDecimalValue(parentItem.getW()))));
         }
     }
 
@@ -124,7 +133,7 @@ public class FindLevel {
                 }
             }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
                 // 禹州逻辑
-                return findNccYuZhouLevel.findNccYuZhouList(parentItem);
+                return findNccYuZhouLevel.findNccYuZhouList(oldCachedDataList,parentItem);
             }else if (companyType.equals(CompanyTypeConstant.ZHONG_NAN)){
                 // 中南
 

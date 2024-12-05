@@ -75,7 +75,7 @@ public class OtherInfo3 {
     @ExcelProperty("方向")
     private String x;
     @ExcelProperty("余额")
-    private String balanceSum;
+    private BigDecimal balanceSum;
 //    @ExcelProperty("余额")
 //    private String y;
     @ColumnWidth(50)
