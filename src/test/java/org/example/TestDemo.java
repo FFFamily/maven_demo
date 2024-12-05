@@ -12,6 +12,7 @@ import org.example.utils.LevelUtil;
 import org.example.utils.SqlUtil;
 import org.example.分类.FindABCD;
 import org.example.寻找等级.FindLevel;
+import org.example.寻找等级.FindNccLangJiLevel;
 import org.example.寻找等级.OtherInfo3;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @SpringBootTest
@@ -29,11 +31,13 @@ public class TestDemo {
     @Resource
     private FindLevel findLevel;
     @Resource
+    private FindNccLangJiLevel findNccLangJiLevel;
+    @Resource
     private SqlUtil sqlUtil;
     @Test
     void findLevel() {
-        // TODO 读取旧系统的明细数据
-        List<OtherInfo3> oldCachedDataList = ExcelDataUtil.getOldExcel();
+        // 读取旧系统的序时账
+        List<OtherInfo3> oldCachedDataList = findNccLangJiLevel.getOldCachedDataList();
         oldCachedDataList.forEach(LevelUtil::organizeDataItem);
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
@@ -97,19 +101,21 @@ public class TestDemo {
                     int finalI = i;
                     result.forEach(item -> {
                         item.setA(String.valueOf(finalI));
-                        item.setZDesc(assistant.getRDesc());
-                        String transactionObjectCode = assistant.getTransactionObjectCode();
-                        String assistantTransactionObjectCodeCopy = assistant.getTransactionObjectCodeCopy();
-                        // 源-交易对象编码
-                        item.setTransactionCode(transactionObjectCode);
-                        // 处理-交易对象编码
-                        item.setTransactionCodeCopy(assistantTransactionObjectCodeCopy);
-                        item.setOriginZ(projectName);
-                        item.setOriginZCopy(projectName.replaceAll("\\.","-"));
-                        // 处理-账户组合
-                        String zCopy = item.getOriginZCopy().replaceAll("\\.","-");
-                        item.setZCopy(zCopy);
-                        item.setMergeValue(zCopy + (item.getTransactionCodeCopy() == null ? "" : item.getTransactionCodeCopy()));
+                        if (!Objects.equals(item.getSystemForm(),"老系统")){
+                            item.setZDesc(assistant.getRDesc());
+                            String transactionObjectCode = assistant.getTransactionObjectCode();
+                            String assistantTransactionObjectCodeCopy = assistant.getTransactionObjectCodeCopy();
+                            // 源-交易对象编码
+                            item.setTransactionCode(transactionObjectCode);
+                            // 处理-交易对象编码
+                            item.setTransactionCodeCopy(assistantTransactionObjectCodeCopy);
+                            item.setOriginZ(projectName);
+                            item.setOriginZCopy(projectName.replaceAll("\\.","-"));
+                            // 处理-账户组合
+                            String zCopy = item.getOriginZCopy().replaceAll("\\.","-");
+                            item.setZCopy(zCopy);
+                            item.setMergeValue(zCopy + (item.getTransactionCodeCopy() == null ? "" : item.getTransactionCodeCopy()));
+                        }
                     });
                     result1.addAll(result);
                 }

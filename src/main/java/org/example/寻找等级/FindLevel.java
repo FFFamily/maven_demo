@@ -127,13 +127,11 @@ public class FindLevel {
                                 || parentItem.getJournalExplanation().contains("发生额数据导入")
                 ))){
                     // 老系统1级
-                    return findNccLangJi(oldCachedDataList, parentItem);
-//                    // 找到老系统1级的所有
-//                    return new HashSet<>(doMain(true,true,findBySql,oldCachedDataList,null,new ArrayList<>(oldOneLevel),null,originCode));
+                    return findNccLangJi(parentItem);
                 }
             }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
                 // 禹州逻辑
-                return findNccYuZhouLevel.findNccYuZhouList(oldCachedDataList,parentItem);
+                return findNccYuZhouLevel.findNccYuZhouList(parentItem);
             }else if (companyType.equals(CompanyTypeConstant.ZHONG_NAN)){
                 // 中南
 
@@ -144,14 +142,14 @@ public class FindLevel {
         return childList;
     }
 
-    public Set<OtherInfo3> findNccLangJi(List<OtherInfo3> oldCachedDataList,OtherInfo3 parentItem){
+    public Set<OtherInfo3> findNccLangJi(OtherInfo3 parentItem){
         if (parentItem.getSystemForm().equals("老系统")){
             // 如果是老系统的，直接放行
             // 因为当老系统向上查找的过程中会存在找不到上级的情况，childList 为空，就会走到这个逻辑，但是这个逻辑是 新系统找老系统的方法
             return new HashSet<>();
         }
         // 找一级的余额组成
-        Set<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(oldCachedDataList,parentItem);
+        Set<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(parentItem);
         otherInfo3s.forEach(item -> item.setSystemForm("老系统"));
         // 余额相等证明找到了
         // 校验余额是否一致

@@ -63,7 +63,7 @@ public class FindNccYuZhouLevel {
      * @param parentItem 新系统明细
      * @return
      */
-    public Set<OtherInfo3> findNccYuZhouList(List<OtherInfo3> oldYuZhouDataList,OtherInfo3 parentItem){
+    public Set<OtherInfo3> findNccYuZhouList(OtherInfo3 parentItem){
         String z = parentItem.getZ();
         String[] split = z.split("\\.");
         // 新系统 科目编码
@@ -72,7 +72,7 @@ public class FindNccYuZhouLevel {
         String companyName = parentItem.getCompanyName();
         // 计算余额
         // TODO 余额的计算规则
-        BigDecimal balance = CommonUtil.getBigDecimalValue(parentItem.getV()).subtract(CommonUtil.getBigDecimalValue(parentItem.getW()));
+        BigDecimal balance = parentItem.getBalanceSum();
         // 匹配旧系统的机构
         Set<CompanyMappingExcel> companyset = companyMappingExcelHashMap.getOrDefault(companyName, new HashSet<>());
         // 匹配旧系统的科目
