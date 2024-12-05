@@ -93,7 +93,7 @@ public class FindLevel {
     }
 
     public  Set<OtherInfo3> find(List<OtherInfo3> oldCachedDataList,List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
-        List<OtherInfo3> list = parentItem.getSystemForm().equals("老系统") ? oldCachedDataList : cachedDataList;
+        List<OtherInfo3> list = "老系统".equals(parentItem.getSystemForm())  ? oldCachedDataList : cachedDataList;
         int thisLevel = level+1;
         Set<OtherInfo3> childList = doUpFilter(list, parentItem, originCode, thisLevel, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
