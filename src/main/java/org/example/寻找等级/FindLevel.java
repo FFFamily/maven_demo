@@ -93,7 +93,7 @@ public class FindLevel {
     }
 
     public  Set<OtherInfo3> find(List<OtherInfo3> oldCachedDataList,List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
-        List<OtherInfo3> list = cachedDataList == null ? oldCachedDataList : cachedDataList;
+        List<OtherInfo3> list = parentItem.getSystemForm().equals("老系统") ? oldCachedDataList : cachedDataList;
         int thisLevel = level+1;
         Set<OtherInfo3> childList = doUpFilter(list, parentItem, originCode, thisLevel, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
@@ -104,7 +104,7 @@ public class FindLevel {
                 // 如果凭证一样 && 借贷相抵
                 return new HashSet<>();
             }
-        }else if (childList.isEmpty() && isOpenFindUp){
+        }else if (childList.isEmpty() && isOpenFindUp ){
             // 如果没办法找到子类，那么就去老系统找
             // 通过公司名称判断是哪个系统
             String companyName = parentItem.getCompanyName();
@@ -136,6 +136,11 @@ public class FindLevel {
     }
 
     public Set<OtherInfo3> findNccLangJi(List<OtherInfo3> oldCachedDataList,OtherInfo3 parentItem){
+        if (parentItem.getSystemForm().equals("老系统")){
+            // 如果是老系统的，直接放行
+            // 因为当老系统向上查找的过程中会存在找不到上级的情况，childList 为空，就会走到这个逻辑，但是这个逻辑是 新系统找老系统的方法
+            return new HashSet<>();
+        }
         // 找一级的余额组成
         Set<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(oldCachedDataList,parentItem);
         otherInfo3s.forEach(item -> item.setSystemForm("老系统"));
