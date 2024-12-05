@@ -88,7 +88,6 @@ public class FindLevel {
         if (result.isEmpty() || !result.contains(parentItem)){
             parentItem.setLevel(level);
             parentItem.setNo(no);
-            result.add(parentItem);
             // 计算余额
             OtherInfo3 lastOne = result.get(result.size()-1);
             BigDecimal lastBalance;
@@ -98,6 +97,7 @@ public class FindLevel {
                 lastBalance = lastOne.getBalanceSum();
             }
             parentItem.setBalanceSum(lastBalance.add(CommonUtil.getBigDecimalValue(parentItem.getV()).subtract(CommonUtil.getBigDecimalValue(parentItem.getW()))));
+            result.add(parentItem);
         }
     }
 
