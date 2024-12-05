@@ -52,8 +52,10 @@ public class FindLevel {
         for (int i = 0; i < finalResult.size(); i++) {
             OtherInfo3 otherInfo3 = finalResult.get(i);
 //            int level = 1;
-            otherInfo3.setLevel(otherInfo3.getLevel() == null ? 1 : otherInfo3.getLevel());
-            otherInfo3.setNo(otherInfo3.getNo()==null ? String.valueOf(otherInfo3.getLevel()) : otherInfo3.getNo()+"-"+(i+1));
+//            otherInfo3.setLevel(otherInfo3.getLevel() == null ? i : otherInfo3.getLevel());
+//            otherInfo3.setNo(otherInfo3.getNo()==null ? String.valueOf(otherInfo3.getLevel()) : otherInfo3.getNo()+"-"+(i+1));
+            otherInfo3.setLevel(1);
+            otherInfo3.setNo("1");
             // 计算余额
             BigDecimal lastBalance;
             if (i > 0){
