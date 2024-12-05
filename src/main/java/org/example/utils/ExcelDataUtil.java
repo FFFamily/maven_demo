@@ -237,7 +237,8 @@ public class ExcelDataUtil {
                 otherInfo3.setQ(oldExcelTemplate.getD());
                 // 拼接凭证号
                 otherInfo3.setR(year+"-"+month+otherInfo3.getQ());
-                // TODO 来源
+                // 来源随便写一个，以便于分级查找的时候不被拦截
+                otherInfo3.setS("人工");
                 // 借
                 otherInfo3.setV(oldExcelTemplate.getL());
                 // 贷

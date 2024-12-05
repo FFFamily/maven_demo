@@ -94,7 +94,8 @@ public class FindLevel {
 
     public  Set<OtherInfo3> find(List<OtherInfo3> oldCachedDataList,List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
         List<OtherInfo3> list = cachedDataList == null ? oldCachedDataList : cachedDataList;
-        Set<OtherInfo3> childList = doUpFilter(list, parentItem, originCode, level+1, isOpenFindUp,findBySql);
+        int thisLevel = level+1;
+        Set<OtherInfo3> childList = doUpFilter(list, parentItem, originCode, thisLevel, isOpenFindUp,findBySql);
         if (childList.size() == 1) {
             // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
             Iterator<OtherInfo3> iterator = childList.iterator();
@@ -117,9 +118,9 @@ public class FindLevel {
                                 || parentItem.getJournalExplanation().contains("发生额数据导入")
                 ))){
                     // 老系统1级
-                    Set<OtherInfo3> oldOneLevel = findNccLangJi(oldCachedDataList, parentItem);
-                    // 找到老系统1级的所有
-                    return new HashSet<>(doMain(true,true,findBySql,oldCachedDataList,null,new ArrayList<>(oldOneLevel),null,originCode));
+                    return findNccLangJi(oldCachedDataList, parentItem);
+//                    // 找到老系统1级的所有
+//                    return new HashSet<>(doMain(true,true,findBySql,oldCachedDataList,null,new ArrayList<>(oldOneLevel),null,originCode));
                 }
             }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
                 // 禹州逻辑
@@ -134,7 +135,7 @@ public class FindLevel {
         return childList;
     }
 
-    public Set<OtherInfo3> findNccLangJi(List<OtherInfo3> oldCachedDataList, OtherInfo3 parentItem){
+    public Set<OtherInfo3> findNccLangJi(List<OtherInfo3> oldCachedDataList,OtherInfo3 parentItem){
         // 找一级的余额组成
         Set<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(oldCachedDataList,parentItem);
         otherInfo3s.forEach(item -> item.setSystemForm("老系统"));
