@@ -40,7 +40,7 @@ public class TestDemo {
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
                 .filter(item -> item.getCompanyCode().equals("WCRC0"))
-//                .filter(item -> item.getR().equals("WCRC0.0.1123190101.0.999999.0.0.0.30017800.0"))
+//                .filter(item -> item.getR().equals("WCRC0.0.2241019901.13.999999.0.0.0.30017799.0"))
 //                .filter(item -> item.getTransactionObjectId().equals("SS:71683924"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));

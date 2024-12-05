@@ -21,7 +21,7 @@ public class FindNccYuZhouLevel {
     // 科目
     private HashMap<String, Set<YZProjectCodeMappingExcel>> yzProjectCodeMappingExcelHashMap;
     List<OtherInfo3> oldYZData = new ArrayList<>();
-    @PostConstruct
+//    @PostConstruct
     public void init(){
         // 读取excel
         oldYZData = OldExcelDataUtil.getOldExcel("src/main/java/org/example/excel/禹洲/2021年科目辅助余额表.xlsx", "新的工作表-公司原表");
