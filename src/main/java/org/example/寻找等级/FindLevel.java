@@ -122,7 +122,7 @@ public class FindLevel {
                 // 朗基逻辑
                 // 如果是老系统的数据就不需要判断是不是期初导入
                 // 不是老系统就得判断
-                if (parentItem.getSystemForm().equals("老系统") || (parentItem.getJournalExplanation() != null && (
+                if (Objects.equals(parentItem.getSystemForm(),"老系统") || (parentItem.getJournalExplanation() != null && (
                         parentItem.getJournalExplanation().contains("期初数据导入")
                                 || parentItem.getJournalExplanation().contains("发生额数据导入")
                 ))){
