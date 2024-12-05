@@ -125,10 +125,10 @@ public class TestDemo {
                                 // 等级相等,
                                 lastBalance = lastOne.getBalanceSum();
                             }else if (lastOne.getLevel() < item.getLevel()){
-                                lastBalance = lastLevelMap.getOrDefault(item.getLevel(),BigDecimal.ZERO);
-                            }else {
                                 lastLevelMap.put(lastOne.getLevel(),lastOne.getBalanceSum());
                                 lastBalance = BigDecimal.ZERO;
+                            }else {
+                                lastBalance = lastLevelMap.getOrDefault(item.getLevel(),BigDecimal.ZERO);
                             }
                         }
                         item.setBalanceSum(lastBalance.add(CommonUtil.getBigDecimalValue(item.getV()).subtract(CommonUtil.getBigDecimalValue(item.getW()))));
