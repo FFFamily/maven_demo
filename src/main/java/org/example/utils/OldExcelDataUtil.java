@@ -51,6 +51,7 @@ public class OldExcelDataUtil {
                 otherInfo3.setNccProjectCode(oldExcelTemplate.getG());
                 // ncc 辅助核算
                 otherInfo3.setNccAssistantCode(oldExcelTemplate.getI());
+                otherInfo3.setSystemForm("老系统");
                 data.add(otherInfo3);
             }
         })).sheet(sheetName).headRowNumber(2).doRead();
