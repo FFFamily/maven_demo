@@ -116,7 +116,7 @@ public class TestDemo {
                         }
                         // 计算余额
                         // 计算余额
-                        OtherInfo3 lastOne = result.isEmpty() ? null : result.get(i1-1);
+                        OtherInfo3 lastOne = i1 == 0 ? null : result.get(i1-1);
                         BigDecimal lastBalance;
                         if (lastOne == null){
                             lastBalance = BigDecimal.ZERO;
