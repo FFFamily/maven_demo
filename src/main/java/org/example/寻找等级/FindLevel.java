@@ -89,9 +89,9 @@ public class FindLevel {
             parentItem.setLevel(level);
             parentItem.setNo(no);
             // 计算余额
-            OtherInfo3 lastOne = result.get(result.size()-1);
+            OtherInfo3 lastOne = result.isEmpty() ? null : result.get(result.size()-1);
             BigDecimal lastBalance;
-            if (lastOne.getBalanceSum() == null){
+            if (lastOne == null || lastOne.getBalanceSum() == null){
                 lastBalance = BigDecimal.ZERO;
             }else {
                 lastBalance = lastOne.getBalanceSum();
