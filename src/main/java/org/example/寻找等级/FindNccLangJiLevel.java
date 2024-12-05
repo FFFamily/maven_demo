@@ -30,30 +30,40 @@ public class FindNccLangJiLevel {
 
 
     public Set<OtherInfo3> findNccLangJiList(List<OtherInfo3> oldCachedDataList, OtherInfo3 parentItem){
+        // 科目段
+        String code;
+        // 子目段
+        String childCode;
+        // 项目段
+        String projectCode;
+        // 交易对象编码
+        String transactionCode;
+        // 客商
+        String customerCode;
         // 拿到账户组合进行拆分
         String[] z = parentItem.getZ().split("\\.");
         // 科目段
-        String code = z[2];
+        code = z[2];
         // 子目段
-        String childCode = z[3];
+        childCode = z[3];
         // 项目段
-        String projectCode = z[8];
+        projectCode = z[8];
         // 交易对象编码
-        String transactionCode = parentItem.getTransactionCode();
-        String customerCode;
-        if (transactionCode != null){
+        transactionCode = parentItem.getTransactionCode();
+        if (transactionCode != null) {
             String regex = "(?<=:)[^:]+(?=:)";
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(transactionCode);
             if (matcher.find()) {
                 // 找到客商编码
                 customerCode = matcher.group();
-            }else {
+            } else {
                 customerCode = null;
             }
-        }else {
+        } else {
             customerCode = null;
         }
+
         // 先去老系统重找对应的数据
         // 新系统的数据可能由老系统的几笔构成
         // 通过科目段+子目段找到 NCC 的 科目段

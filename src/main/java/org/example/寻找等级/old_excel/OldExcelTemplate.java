@@ -20,8 +20,8 @@ public class OldExcelTemplate {
     private Integer d;
     // 分录号
     private Integer e;
-    // 科目编码
     private String f;
+    // 科目编码
     private String g;
     // 辅助项
     // 客商辅助核算

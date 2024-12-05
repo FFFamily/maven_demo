@@ -116,7 +116,10 @@ public class FindLevel {
                         parentItem.getJournalExplanation().contains("期初数据导入")
                                 || parentItem.getJournalExplanation().contains("发生额数据导入")
                 ))){
-                    return findNccLangJi(oldCachedDataList,parentItem);
+                    // 老系统1级
+                    Set<OtherInfo3> oldOneLevel = findNccLangJi(oldCachedDataList, parentItem);
+                    // 找到老系统1级的所有
+                    return new HashSet<>(doMain(true,true,findBySql,oldCachedDataList,null,new ArrayList<>(oldOneLevel),null,originCode));
                 }
             }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
                 // 禹州逻辑
