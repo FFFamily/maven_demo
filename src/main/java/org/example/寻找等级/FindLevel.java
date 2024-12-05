@@ -54,6 +54,14 @@ public class FindLevel {
 //            int level = 1;
             otherInfo3.setLevel(otherInfo3.getLevel() == null ? 1 : otherInfo3.getLevel());
             otherInfo3.setNo(otherInfo3.getNo()==null ? String.valueOf(otherInfo3.getLevel()) : otherInfo3.getNo()+"-"+(i+1));
+            // 计算余额
+            BigDecimal lastBalance;
+            if (i > 0){
+                lastBalance = finalResult.get(i-1).getBalanceSum();
+            }else {
+                lastBalance = BigDecimal.ZERO;
+            }
+            otherInfo3.setBalanceSum(lastBalance.add(CommonUtil.getBigDecimalValue(otherInfo3.getV()).subtract(CommonUtil.getBigDecimalValue(otherInfo3.getW()))));
             // 遍历一级
             deque.push(otherInfo3);
             // 准备进行迭代遍历
@@ -88,15 +96,6 @@ public class FindLevel {
         if (result.isEmpty() || !result.contains(parentItem)){
             parentItem.setLevel(level);
             parentItem.setNo(no);
-            // 计算余额
-            OtherInfo3 lastOne = result.isEmpty() ? null : result.get(result.size()-1);
-            BigDecimal lastBalance;
-            if (lastOne == null || lastOne.getBalanceSum() == null){
-                lastBalance = BigDecimal.ZERO;
-            }else {
-                lastBalance = lastOne.getBalanceSum();
-            }
-            parentItem.setBalanceSum(lastBalance.add(CommonUtil.getBigDecimalValue(parentItem.getV()).subtract(CommonUtil.getBigDecimalValue(parentItem.getW()))));
             result.add(parentItem);
         }
     }

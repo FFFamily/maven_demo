@@ -20,10 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SpringBootTest
@@ -98,10 +95,11 @@ public class TestDemo {
                     otherInfo3.setOriginZ(projectName);
                     result1.add(otherInfo3);
                 } else {
-                    int finalI = i;
-                    result.forEach(item -> {
-                        item.setA(String.valueOf(finalI));
-                        if (!Objects.equals(item.getSystemForm(),"老系统")){
+                    HashMap<Integer,BigDecimal> lastLevelMap = new HashMap<>();
+                    for (int i1 = 0; i1 < result.size(); i1++) {
+                        OtherInfo3 item = result.get(i1);
+                        item.setA(String.valueOf(i));
+                        if (!Objects.equals(item.getSystemForm(),"老系统")) {
                             item.setZDesc(assistant.getRDesc());
                             String transactionObjectCode = assistant.getTransactionObjectCode();
                             String assistantTransactionObjectCodeCopy = assistant.getTransactionObjectCodeCopy();
@@ -116,7 +114,25 @@ public class TestDemo {
                             item.setZCopy(zCopy);
                             item.setMergeValue(zCopy + (item.getTransactionCodeCopy() == null ? "" : item.getTransactionCodeCopy()));
                         }
-                    });
+                        // 计算余额
+                        // 计算余额
+                        OtherInfo3 lastOne = result.isEmpty() ? null : result.get(i1-1);
+                        BigDecimal lastBalance;
+                        if (lastOne == null){
+                            lastBalance = BigDecimal.ZERO;
+                        }else {
+                            if (lastOne.getLevel().equals(item.getLevel())){
+                                // 等级相等,
+                                lastBalance = lastOne.getBalanceSum();
+                            }else if (lastOne.getLevel() < item.getLevel()){
+                                lastBalance = lastLevelMap.getOrDefault(item.getLevel(),BigDecimal.ZERO);
+                            }else {
+                                lastLevelMap.put(lastOne.getLevel(),lastOne.getBalanceSum());
+                                lastBalance = BigDecimal.ZERO;
+                            }
+                        }
+                        item.setBalanceSum(lastBalance.add(CommonUtil.getBigDecimalValue(item.getV()).subtract(CommonUtil.getBigDecimalValue(item.getW()))));
+                    }
                     result1.addAll(result);
                 }
             }
