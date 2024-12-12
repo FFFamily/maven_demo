@@ -30,9 +30,9 @@ public class Step5Test {
         for (String company : allCompany) {
             String type = CompanyTypeConstant.mapping.get(company);
             if (type.equals(CompanyTypeConstant.ZHONG_NAN)){
-                if (!company.equals("江苏中南物业服务有限公司温州分公司")){
-                    continue;
-                }
+//                if (!company.equals("江苏中南物业服务有限公司温州分公司")){
+//                    continue;
+//                }
                 System.out.println("当前公司："+company);
                 List<OracleData> res = new ArrayList<>();
 //                String findHangSQL = "SELECT z.\"行说明\"  FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+company+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12'  GROUP BY z.\"行说明\" HAVING  COUNT(z.\"行说明\") > 1 ";

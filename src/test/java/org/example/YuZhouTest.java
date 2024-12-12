@@ -6,6 +6,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import org.example.enitty.Assistant;
 import org.example.enitty.yu_zhou.YuZhouOldBalanceExcel;
+import org.example.enitty.yu_zhou.YuZhouOldDetailExcel;
 import org.example.enitty.zhong_nan.OldZNAuxiliaryBalanceSheet;
 import org.example.utils.CommonUtil;
 import org.example.寻找等级.OtherInfo3;
@@ -61,10 +62,10 @@ public class YuZhouTest {
     public List<OtherInfo3> readDetailExcel(){
         List<OtherInfo3> result = new ArrayList<>();
         EasyExcel.read("src/main/java/org/example/excel/zhong_nan/中南22年新旧系统辅助科目余额表（处理后）.xlsx",
-                        YuZhouOldBalanceExcel.class,
-                        new PageReadListener<YuZhouOldBalanceExcel>(dataList -> {
-                            for (YuZhouOldBalanceExcel data : dataList) {
-//                                String dateStr = data.getA();
+                        YuZhouOldDetailExcel.class,
+                        new PageReadListener<YuZhouOldDetailExcel>(dataList -> {
+                            for (YuZhouOldDetailExcel data : dataList) {
+                                String dateStr = data.getA()+"-"+data.getB()+"-"+data.getC();
 //                                // 公司
 //                                otherInfo3.setCompanyName(data.getU());
 //                                // 总账日期
