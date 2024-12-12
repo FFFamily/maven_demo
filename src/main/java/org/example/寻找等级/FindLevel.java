@@ -39,7 +39,7 @@ public class FindLevel {
                                     List<OtherInfo3> cachedDataList,
                                     List<OtherInfo3> startCollect,
                                     String z,
-                                    String originCode) {
+                                    Assistant assistant) {
 
         List<OtherInfo3> finalResult;
         if (isFindAll){
@@ -80,12 +80,12 @@ public class FindLevel {
                         String form = parentItem.getS();
                         // 只有一级的时候进行判断
                         if (form.equals("电子表格") || form.equals("人工") || form.equals("自动复制")) {
-                            Set<OtherInfo3> childList = find(oldCachedDataList,cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
+                            Set<OtherInfo3> childList = find(oldCachedDataList,cachedDataList, parentItem,assistant, level, isOpenFindUp, findBySql);
                             pushChild(childList,parentItem,deque,level);
                         }
                     } else {
                         judgeJoin(result,parentItem,no,level);
-                        Set<OtherInfo3> childList = find(oldCachedDataList,cachedDataList, parentItem, originCode, level, isOpenFindUp, findBySql);
+                        Set<OtherInfo3> childList = find(oldCachedDataList,cachedDataList, parentItem,assistant , level, isOpenFindUp, findBySql);
                         pushChild(childList,parentItem,deque,level);
                     }
                 }
@@ -102,10 +102,10 @@ public class FindLevel {
         }
     }
 
-    public  Set<OtherInfo3> find(List<OtherInfo3> oldCachedDataList,List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, String originCode, int level, boolean isOpenFindUp,Boolean findBySql) {
+    public  Set<OtherInfo3> find(List<OtherInfo3> oldCachedDataList,List<OtherInfo3> cachedDataList, OtherInfo3 parentItem, Assistant assistant, int level, boolean isOpenFindUp,Boolean findBySql) {
         List<OtherInfo3> list = "老系统".equals(parentItem.getSystemForm())  ? oldCachedDataList : cachedDataList;
         int thisLevel = level+1;
-        Set<OtherInfo3> childList = doUpFilter(list, parentItem, originCode, thisLevel, isOpenFindUp,findBySql);
+        Set<OtherInfo3> childList = doUpFilter(list, parentItem, thisLevel, isOpenFindUp);
         if (childList.size() == 1) {
             // 如果只是返回了一条，证明两种：1 他就是和父类能够借贷相抵 || 2他的子集也是一条
             Iterator<OtherInfo3> iterator = childList.iterator();
@@ -128,11 +128,11 @@ public class FindLevel {
                                 || parentItem.getJournalExplanation().contains("发生额数据导入")
                 ))){
                     // 老系统1级
-                    return findNccLangJi(parentItem);
+                    return findNccLangJi(oldCachedDataList,parentItem,assistant);
                 }
             }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
                 // 禹州逻辑
-                return findNccYuZhouLevel.findNccYuZhouList(parentItem);
+//                return findNccYuZhouLevel.findNccYuZhouList(parentItem);
             }else if (companyType.equals(CompanyTypeConstant.ZHONG_NAN)){
                 // 中南
 
@@ -143,18 +143,23 @@ public class FindLevel {
         return childList;
     }
 
-    public Set<OtherInfo3> findNccLangJi(OtherInfo3 parentItem){
+    /**
+     *
+     * @param parentItem 当前总账凭证明细
+     * @param assistant 最初的辅助余额表信息
+     * @return
+     */
+    public Set<OtherInfo3> findNccLangJi(List<OtherInfo3> oldCachedDataList,OtherInfo3 parentItem,Assistant assistant){
         if (parentItem.getSystemForm().equals("老系统")){
             // 如果是老系统的，直接放行
             // 因为当老系统向上查找的过程中会存在找不到上级的情况，childList 为空，就会走到这个逻辑，但是这个逻辑是 新系统找老系统的方法
             return new HashSet<>();
         }
         // 找一级的余额组成
-        Set<OtherInfo3> otherInfo3s = findNccLangJiLevel.findNccLangJiList(parentItem);
-//        otherInfo3s.forEach(item -> item.setSystemForm("老系统"));
+        //        otherInfo3s.forEach(item -> item.setSystemForm("老系统"));
         // 余额相等证明找到了
         // 校验余额是否一致
-        return otherInfo3s;
+        return findNccLangJiLevel.findNccLangJiList(oldCachedDataList,parentItem,assistant);
     }
 
 
@@ -191,10 +196,8 @@ public class FindLevel {
 
     private  Set<OtherInfo3> doUpFilter(List<OtherInfo3> cachedDataList,
                                         OtherInfo3 item,
-                                        String originCode,
                                         Integer level,
-                                        boolean isOpenFindUp,
-                                        boolean findBySql) {
+                                        boolean isOpenFindUp) {
         if (!isOpenFindUp) {
 //            return new ArrayList<>();
             return new HashSet<>();

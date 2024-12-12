@@ -1,18 +1,18 @@
-server:
-  port: 8021
-spring:
-  datasource:
-    dynamic:
-      primary: master
-      strict: false
-      datasource:
-        maser:
-          url: jdbc:oracle:thin:@192:168:61:10:1521/helowin
-          username: apps
-          password: 123456
-          driver-class-name: oracle.jdbc.driver.OracleDriver
-        slave_1:
-          url: jdbc:mysql://127.0.0.1:3306/dynamic
-          username: root
-          password: 123456
-          driver-class-name: com.mysql.jdbc.Driver
+#server:
+#  port: 8082
+#spring:
+#  datasource:
+#    dynamic:
+#      primary: master
+#      strict: false
+#      datasource:
+#        maser:
+#          url: jdbc:oracle:thin:@192:168:61:10:1521/helowin
+#          username: apps
+#          password: 123456
+#          driver-class-name: oracle.jdbc.driver.OracleDriver
+#        slave_1:
+#          url: jdbc:mysql://127.0.0.1:3306/dynamic
+#          username: root
+#          password: 123456
+#          driver-class-name: com.mysql.jdbc.Driver

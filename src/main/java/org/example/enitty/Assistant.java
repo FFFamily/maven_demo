@@ -5,7 +5,7 @@ import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import lombok.Data;
 
 /**
- * 辅助
+ * 辅助余额
  */
 @Data
 public class Assistant {

@@ -6,10 +6,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.enitty.Assistant;
 import org.example.enitty.SourceFileData;
-import org.example.utils.CommonUtil;
-import org.example.utils.ExcelDataUtil;
-import org.example.utils.LevelUtil;
-import org.example.utils.SqlUtil;
+import org.example.utils.*;
 import org.example.分类.FindABCD;
 import org.example.寻找等级.FindLevel;
 import org.example.寻找等级.FindNccLangJiLevel;
@@ -33,19 +30,26 @@ public class TestDemo {
     private SqlUtil sqlUtil;
     @Test
     void findLevel() {
-        // 读取旧系统的序时账
-        List<OtherInfo3> oldCachedDataList = findNccLangJiLevel.getOldCachedDataList();
-        oldCachedDataList.forEach(LevelUtil::organizeDataItem);
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
-                .filter(item -> item.getCompanyCode().equals("WCRC0"))
-//                .filter(item -> item.getR().equals("WCRC0.0.2241019901.13.999999.0.0.0.30017799.0"))
-//                .filter(item -> item.getTransactionObjectId().equals("SS:71683924"))
+//                .filter(item -> item.getCompanyCode().equals("WCRC0"))
+//                .filter(item -> item.getR().equals("WCRC0.0.1122010101.05.999999.0.0.0.30017821.0"))
+//                .filter(item -> item.getTransactionObjectId().equals("SS:72747717"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
             System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
+            // 读取旧系统的序时账
+            Assistant Firstassistant = companyMap.get(companyCode).get(0);
+            String companyName = Firstassistant.getE();
+            String companyType = CompanyTypeConstant.mapping.get(companyName);
+            if (!companyType.equals(CompanyTypeConstant.LANG_JI)){
+                System.out.println("不是朗基的公司，跳过");
+                continue;
+            }
+            List<OtherInfo3> oldCachedDataList = findNccLangJiLevel.getOldCachedDataListByCompanyName(companyName);
+            oldCachedDataList.forEach(LevelUtil::organizeDataItem);
             List<Assistant> realAssistantList = companyMap.get(companyCode);
             List<OtherInfo3> result1 = new ArrayList<>();
             System.out.println("共"+realAssistantList.size()+"条");
@@ -67,9 +71,9 @@ public class TestDemo {
                 String onlySign = assistant.getOnlySign();
                 List<OtherInfo3> startCollect = cachedDataList.stream()
                         .filter(item -> item.getOnlySign().equals(onlySign))
-                        .peek(item -> {
-                            item.setTransactionCode(assistant.getTransactionObjectCode());
-                        })
+//                        .peek(item -> {
+//                            item.setTransactionCode(assistant.getTransactionObjectCode());
+//                        })
                         .collect(Collectors.toList());
                 List<OtherInfo3> result = findLevel.doMain(
                         true,
@@ -79,7 +83,7 @@ public class TestDemo {
                         cachedDataList,
                         startCollect,
                         assistant.getZ(),
-                        onlySign);
+                        assistant);
                 if (result.isEmpty()){
                     // 证明所有的都借贷相互抵消了
                     OtherInfo3 otherInfo3 = new OtherInfo3();
@@ -110,7 +114,7 @@ public class TestDemo {
                             item.setOriginZ(projectName);
                             item.setOriginZCopy(projectName.replaceAll("\\.","-"));
                             // 处理-账户组合
-                            String zCopy = item.getOriginZCopy().replaceAll("\\.","-");
+                            String zCopy = item.getZ().replaceAll("\\.","-");
                             item.setZCopy(zCopy);
                             item.setMergeValue(zCopy + (item.getTransactionCodeCopy() == null ? "" : item.getTransactionCodeCopy()));
                         }
@@ -136,8 +140,8 @@ public class TestDemo {
                     result1.addAll(result);
                 }
             }
-            Assistant assistant = companyMap.get(companyCode).get(0);
-            String resultFileName = "模版-" + assistant.getE() + "-" + System.currentTimeMillis() + ".xlsx";
+
+            String resultFileName = "模版-" + companyName + "-" + System.currentTimeMillis() + ".xlsx";
             try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
                 WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
                 excelWriter.write(result1, writeSheet1);

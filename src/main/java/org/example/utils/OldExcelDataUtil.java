@@ -17,16 +17,16 @@ public class OldExcelDataUtil {
         EasyExcel.read(path, OldExcelTemplate.class, new PageReadListener<OldExcelTemplate>(dataList -> {
             for (OldExcelTemplate oldExcelTemplate : dataList) {
                 OtherInfo3 otherInfo3 = new OtherInfo3();
-                String year = oldExcelTemplate.getA();
+                String year = oldExcelTemplate.getA().split("年")[0];
                 String month = oldExcelTemplate.getB();
                 String day = oldExcelTemplate.getC();
                 String dateStr = year + "-" + month + "-" + day;
                 // 公司
-                otherInfo3.setCompanyName("成都朗逸物业服务有限公司");
+                otherInfo3.setCompanyName(oldExcelTemplate.getCompanyName());
                 // 总账日期
                 otherInfo3.setN(DateUtil.parse(dateStr));
                 // 凭证号
-                otherInfo3.setQ(oldExcelTemplate.getD());
+                otherInfo3.setQ(Integer.valueOf(oldExcelTemplate.getD().split("-")[1]));
                 // 拼接凭证号
                 otherInfo3.setR(year + "-" + month + otherInfo3.getQ());
                 // 来源随便写一个，以便于分级查找的时候不被拦截
@@ -54,7 +54,7 @@ public class OldExcelDataUtil {
                 otherInfo3.setSystemForm("老系统");
                 data.add(otherInfo3);
             }
-        })).sheet(sheetName).headRowNumber(2).doRead();
+        })).sheet(sheetName).doRead();
         return data;
     }
 }

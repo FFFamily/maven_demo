@@ -49,4 +49,5 @@ public class OracleData {
     private String 账户组合;
     private String 账户描述;
 
+    private String 额外字段;
 }

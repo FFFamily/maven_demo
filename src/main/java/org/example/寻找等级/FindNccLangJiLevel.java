@@ -1,6 +1,11 @@
 package org.example.寻找等级;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelReader;
+import com.alibaba.excel.read.listener.PageReadListener;
+import com.alibaba.excel.read.metadata.ReadSheet;
 import lombok.Getter;
+import org.example.enitty.Assistant;
 import org.example.utils.CommonUtil;
 import org.example.utils.ExcelDataUtil;
 import org.example.utils.LevelUtil;
@@ -18,24 +23,81 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 @Component
 public class FindNccLangJiLevel {
+    // 科目映射
     HashMap<String,Set<MappingNccToFmsExcel>> mappingNccToFmsExcels;
+    // 项目映射
     HashMap<String,Set<MappingProjectExcel>> mappingProjectExcels;
+    // 客商映射
     HashMap<String, MappingCustomerExcel> mappingCustomerExcelHashMap;
-    @Getter
-    List<OtherInfo3> oldCachedDataList;
+
 
     @PostConstruct
     public void init(){
         mappingNccToFmsExcels = new HashMap<>();
         mappingProjectExcels = new HashMap<>();
         mappingCustomerExcelHashMap = new HashMap<>();
-        ExcelDataUtil.findMappingNccToFmsExcel(mappingNccToFmsExcels,mappingCustomerExcelHashMap,mappingProjectExcels);
-        oldCachedDataList = OldExcelDataUtil.getOldExcel("src/main/java/org/example/excel/lang_ji/成都朗逸物业服务有限公司.xlsx", "朗逸物业NCC序时簿");
+        getMappingNccToFmsExcels();
+        getMappingProjectExcels();
+        getMappingCustomerExcelHashMap();
+
+    }
+
+    /**
+     * 通过公司名称获取
+     */
+    public List<OtherInfo3> getOldCachedDataListByCompanyName(String companyName){
+        List<OtherInfo3> result = OldExcelDataUtil.getOldExcel("src/main/java/org/example/excel/lang_ji/2023年1-11月序时簿.xlsx", companyName);
+        result.addAll(OldExcelDataUtil.getOldExcel("src/main/java/org/example/excel/lang_ji/2022.xlsx", companyName));
+        return result;
+    }
+
+    public void getMappingNccToFmsExcels() {
+        try (ExcelReader excelReader = EasyExcel.read("src/main/java/org/example/excel/lang_ji/朗逸物业映射关系.xlsx").build()) {
+            ReadSheet readSheet1 = EasyExcel.readSheet(0).head(MappingNccToFmsExcel.class).registerReadListener(new PageReadListener<MappingNccToFmsExcel>(dataList -> {
+                for (MappingNccToFmsExcel mappingNccToFmsExcel : dataList) {
+                    String j = mappingNccToFmsExcel.getJ();
+                    String k = mappingNccToFmsExcel.getK();
+                    String key = j+"."+k;
+                    Set<MappingNccToFmsExcel> list = mappingNccToFmsExcels.getOrDefault(key, new HashSet<>());
+                    if (list.stream().noneMatch(item -> item.getD().equals(mappingNccToFmsExcel.getD()))){
+                        list.add(mappingNccToFmsExcel);
+                    }
+                    mappingNccToFmsExcels.put(key,list);
+                }
+            })).build();
+            excelReader.read(readSheet1);
+        }
+    }
+    public void getMappingProjectExcels() {
+        EasyExcel.read("src/main/java/org/example/excel/lang_ji/客商.xlsx", MappingCustomerExcel.class,new PageReadListener<MappingCustomerExcel>(dataList -> {
+            for (MappingCustomerExcel mappingNccToFmsExcel : dataList) {
+                String key = mappingNccToFmsExcel.getB();
+                if (key == null){
+                    continue;
+                }
+                mappingCustomerExcelHashMap.put(key,mappingNccToFmsExcel);
+            }
+        })).doReadAll();
+    }
+    public void getMappingCustomerExcelHashMap() {
+        EasyExcel.read("src/main/java/org/example/excel/lang_ji/项目段.xlsx",MappingProjectExcel.class,new PageReadListener<MappingProjectExcel>(dataList -> {
+            for (MappingProjectExcel mappingNccToFmsExcel : dataList) {
+                String key = mappingNccToFmsExcel.getC();
+                if (key == null){
+                    continue;
+                }
+                Set<MappingProjectExcel> list = mappingProjectExcels.getOrDefault(key, new HashSet<>());
+                if (list.stream().noneMatch(item -> item.getA().equals(mappingNccToFmsExcel.getA()))){
+                    list.add(mappingNccToFmsExcel);
+                }
+                mappingProjectExcels.put(key,list);
+            }
+        })).doReadAll();
     }
 
 
 
-    public Set<OtherInfo3> findNccLangJiList(OtherInfo3 parentItem){
+    public Set<OtherInfo3> findNccLangJiList(List<OtherInfo3> oldCachedDataList,OtherInfo3 parentItem, Assistant assistant){
         // 科目段
         String code;
         // 子目段
@@ -54,8 +116,9 @@ public class FindNccLangJiLevel {
         childCode = z[3];
         // 项目段
         projectCode = z[8];
-        // 交易对象编码
-        transactionCode = parentItem.getTransactionCode();
+        // 余额表中的交易对象编码 交易对象编码
+//        transactionCode = parentItem.getTransactionCode();
+        transactionCode = assistant.getTransactionObjectCode();
         if (transactionCode != null) {
             String regex = "(?<=:)[^:]+(?=:)";
             Pattern pattern = Pattern.compile(regex);

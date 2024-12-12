@@ -22,6 +22,10 @@ public class SqlUtil {
         }
     }
 
+    public List<String> findAllCompany(){
+        return jdbcTemplate.queryForList("SELECT z.\"公司段描述\" FROM ZDPROD_EXPDP_20241120 z GROUP BY z.\"公司段描述\"", String.class);
+    }
+
     public OtherInfo3 cover(ResultSet rs, int rowNum) throws SQLException {
         OtherInfo3 info = new OtherInfo3();
 //        info.setA(String.valueOf(rowNum));
