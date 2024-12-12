@@ -30,25 +30,30 @@ public class Step5Test {
         for (String company : allCompany) {
             String type = CompanyTypeConstant.mapping.get(company);
             if (type.equals(CompanyTypeConstant.ZHONG_NAN)){
-//                if (!company.equals("江苏中南物业服务有限公司温州分公司")){
-//                    continue;
-//                }
+                if (!company.equals("江苏中南物业服务有限公司温州分公司")){
+                    continue;
+                }
                 System.out.println("当前公司："+company);
                 List<OracleData> res = new ArrayList<>();
 //                String findHangSQL = "SELECT z.\"行说明\"  FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+company+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12'  GROUP BY z.\"行说明\" HAVING  COUNT(z.\"行说明\") > 1 ";
-                String findPiSQL = "SELECT DISTINCT z.\"批名\"" +
+                String findPiSQL = "SELECT  * " +
                         "FROM ZDPROD_EXPDP_20241120 z " +
                         "WHERE z.\"公司段描述\" = '"+company+"' " +
                         "AND z.\"期间\" >= '2023-07' " +
                         "AND z.\"期间\" <= '2023-12' ";
+
+                List<Map<String, Object>> sqlList = jdbcTemplate.queryForList(findPiSQL);
+//                List<String> collect = sqlList.stream().map(item -> (String)item.get("批名")).distinct().collect(Collectors.toList());
+                Map<String, List<Map<String, Object>>> map = sqlList.stream().collect(Collectors.groupingBy(item -> (String) item.get("批名")));
                 // 拿到所有的行说明
-                List<String> list = jdbcTemplate.queryForList(findPiSQL,String.class);
-                for (String pi : list) {
+//                List<String> list = jdbcTemplate.queryForList(findPiSQL,String.class);
+                for (String pi : map.keySet()) {
+                    System.out.println(pi);
 //                    if (!pi.equals("BKOZ0_GUANYANYAN5202310021731")){
 //                        continue;
 //                    }
-                    String sql = "SELECT *" + "FROM ZDPROD_EXPDP_20241120 z " + "WHERE z.\"公司段描述\" = '"+company+"' " + "AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" = '"+pi+"' ";
-                    List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sql).stream().filter(item -> {
+//                    String sql = "SELECT *" + "FROM ZDPROD_EXPDP_20241120 z " + "WHERE z.\"公司段描述\" = '"+company+"' " + "AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" = '"+pi+"' ";
+                    List<Map<String, Object>> mapList = map.get(pi).stream().filter(item -> {
                         String form = (String) item.get("科目段描述");
                         return form.startsWith("应付账款")
                                 || form.startsWith("预付账款")
