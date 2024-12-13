@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,7 @@ public class YuZhouTest {
     public List<Assistant> readBalanceExcel(){
         List<Assistant> balanceExcels = new ArrayList<>();
         // 读取旧系统的余额信息 2022年
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/中南22年新旧系统辅助科目余额表（处理后）.xlsx",
+        EasyExcel.read("src/main/java/org/example/excel/yu_zhou/01禹州南京-D类客商映射表.xlsx",
                         YuZhouOldBalanceExcel.class,
                         new PageReadListener<YuZhouOldBalanceExcel>(dataList -> {
                             for (YuZhouOldBalanceExcel data : dataList) {
@@ -73,8 +74,15 @@ public class YuZhouTest {
                                 // 左前缀匹配
                                 assistant.setZ(getZ(money));
                                 // 唯一标识：科目编码+辅助段
-                                String onlySign = data.getN()+data.getP();
+                                String onlySign = data.getN();
                                 assistant.setOnlySign(onlySign);
+                                String regex = "(?<=：)[^【】]+";
+                                Pattern pattern = Pattern.compile(regex);
+                                // 唯一标识
+                                Matcher matcher = pattern.matcher(data.getP());
+                                while (matcher.find()) {
+                                    assistant.setOnlySign(assistant.getOnlySign() + matcher.group().trim());
+                                }
                                 assistant.setE(data.getQ().split("-")[0]);
                                 balanceExcels.add(assistant);
                             }
@@ -89,7 +97,7 @@ public class YuZhouTest {
      */
     public List<OtherInfo3> readDetailExcel(String companyName){
         List<OtherInfo3> result = new ArrayList<>();
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/中南22年新旧系统辅助科目余额表（处理后）.xlsx",
+        EasyExcel.read("src/main/java/org/example/excel/yu_zhou/序时账-20-22年4月.xls",
                         YuZhouOldDetailExcel.class,
                         new PageReadListener<YuZhouOldDetailExcel>(dataList -> {
                             for (YuZhouOldDetailExcel data : dataList) {
@@ -114,8 +122,16 @@ public class YuZhouTest {
                                 otherInfo3.setX(CommonUtil.getX(otherInfo3.getV(), otherInfo3.getW()));
                                 // 唯一标识
                                 // 科目编码-辅助段
-                                String onlySign = data.getG() + data.getI();
+                                String regex = "(?<=：)[^【】]+";
+                                Pattern pattern = Pattern.compile(regex);
+                                // 唯一标识
+
+                                Matcher matcher = pattern.matcher( data.getI());
+                                String onlySign = data.getG();
                                 otherInfo3.setOnlySign(onlySign);
+                                while (matcher.find()) {
+                                    otherInfo3.setOnlySign(otherInfo3.getOnlySign() + matcher.group().trim());
+                                }
                                 otherInfo3.setSystemForm("老系统");
                                 result.add(otherInfo3);
                             }

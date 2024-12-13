@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class Demo4 {
     public static void main(String[] args) {
-        String input = "【银行类别：01\\中国工商银行】【银行账户：4402939119100049806\\工行府河音乐花园支行9806】";
+        String input = "【项目：南京禹洲吉庆里】【供应商档案：南京先禾园林绿化工程有限公司】";
         String regex = "(?<=：)[^【】]+";
 
         Pattern pattern = Pattern.compile(regex);
