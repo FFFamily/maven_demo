@@ -39,9 +39,11 @@ public class YuZhouTest {
         for (String company : collect.keySet()) {
             List<Assistant> assistants = collect.get(company);
             List<OtherInfo3> result = new ArrayList<>();
+            System.out.println("当前公司："+company);
             // 便利余额
             for (Assistant assistant : assistants) {
                 String companyName = assistant.getE();
+
                 // 这个公司的所有明细
                 List<OtherInfo3> otherInfo3s = readDetailExcel(companyName);
                 List<OtherInfo3> startCollect = otherInfo3s.stream().filter(item -> item.getOnlySign().equals(assistant.getOnlySign())).collect(Collectors.toList());
@@ -69,25 +71,32 @@ public class YuZhouTest {
                         YuZhouOldBalanceExcel.class,
                         new PageReadListener<YuZhouOldBalanceExcel>(dataList -> {
                             for (YuZhouOldBalanceExcel data : dataList) {
-                                Assistant assistant = new Assistant();
-                                BigDecimal money = data.getV();
-                                // 左前缀匹配
-                                assistant.setZ(getZ(money));
-                                // 唯一标识：科目编码+辅助段
-                                String onlySign = data.getN();
-                                assistant.setOnlySign(onlySign);
-                                String regex = "(?<=：)[^【】]+";
-                                Pattern pattern = Pattern.compile(regex);
-                                // 唯一标识
-                                Matcher matcher = pattern.matcher(data.getP());
-                                while (matcher.find()) {
-                                    assistant.setOnlySign(assistant.getOnlySign() + matcher.group().trim());
+                                try {
+                                    Assistant assistant = new Assistant();
+                                    BigDecimal money = data.getV();
+                                    // 左前缀匹配
+                                    assistant.setZ(getZ(money));
+                                    // 唯一标识：科目编码+辅助段
+                                    String onlySign = data.getN();
+                                    assistant.setOnlySign(onlySign);
+                                    String regex = "(?<=：)[^【】]+";
+                                    Pattern pattern = Pattern.compile(regex);
+                                    // 唯一标识
+                                    Matcher matcher = pattern.matcher(data.getP());
+                                    while (matcher.find()) {
+                                        assistant.setOnlySign(assistant.getOnlySign() + matcher.group().trim());
+                                    }
+                                    assistant.setE(data.getQ().split("-")[0]);
+                                    balanceExcels.add(assistant);
+                                }catch (Exception e){
+                                    System.out.println("解析禹州数据出错");
+                                    System.out.println(data);
+//                                    e.printStackTrace();
                                 }
-                                assistant.setE(data.getQ().split("-")[0]);
-                                balanceExcels.add(assistant);
+
                             }
                         }))
-                .sheet("3六大往来明细表-禹州南京分公司").doRead();
+                .sheet("3六大往来明细表-禹州南京分公司").headRowNumber(2).doRead();
         return balanceExcels;
     }
 
@@ -97,46 +106,62 @@ public class YuZhouTest {
      */
     public List<OtherInfo3> readDetailExcel(String companyName){
         List<OtherInfo3> result = new ArrayList<>();
-        EasyExcel.read("src/main/java/org/example/excel/yu_zhou/序时账-20-22年4月.xls",
+        EasyExcel.read("src/main/java/org/example/excel/yu_zhou/序时账-20-22年4月-调整数字格式.xls",
                         YuZhouOldDetailExcel.class,
                         new PageReadListener<YuZhouOldDetailExcel>(dataList -> {
                             for (YuZhouOldDetailExcel data : dataList) {
-                                OtherInfo3 otherInfo3 = new OtherInfo3();
-                                String dateStr = data.getA()+"-"+data.getB()+"-"+data.getC();
-                                // 公司
-                                otherInfo3.setCompanyName(companyName);
-                                // 总账日期
-                                DateTime dateTime = DateUtil.parse(dateStr);
-                                otherInfo3.setN(dateTime);
-                                // 凭证号
-                                String pz = data.getD().split("-")[1];
-                                otherInfo3.setQ(Integer.valueOf(pz));
-                                // 拼接凭证号
-                                otherInfo3.setR(dateTime.year() + "-" + (dateTime.month()+1) + otherInfo3.getQ());
-                                // 来源随便写一个，以便于分级查找的时候不被拦截
-                                otherInfo3.setS("人工");
-                                // 借
-                                otherInfo3.setV(data.getL());
-                                // 贷
-                                otherInfo3.setW(data.getN());
-                                otherInfo3.setX(CommonUtil.getX(otherInfo3.getV(), otherInfo3.getW()));
-                                // 唯一标识
-                                // 科目编码-辅助段
-                                String regex = "(?<=：)[^【】]+";
-                                Pattern pattern = Pattern.compile(regex);
-                                // 唯一标识
 
-                                Matcher matcher = pattern.matcher( data.getI());
-                                String onlySign = data.getG();
-                                otherInfo3.setOnlySign(onlySign);
-                                while (matcher.find()) {
-                                    otherInfo3.setOnlySign(otherInfo3.getOnlySign() + matcher.group().trim());
+                                try {
+                                    if (data.getA() == null || data.getB() == null || data.getC() == null) {
+                                        System.out.println("错误的格式："+data);
+                                        continue;
+                                    }
+                                    OtherInfo3 otherInfo3 = new OtherInfo3();
+                                    String dateStr = data.getA()+"-"+data.getB()+"-"+data.getC();
+                                    // 公司
+                                    otherInfo3.setCompanyName(companyName);
+                                    // 总账日期
+                                    DateTime dateTime = DateUtil.parse(dateStr);
+                                    otherInfo3.setN(dateTime);
+                                    // 凭证号
+                                    String pz = data.getD().split("-")[1];
+                                    otherInfo3.setQ(Integer.valueOf(pz));
+                                    // 拼接凭证号
+                                    otherInfo3.setR(dateTime.year() + "-" + (dateTime.month()+1) + otherInfo3.getQ());
+                                    // 来源随便写一个，以便于分级查找的时候不被拦截
+                                    otherInfo3.setS("人工");
+                                    // 借
+//                                    otherInfo3.setV(data.getL() == null ? null : new BigDecimal(data.getL()));
+                                    otherInfo3.setV(data.getL());
+                                    // 贷
+//                                    otherInfo3.setW(data.getN() == null ? null : new BigDecimal(data.getN()));
+                                    otherInfo3.setW(data.getN());
+                                    otherInfo3.setX(CommonUtil.getX(otherInfo3.getV(), otherInfo3.getW()));
+                                    // 唯一标识
+                                    // 科目编码-辅助段
+                                    String regex = "(?<=：)[^【】]+";
+                                    Pattern pattern = Pattern.compile(regex);
+                                    // 唯一标识
+
+                                    String onlySign = data.getG();
+                                    otherInfo3.setOnlySign(onlySign);
+                                    if (data.getI() != null){
+                                        Matcher matcher = pattern.matcher( data.getI());
+                                        while (matcher.find()) {
+                                            otherInfo3.setOnlySign(otherInfo3.getOnlySign() + matcher.group().trim());
+                                        }
+                                    }
+                                    otherInfo3.setSystemForm("老系统");
+                                    result.add(otherInfo3);
+                                }catch (Exception e){
+                                    System.out.println("处理序时账户出错： "+e.getMessage());
+                                    System.out.println(data);
+                                    e.printStackTrace();
                                 }
-                                otherInfo3.setSystemForm("老系统");
-                                result.add(otherInfo3);
+
                             }
                         }))
-                .sheet(companyName).doRead();
+                .sheet(companyName).headRowNumber(2).doRead();
         return result;
     }
 }

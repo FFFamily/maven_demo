@@ -19,18 +19,23 @@ public class YuZhouOldDetailExcel {
     // 日
     @ExcelProperty(index = 2)
     private String c;
-    @ExcelProperty("凭证号")
+
+    // 凭证号
+    @ExcelProperty(index = 3)
     private String d;
-    @ExcelProperty("科目编码")
+    // 科目编码
+    @ExcelProperty(index = 6)
     private String g;
-    @ExcelProperty("科目名称")
+    // 科目名称
+    @ExcelProperty(index = 7)
     private String h;
-    @ExcelProperty("辅助项")
+    // 辅助项
+    @ExcelProperty(index = 8)
     private String i;
     // 借
-    @ExcelProperty(index = 12)
+    @ExcelProperty(index = 11)
     private BigDecimal l;
     // 贷
-    @ExcelProperty(index = 14)
+    @ExcelProperty(index = 13)
     private BigDecimal n;
 }
