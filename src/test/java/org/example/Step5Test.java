@@ -68,7 +68,7 @@ public class Step5Test {
                         BigDecimal v =  curr.get("输入借方") == null ? null : (BigDecimal)curr.get("输入借方");
                         BigDecimal w =  curr.get("输入贷方") == null ? null : (BigDecimal)curr.get("输入贷方");
                         return prev.add(CommonUtil.getBigDecimalValue(v)).subtract(CommonUtil.getBigDecimalValue(w));
-                    }, (l, r) -> l);
+                    }, (l,      r) -> l);
                     if (sum.compareTo(BigDecimal.ZERO) != 0) {
                         // 不为0则跳过
                         res.addAll(data(mapList));
@@ -76,6 +76,7 @@ public class Step5Test {
                     }
                     boolean flag = true;
                     Map<String, List<Map<String, Object>>> group = mapList.stream().collect(Collectors.groupingBy(item -> (String)item.get("科目代码")));
+                    // 遍历同一批次下不同科目
                     for (String key : group.keySet()) {
                         List<Map<String, Object>> itemList = group.get(key);
                         BigDecimal itemSum = BigDecimal.ZERO;
@@ -89,10 +90,17 @@ public class Step5Test {
                             flag = false;
                             break;
                         }
+                        // 同一批次，筛选每个科目，交易对象都一样,则不标记
+                        long count = itemList.stream().map(item -> (String) item.get("交易对象名称")).distinct().count();
+                        if (count > 1){
+                            flag = false;
+                            break;
+                        }
                     }
                     if (flag) {
-                        long size = mapList.stream().map(item -> item.get("交易对象")).distinct().count();
-                        if (size != 1){
+                        List<String> collect = mapList.stream().map(item -> (String)item.get("交易对象名称")).distinct().collect(Collectors.toList());
+                        long size = collect.size();
+                        if (size != 1 && collect.stream().anyMatch(item -> item.contains("公司"))){
                             // 交易对象全部都一样才需要标记
                             mapList.forEach(item -> item.put("额外字段","客商拆分"));
                         }
