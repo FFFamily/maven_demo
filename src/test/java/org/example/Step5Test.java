@@ -1,5 +1,8 @@
 package org.example;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.unit.DataUnit;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.util.ListUtils;
@@ -35,24 +38,19 @@ public class Step5Test {
 //                }
                 System.out.println("当前公司："+company);
                 List<OracleData> res = new ArrayList<>();
-//                String findHangSQL = "SELECT z.\"行说明\"  FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+company+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12'  GROUP BY z.\"行说明\" HAVING  COUNT(z.\"行说明\") > 1 ";
-                String findPiSQL = "SELECT  * " +
-                        "FROM ZDPROD_EXPDP_20241120 z " +
-                        "WHERE z.\"公司段描述\" = '"+company+"' " +
-                        "AND z.\"期间\" >= '2023-07' " +
-                        "AND z.\"期间\" <= '2023-12' ";
-
+                String findPiSQL = "SELECT  * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+company+"' ";
+//                        "companyAND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' ";
                 List<Map<String, Object>> sqlList = jdbcTemplate.queryForList(findPiSQL);
-//                List<String> collect = sqlList.stream().map(item -> (String)item.get("批名")).distinct().collect(Collectors.toList());
-                Map<String, List<Map<String, Object>>> map = sqlList.stream().collect(Collectors.groupingBy(item -> (String) item.get("批名")));
+                Map<String, List<Map<String, Object>>> map = sqlList.stream()
+                        .filter(item -> {
+                            String time = (String)item.get("期间");
+                            DateTime dataTime = DateUtil.parse(time);
+                            return dataTime.isAfter(DateUtil.parse("2023-07")) && dataTime.isBefore(DateUtil.parse("2023-12"));
+                        })
+                        .collect(Collectors.groupingBy(item -> (String) item.get("批名")));
                 // 拿到所有的行说明
-//                List<String> list = jdbcTemplate.queryForList(findPiSQL,String.class);
                 for (String pi : map.keySet()) {
                     System.out.println(pi);
-//                    if (!pi.equals("BKOZ0_GUANYANYAN5202310021731")){
-//                        continue;
-//                    }
-//                    String sql = "SELECT *" + "FROM ZDPROD_EXPDP_20241120 z " + "WHERE z.\"公司段描述\" = '"+company+"' " + "AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" = '"+pi+"' ";
                     List<Map<String, Object>> mapList = map.get(pi).stream().filter(item -> {
                         String form = (String) item.get("科目段描述");
                         return form.startsWith("应付账款")
@@ -63,7 +61,6 @@ public class Step5Test {
                                 || form.startsWith("其他应付款")
                                 || form.startsWith("其他应收款");
                     }).collect(Collectors.toList());
-
                     BigDecimal sum = mapList.stream().reduce(BigDecimal.ZERO, (prev, curr) -> {
                         BigDecimal v =  curr.get("输入借方") == null ? null : (BigDecimal)curr.get("输入借方");
                         BigDecimal w =  curr.get("输入贷方") == null ? null : (BigDecimal)curr.get("输入贷方");
@@ -71,7 +68,7 @@ public class Step5Test {
                     }, (l,      r) -> l);
                     if (sum.compareTo(BigDecimal.ZERO) != 0) {
                         // 不为0则跳过
-                        res.addAll(data(mapList));
+//                        res.addAll(data(mapList));
                         continue;
                     }
                     boolean flag = true;
@@ -111,10 +108,10 @@ public class Step5Test {
                             }
                         }
                     }
-                    res.addAll(data(mapList));
+//                    res.addAll(data(mapList));
                 }
                 String fileName = "第五步数据-"+company + System.currentTimeMillis() + ".xlsx";
-                EasyExcel.write(fileName, OracleData.class).sheet("模板").doWrite(res);
+                EasyExcel.write(fileName, OracleData.class).sheet("模板").doWrite(data(sqlList));
             }
         }
     }
