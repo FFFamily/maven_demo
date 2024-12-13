@@ -5,10 +5,13 @@ import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import org.example.enitty.Assistant;
+import org.example.enitty.OracleData;
 import org.example.enitty.yu_zhou.YuZhouOldBalanceExcel;
 import org.example.enitty.yu_zhou.YuZhouOldDetailExcel;
 import org.example.enitty.zhong_nan.OldZNAuxiliaryBalanceSheet;
 import org.example.utils.CommonUtil;
+import org.example.utils.LevelUtil;
+import org.example.寻找等级.FindLevel;
 import org.example.寻找等级.OtherInfo3;
 import org.example.新老系统.Step1;
 import org.junit.jupiter.api.Test;
@@ -18,19 +21,43 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.example.utils.CommonUtil.getZ;
 
 @SpringBootTest
 public class YuZhouTest {
+    @Resource
+    private FindLevel findLevel;
     @Test
     void test1() {
         // 余额
-        List<Assistant> assistants = readBalanceExcel();
-        // 便利余额
-        for (Assistant assistant : assistants) {
-
+        Map<String, List<Assistant>> collect = readBalanceExcel().stream().collect(Collectors.groupingBy(item -> item.getE()));
+        for (String company : collect.keySet()) {
+            List<Assistant> assistants = collect.get(company);
+            List<OtherInfo3> result = new ArrayList<>();
+            // 便利余额
+            for (Assistant assistant : assistants) {
+                String companyName = assistant.getE();
+                // 这个公司的所有明细
+                List<OtherInfo3> otherInfo3s = readDetailExcel(companyName);
+                List<OtherInfo3> startCollect = otherInfo3s.stream().filter(item -> item.getOnlySign().equals(assistant.getOnlySign())).collect(Collectors.toList());
+                List<OtherInfo3> res = findLevel.doMain(
+                        true,
+                        false,
+                        false,
+                        otherInfo3s,
+                        null,
+                        startCollect,
+                        assistant.getZ(),
+                        assistant
+                );
+                result.addAll(res);
+            }
+            String fileName = "禹州老系统分级-"+company+ ".xlsx";
+            EasyExcel.write(fileName, OtherInfo3.class).sheet("模板").doWrite(result);
         }
     }
     // 读取余额表
@@ -45,9 +72,10 @@ public class YuZhouTest {
                                 BigDecimal money = data.getV();
                                 // 左前缀匹配
                                 assistant.setZ(getZ(money));
-                                // 唯一标识：科目编码+科目名称+辅助段+账套
-                                String onlySign = data.getN()+data.getO()+data.getP()+data.getQ();
+                                // 唯一标识：科目编码+辅助段
+                                String onlySign = data.getN()+data.getP();
                                 assistant.setOnlySign(onlySign);
+                                assistant.setE(data.getQ().split("-")[0]);
                                 balanceExcels.add(assistant);
                             }
                         }))
@@ -84,23 +112,15 @@ public class YuZhouTest {
                                 // 贷
                                 otherInfo3.setW(data.getN());
                                 otherInfo3.setX(CommonUtil.getX(otherInfo3.getV(), otherInfo3.getW()));
-                                // TODO 余额
-                                String regex = "(?<=：)[^【】]+";
-                                Pattern pattern = Pattern.compile(regex);
                                 // 唯一标识
-                                // 科目编码-科目名称-辅助段-账套
-//                                String onlySign = data.getC() + data.getU()+ data.getO();
-//                                if (data.getM() == null || data.getM().isEmpty()) {
-//                                    onlySign += (data.getK() == null ? "" : data.getK());
-//                                }else {
-//                                    onlySign+=data.getM();
-//                                }
-//                                otherInfo3.setOnlySign(onlySign);
-//                                otherInfo3.setSystemForm("老系统");
-//                                res.add(otherInfo3);
+                                // 科目编码-辅助段
+                                String onlySign = data.getG() + data.getI();
+                                otherInfo3.setOnlySign(onlySign);
+                                otherInfo3.setSystemForm("老系统");
+                                result.add(otherInfo3);
                             }
                         }))
                 .sheet(companyName).doRead();
-        return null;
+        return result;
     }
 }
