@@ -43,9 +43,14 @@ public class Step5Test {
                 List<Map<String, Object>> sqlList = jdbcTemplate.queryForList(findPiSQL);
                 Map<String, List<Map<String, Object>>> map = sqlList.stream()
                         .filter(item -> {
-                            String time = (String)item.get("期间");
-                            DateTime dataTime = DateUtil.parse(time);
-                            return dataTime.isAfter(DateUtil.parse("2023-07")) && dataTime.isBefore(DateUtil.parse("2023-12"));
+                            String time = (String)item.get("期间")+"-01";
+                            try {
+                                DateTime dataTime = DateUtil.parse(time);
+                                return dataTime.isAfter(DateUtil.parse("2023-07-01")) && dataTime.isBefore(DateUtil.parse("2023-12-01"));
+                            }catch (Exception e){
+                                System.out.println("时间处理出错: "+time);
+                                return false;
+                            }
                         })
                         .collect(Collectors.groupingBy(item -> (String) item.get("批名")));
                 // 拿到所有的行说明

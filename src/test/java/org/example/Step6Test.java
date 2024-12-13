@@ -29,6 +29,7 @@ import static org.example.utils.CommonUtil.getZ;
 public class Step6Test {
     @Resource
     private JdbcTemplate jdbcTemplate;
+
     @Test
     void test1() {
         List<Step6OldDetailExcel> excels = readPropertyExcel();
@@ -36,7 +37,7 @@ public class Step6Test {
         for (String companyName : companyMap.keySet()) {
             System.out.println("当前公式为： "+companyName);
             List<Step6OldDetailExcel> list = companyMap.get(companyName);
-            String findSql = "SELCT * FROM Z z WHERE z.'公司段描述' = '"+companyName+"' AND z.'期间' >= '2023-07' AND z.'期间' <= '2023-12' AND z.'批次' like '%NCC%' ";
+            String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" like '%NCC%'";
             List<OracleData> oracleData = jdbcTemplate.queryForList(findSql, OracleData.class);
             // 按月进行分组
             Map<String, List<Step6OldDetailExcel>> collect = list.stream().collect(Collectors.groupingBy(item -> {
