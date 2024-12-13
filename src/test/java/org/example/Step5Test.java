@@ -62,15 +62,6 @@ public class Step5Test {
                                 || form.startsWith("应收账款")
                                 || form.startsWith("其他应付款")
                                 || form.startsWith("其他应收款");
-                    }).peek(item -> {
-                        Object projectDesc = item.get("科目段描述");
-                        if (projectDesc != null) {
-                            String p = ((String) projectDesc).split("-")[0];
-                            item.put("科目",p);
-                        }
-                        BigDecimal v =  item.get("输入借方") == null ? null : (BigDecimal)item.get("输入借方");
-                        BigDecimal w =  item.get("输入贷方") == null ? null : (BigDecimal)item.get("输入贷方");
-                        item.put("借正贷负",CommonUtil.getBigDecimalValue(v).subtract(CommonUtil.getBigDecimalValue(w)));
                     }).collect(Collectors.toList());
 
                     BigDecimal sum = mapList.stream().reduce(BigDecimal.ZERO, (prev, curr) -> {
@@ -131,6 +122,14 @@ public class Step5Test {
     private List<OracleData> data(List<Map<String, Object>> result) {
         List<OracleData> dataList = ListUtils.newArrayList();
         for (Map<String, Object> map : result) {
+            Object projectDesc = map.get("科目段描述");
+            if (projectDesc != null) {
+                String p = ((String) projectDesc).split("-")[0];
+                map.put("科目",p);
+            }
+            BigDecimal v =  map.get("输入借方") == null ? null : (BigDecimal)map.get("输入借方");
+            BigDecimal w =  map.get("输入贷方") == null ? null : (BigDecimal)map.get("输入贷方");
+            map.put("借正贷负",CommonUtil.getBigDecimalValue(v).subtract(CommonUtil.getBigDecimalValue(w)));
             dataList.add(JSONUtil.parse(map).toBean(OracleData.class));
         }
         return dataList;
