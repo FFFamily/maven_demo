@@ -3,6 +3,8 @@ package org.example.enitty;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class OracleData {
     private String 帐套;
@@ -35,8 +37,8 @@ public class OracleData {
     private String 日记账状态;
     private String 本位币币种;
     private String 原币币种;
-    private String 输入借方;
-    private String 输入贷方;
+    private BigDecimal 输入借方;
+    private BigDecimal 输入贷方;
     private String 本位币借方;
     private String 本位币贷方;
     private String 关联方;
