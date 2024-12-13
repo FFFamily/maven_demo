@@ -50,4 +50,6 @@ public class OracleData {
     private String 账户描述;
 
     private String 额外字段;
+    private String 科目;
+    private String 借正贷负;
 }
