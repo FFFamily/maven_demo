@@ -92,7 +92,7 @@ public class Step5Test {
                         }
                         // 同一批次，筛选每个科目，交易对象都一样,则不标记
                         long count = itemList.stream().map(item -> (String) item.get("交易对象名称")).distinct().count();
-                        if (count > 1){
+                        if (count <= 1){
                             flag = false;
                             break;
                         }
