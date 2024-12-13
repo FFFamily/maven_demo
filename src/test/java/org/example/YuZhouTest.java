@@ -41,7 +41,8 @@ public class YuZhouTest {
             List<OtherInfo3> result = new ArrayList<>();
             System.out.println("当前公司："+company);
             // 便利余额
-            for (Assistant assistant : assistants) {
+            for (int i = 0; i < assistants.size(); i++) {
+                Assistant assistant = assistants.get(i);
                 String companyName = assistant.getE();
 
                 // 这个公司的所有明细
@@ -57,6 +58,10 @@ public class YuZhouTest {
                         assistant.getZ(),
                         assistant
                 );
+                int finalI = i;
+                res.forEach(item -> {
+                    item.setA(String.valueOf(finalI));
+                });
                 result.addAll(res);
             }
             String fileName = "禹州老系统分级-"+company+ ".xlsx";
