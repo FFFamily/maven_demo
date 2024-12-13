@@ -62,6 +62,15 @@ public class Step5Test {
                                 || form.startsWith("应收账款")
                                 || form.startsWith("其他应付款")
                                 || form.startsWith("其他应收款");
+                    }).peek(item -> {
+                        Object projectDesc = item.get("科目段描述");
+                        if (projectDesc != null) {
+                            String p = ((String) projectDesc).split("-")[0];
+                            item.put("科目",p);
+                        }
+                        BigDecimal v =  item.get("输入借方") == null ? null : (BigDecimal)item.get("输入借方");
+                        BigDecimal w =  item.get("输入贷方") == null ? null : (BigDecimal)item.get("输入贷方");
+                        item.put("借正贷负",CommonUtil.getBigDecimalValue(v).subtract(CommonUtil.getBigDecimalValue(w)));
                     }).collect(Collectors.toList());
 
                     BigDecimal sum = mapList.stream().reduce(BigDecimal.ZERO, (prev, curr) -> {
@@ -99,10 +108,16 @@ public class Step5Test {
                     }
                     if (flag) {
                         List<String> collect = mapList.stream().map(item -> (String)item.get("交易对象名称")).distinct().collect(Collectors.toList());
-                        long size = collect.size();
-                        if (size != 1 && collect.stream().noneMatch(item -> item == null || item.contains("公司"))){
-                            // 交易对象全部都一样才需要标记
-                            mapList.forEach(item -> item.put("额外字段","客商拆分"));
+                        if (collect.stream().anyMatch(item -> item != null && !item.contains("虚拟"))){
+
+                        }else {
+                            long size = collect.size();
+                            if (size != 1 // 交易对象全部都一样才需要标记
+                                    && collect.stream().noneMatch(item -> item == null || item.contains("公司"))
+                            ){
+
+                                mapList.forEach(item -> item.put("额外字段","客商拆分"));
+                            }
                         }
                     }
                     res.addAll(data(mapList));

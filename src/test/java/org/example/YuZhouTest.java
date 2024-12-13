@@ -89,7 +89,7 @@ public class YuZhouTest {
                                 Pattern pattern = Pattern.compile(regex);
                                 // 唯一标识
                                 // 科目编码-科目名称-辅助段-账套
-//                                科目编码-科目名称-辅助段-账套String  onlySign = data.getC() + data.getU()+ data.getO();
+//                                String onlySign = data.getC() + data.getU()+ data.getO();
 //                                if (data.getM() == null || data.getM().isEmpty()) {
 //                                    onlySign += (data.getK() == null ? "" : data.getK());
 //                                }else {

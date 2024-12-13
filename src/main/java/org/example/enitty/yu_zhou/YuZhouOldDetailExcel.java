@@ -22,7 +22,11 @@ public class YuZhouOldDetailExcel {
     @ExcelProperty("凭证号")
     private String d;
     @ExcelProperty("科目编码")
+    private String g;
+    @ExcelProperty("科目名称")
     private String h;
+    @ExcelProperty("辅助项")
+    private String i;
     // 借
     @ExcelProperty(index = 12)
     private BigDecimal l;
