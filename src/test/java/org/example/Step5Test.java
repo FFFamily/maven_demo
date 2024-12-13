@@ -108,7 +108,7 @@ public class Step5Test {
                     }
                     if (flag) {
                         List<String> collect = mapList.stream().map(item -> (String)item.get("交易对象名称")).distinct().collect(Collectors.toList());
-                        if (collect.stream().anyMatch(item -> item != null && !item.contains("虚拟"))){
+                        if (collect.stream().allMatch(item -> item != null && !item.contains("虚拟"))){
 
                         }else {
                             long size = collect.size();
