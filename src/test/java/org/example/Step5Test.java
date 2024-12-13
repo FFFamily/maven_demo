@@ -100,7 +100,7 @@ public class Step5Test {
                     if (flag) {
                         List<String> collect = mapList.stream().map(item -> (String)item.get("交易对象名称")).distinct().collect(Collectors.toList());
                         long size = collect.size();
-                        if (size != 1 && collect.stream().noneMatch(item -> item != null && item.contains("公司"))){
+                        if (size != 1 && collect.stream().noneMatch(item -> item == null || item.contains("公司"))){
                             // 交易对象全部都一样才需要标记
                             mapList.forEach(item -> item.put("额外字段","客商拆分"));
                         }

@@ -59,35 +59,37 @@ public class YuZhouTest {
      * 明细账
      * @return
      */
-    public List<OtherInfo3> readDetailExcel(){
+    public List<OtherInfo3> readDetailExcel(String companyName){
         List<OtherInfo3> result = new ArrayList<>();
         EasyExcel.read("src/main/java/org/example/excel/zhong_nan/中南22年新旧系统辅助科目余额表（处理后）.xlsx",
                         YuZhouOldDetailExcel.class,
                         new PageReadListener<YuZhouOldDetailExcel>(dataList -> {
                             for (YuZhouOldDetailExcel data : dataList) {
+                                OtherInfo3 otherInfo3 = new OtherInfo3();
                                 String dateStr = data.getA()+"-"+data.getB()+"-"+data.getC();
-//                                // 公司
-//                                otherInfo3.setCompanyName(data.getU());
-//                                // 总账日期
-//                                DateTime dateTime = DateUtil.parse(dateStr);
-//                                otherInfo3.setN(dateTime);
-//                                // 凭证号
-//                                otherInfo3.setQ(data.getB());
-//                                // 拼接凭证号
-//                                otherInfo3.setR(dateTime.year() + "-" + (dateTime.month()+1) + otherInfo3.getQ());
-//                                // 来源随便写一个，以便于分级查找的时候不被拦截
-//                                otherInfo3.setS("人工");
-//                                // 借
-//                                otherInfo3.setV(data.getH());
-//                                // 贷
-//                                otherInfo3.setW(data.getI());
-//                                otherInfo3.setX(CommonUtil.getX(otherInfo3.getV(), otherInfo3.getW()));
-//                                // TODO 余额
-//                                String regex = "(?<=：)[^【】]+";
-//                                Pattern pattern = Pattern.compile(regex);
-//                                // 唯一标识
-//                                // 科目编码-业务单元-项目-客商-人员档案
-//                                String  onlySign = data.getC() + data.getU()+ data.getO();
+                                // 公司
+                                otherInfo3.setCompanyName(companyName);
+                                // 总账日期
+                                DateTime dateTime = DateUtil.parse(dateStr);
+                                otherInfo3.setN(dateTime);
+                                // 凭证号
+                                String pz = data.getD().split("-")[1];
+                                otherInfo3.setQ(Integer.valueOf(pz));
+                                // 拼接凭证号
+                                otherInfo3.setR(dateTime.year() + "-" + (dateTime.month()+1) + otherInfo3.getQ());
+                                // 来源随便写一个，以便于分级查找的时候不被拦截
+                                otherInfo3.setS("人工");
+                                // 借
+                                otherInfo3.setV(data.getL());
+                                // 贷
+                                otherInfo3.setW(data.getN());
+                                otherInfo3.setX(CommonUtil.getX(otherInfo3.getV(), otherInfo3.getW()));
+                                // TODO 余额
+                                String regex = "(?<=：)[^【】]+";
+                                Pattern pattern = Pattern.compile(regex);
+                                // 唯一标识
+                                // 科目编码-科目名称-辅助段-账套
+//                                科目编码-科目名称-辅助段-账套String  onlySign = data.getC() + data.getU()+ data.getO();
 //                                if (data.getM() == null || data.getM().isEmpty()) {
 //                                    onlySign += (data.getK() == null ? "" : data.getK());
 //                                }else {
@@ -98,7 +100,7 @@ public class YuZhouTest {
 //                                res.add(otherInfo3);
                             }
                         }))
-                .sheet("3六大往来明细表-禹州南京分公司").doRead();
+                .sheet(companyName).doRead();
         return null;
     }
 }
