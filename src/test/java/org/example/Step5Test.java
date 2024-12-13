@@ -30,7 +30,7 @@ public class Step5Test {
         for (String company : allCompany) {
             String type = CompanyTypeConstant.mapping.get(company);
             if (type.equals(CompanyTypeConstant.ZHONG_NAN)){
-                if (!company.equals("江苏中南物业服务有限公司温州分公司")){
+                if (!company.equals("江苏中南物业服务有限公司")){
                     continue;
                 }
                 System.out.println("当前公司："+company);
