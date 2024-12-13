@@ -119,25 +119,29 @@ public class FindLevel {
             // 通过公司名称判断是哪个系统
             String companyName = parentItem.getCompanyName();
             String companyType = CompanyTypeConstant.mapping.get(companyName);
-            if (companyType.equals(CompanyTypeConstant.LANG_JI)){
-                // 朗基逻辑
-                // 如果是老系统的数据就不需要判断是不是期初导入
-                // 不是老系统就得判断
-                if (Objects.equals(parentItem.getSystemForm(),"老系统") || (parentItem.getJournalExplanation() != null && (
-                        parentItem.getJournalExplanation().contains("期初数据导入")
-                                || parentItem.getJournalExplanation().contains("发生额数据导入")
-                ))){
-                    // 老系统1级
-                    return findNccLangJi(oldCachedDataList,parentItem,assistant);
-                }
-            }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
-                // 禹州逻辑
-//                return findNccYuZhouLevel.findNccYuZhouList(parentItem);
-            }else if (companyType.equals(CompanyTypeConstant.ZHONG_NAN)){
-                // 中南
-
+            if (companyType == null){
+                System.out.println("当前公司不属于任何系统： "+companyName);
             }else {
-                throw new RuntimeException("不存在的公司类型");
+                if (companyType.equals(CompanyTypeConstant.LANG_JI)){
+                    // 朗基逻辑
+                    // 如果是老系统的数据就不需要判断是不是期初导入
+                    // 不是老系统就得判断
+                    if (Objects.equals(parentItem.getSystemForm(),"老系统") || (parentItem.getJournalExplanation() != null && (
+                            parentItem.getJournalExplanation().contains("期初数据导入")
+                                    || parentItem.getJournalExplanation().contains("发生额数据导入")
+                    ))){
+                        // 老系统1级
+                        return findNccLangJi(oldCachedDataList,parentItem,assistant);
+                    }
+                }else if (companyType.equals(CompanyTypeConstant.YU_ZHOU)){
+                    // 禹州逻辑
+//                return findNccYuZhouLevel.findNccYuZhouList(parentItem);
+                }else if (companyType.equals(CompanyTypeConstant.ZHONG_NAN)){
+                    // 中南
+
+                }else {
+                    throw new RuntimeException("不存在的公司类型");
+                }
             }
         }
         return childList;
