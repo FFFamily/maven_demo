@@ -139,16 +139,23 @@ public class YuZhouTest {
                                     otherInfo3.setX(CommonUtil.getX(otherInfo3.getV(), otherInfo3.getW()));
                                     // 唯一标识
                                     // 科目编码-辅助段
-                                    String regex = "(?<=：)[^【】]+";
+//                                    String regex = "(?<=：)[^【】]+";
+                                    String regex = "(?<=：)([^/【】]+)(?:/([^【】]+))?";
                                     Pattern pattern = Pattern.compile(regex);
                                     // 唯一标识
-
                                     String onlySign = data.getG();
                                     otherInfo3.setOnlySign(onlySign);
                                     if (data.getI() != null){
                                         Matcher matcher = pattern.matcher( data.getI());
                                         while (matcher.find()) {
-                                            otherInfo3.setOnlySign(otherInfo3.getOnlySign() + matcher.group().trim());
+                                            String trim = matcher.group().trim();
+                                            String[] split = trim.split("/");
+                                            if (split.length == 1){
+                                                otherInfo3.setOnlySign(otherInfo3.getOnlySign() + split[0]);
+                                            }else {
+                                                otherInfo3.setOnlySign(otherInfo3.getOnlySign() + split[1]);
+                                            }
+
                                         }
                                     }
                                     otherInfo3.setSystemForm("老系统");
