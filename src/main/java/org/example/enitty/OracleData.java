@@ -58,5 +58,8 @@ public class OracleData {
     private String 科目;
     private String 借正贷负;
     private String 备注;
+    public Boolean getUsed(){
+        return this.used != null && this.used;
+    }
 
 }
