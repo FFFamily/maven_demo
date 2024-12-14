@@ -26,7 +26,7 @@ public class FindNccZhongNanLevel {
     // 科目映射
     HashMap<String,ZNProjectMapping> znProjectMapping = new HashMap<>();
 
-    @PostConstruct
+
     public void init(){
         initZnProjectMapping();
     }

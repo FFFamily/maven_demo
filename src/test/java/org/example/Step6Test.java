@@ -53,7 +53,7 @@ public class Step6Test {
                 DateTime date = DateUtil.date(item.getTime());
                 int year = date.year();
                 int month = date.month() + 1;
-                return year + "-" + month;
+                return year + "-" + (month > 9 ? month : "0" + month);
             }));
             Map<String, List<OracleData>> timeNewCollect = oracleData.stream().collect(Collectors.groupingBy(OracleData::get期间));
             List<String> timeOldKeyCollect = new ArrayList<>(timeOldCollect.keySet());
@@ -63,14 +63,14 @@ public class Step6Test {
             for (String timeKey : allTimeKey) {
                 List<Step6OldDetailExcel>  timeGroupOld = timeOldCollect.get(timeKey);
                 List<OracleData> timeGroupNew = timeNewCollect.get(timeKey);
-                Map<String, List<Step6OldDetailExcel>> projectOldMap = timeGroupOld.stream().collect(Collectors.groupingBy(item -> item.getProjectName()));
+                Map<String, List<Step6OldDetailExcel>> projectOldMap = timeGroupOld.stream().collect(Collectors.groupingBy(item -> item.getProjectName().split("－")[0]));
                 Map<String, List<OracleData>> projectNewMap = timeGroupNew.stream().collect(Collectors.groupingBy(item -> item.get科目段描述().split("-")[0]));
                 List<String> allProjectKey = Stream.of(projectOldMap.keySet(), projectNewMap.keySet()).flatMap(Collection::stream).distinct().collect(Collectors.toList());
                 for (String projectKey : allProjectKey) {
-                    List<Step6OldDetailExcel>  projectOld = projectOldMap.get(projectKey);
-                    List<OracleData> projectNew = projectNewMap.get(projectKey);
-                    BigDecimal oldSum = projectOld.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.getV()).subtract(curr.getW())), (l, r) -> l);
-                    BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(curr.get输入贷方())), (l, r) -> l);
+                    List<Step6OldDetailExcel>  projectOld = projectOldMap.getOrDefault(projectKey,new ArrayList<>());
+                    List<OracleData> projectNew = projectNewMap.getOrDefault(projectKey,new ArrayList<>());
+                    BigDecimal oldSum = projectOld.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.getV()).subtract(CommonUtil.getBigDecimalValue(curr.getW()))), (l, r) -> l);
+                    BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(CommonUtil.getBigDecimalValue(curr.get输入贷方()))), (l, r) -> l);
                     if (oldSum.compareTo(newSum) != 0) {
                         // 两个余额不相等
                         Step6Result1 step6Result1 = new Step6Result1();
@@ -86,7 +86,7 @@ public class Step6Test {
                         int oldSize = projectOld.size();
                         int newSize = projectNew.size();
                         if (oldSize > newSize) {
-                            Map<String, Step6OldDetailExcel> collect = projectOld.stream().collect(Collectors.toMap(Step6OldDetailExcel::getMatch, item -> item));
+                            Map<String, Step6OldDetailExcel> collect = projectOld.stream().collect(Collectors.toMap(Step6OldDetailExcel::getMatch, item -> item,(l,r) -> l));
                             for (int i = 0; i < newSize; i++) {
                                 OracleData newData = projectNew.get(i);
                                 Step6OldDetailExcel oldData = collect.get(newData.get行说明());
@@ -105,7 +105,7 @@ public class Step6Test {
                                 result3s.add(data);
                             }
                         }else if (oldSize < newSize) {
-                            Map<String, OracleData> collect = projectNew.stream().collect(Collectors.toMap(OracleData::get行说明, item -> item));
+                            Map<String, OracleData> collect = projectNew.stream().collect(Collectors.toMap(OracleData::get行说明, item -> item,(l,r) -> l));
                             for (int i = 0; i < oldSize; i++) {
                                 Step6OldDetailExcel oldData = projectOld.get(i);
                                 OracleData newData = collect.get(oldData.getMatch());
@@ -124,7 +124,7 @@ public class Step6Test {
                                 result2s.add(data);
                             }
                         }else {
-                            Map<String, Step6OldDetailExcel> collect = projectOld.stream().collect(Collectors.toMap(Step6OldDetailExcel::getMatch, item -> item));
+                            Map<String, Step6OldDetailExcel> collect = projectOld.stream().collect(Collectors.toMap(Step6OldDetailExcel::getMatch, item -> item,(l,r) -> l));
                             for (int i = 0; i < newSize; i++) {
                                 OracleData newData = projectNew.get(i);
                                 Step6OldDetailExcel oldData = collect.get(newData.get行说明());
@@ -167,7 +167,7 @@ public class Step6Test {
     public List<Step6OldDetailExcel> readPropertyExcel(){
         List<Step6OldDetailExcel> excels = new ArrayList<>();
         // 读取旧系统的余额信息 2022年
-        EasyExcel.read("", YuZhouOldBalanceExcel.class,
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/物业杭州公司 - 副本.xlsx", Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
                                 try {
@@ -201,7 +201,7 @@ public class Step6Test {
 
                             }
                         }))
-                .sheet("").headRowNumber(2).doRead();
+                .sheet("综合查询表").headRowNumber(3).doRead();
         return excels;
     }
 }
