@@ -101,8 +101,8 @@ public class FindNccZhongNanLevel {
 
     public void initZnProjectMapping(ExcelReader excelReader) {
         ReadSheet readSheet1 = EasyExcel.readSheet("0-科目映射").head(ZNProjectMapping.class).registerReadListener(new PageReadListener<ZNProjectMapping>(dataList -> {
-            for (ZNProjectMapping znProjectMapping : dataList) {
-
+            for (ZNProjectMapping data : dataList) {
+                znProjectMapping.put(data.getNccProjectCode(),data);
             }
         })).build();
         excelReader.read(readSheet1);
