@@ -230,6 +230,9 @@ public class Step6Test {
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
                                 try {
+                                    if (data.getV() == null && data.getW() == null){
+                                        throw new RuntimeException("无法计算金额");
+                                    }
                                     String companyName = data.getCompanyName();
                                     String realCompanyName = companyName.split("-")[0];
                                     data.setCompanyName(realCompanyName);
