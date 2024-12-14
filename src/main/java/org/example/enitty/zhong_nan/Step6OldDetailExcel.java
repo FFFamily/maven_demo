@@ -33,4 +33,8 @@ public class Step6OldDetailExcel {
     @ExcelIgnore
     private Boolean used;
 
+    public Boolean getUsed(){
+        return used != null && used;
+    }
+
 }
