@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 public class NewBalanceExcelResult {
     @ExcelProperty("匹配段")
     private String onlySign;
+    @ExcelProperty("辅助核算段")
+    private String auxiliaryAccounting;
     @ExcelProperty("借")
     private BigDecimal v;
     @ExcelProperty("贷")

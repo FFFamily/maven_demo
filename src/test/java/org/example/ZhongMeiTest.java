@@ -48,13 +48,16 @@ public class ZhongMeiTest {
 //            });
 //            allCompanyList.addAll(sqlData);
             Map<String, List<Step6OldDetailExcel>> result =
-                    allCompanyList.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getOnlySign));
+                    allCompanyList.stream().collect(Collectors.groupingBy(item -> item.getOnlySign()+item.getAuxiliaryAccounting()));
             for (String onlySign : result.keySet()) {
                 List<Step6OldDetailExcel> all = result.get(onlySign);
+                Step6OldDetailExcel step6OldDetailExcel = all.get(0);
                 NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
-                newBalanceExcelResult.setOnlySign(onlySign);
+                newBalanceExcelResult.setOnlySign(step6OldDetailExcel.getOnlySign());
+                newBalanceExcelResult.setAuxiliaryAccounting(step6OldDetailExcel.getAuxiliaryAccounting());
                 newBalanceExcelResult.setV(all.stream().map(Step6OldDetailExcel::getV).reduce(BigDecimal.ZERO, (prev,curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)),(l, r) ->l));
                 newBalanceExcelResult.setW(all.stream().map(Step6OldDetailExcel::getW).reduce(BigDecimal.ZERO, (prev,curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)),(l, r) ->l));
+
                 results.add(newBalanceExcelResult);
             }
             String fileName = "组合余额表-"+companyName + ".xlsx";
@@ -118,7 +121,7 @@ public class ZhongMeiTest {
                                     // 8-ICP
                                     String customerName = data.getCustomerName();
                                     ZNIPCMapping znipcMapping = findNccZhongNanLevel.znipcMapping.get(customerName);
-                                    String icp = znipcMapping == null ? "0" : znipcMapping.getFmsICPCode();
+                                    String icp = znipcMapping == null ? null : znipcMapping.getFmsICPCode();
 //                                    ZNCompanyMapping znCompanyMapping1 = findNccZhongNanLevel.znCustomerMapping.get(customerName);
 //                                    String icp = znCompanyMapping1.getFMSCompanyCode() == null ? "0" : znCompanyMapping1.getFMSCompanyCode();
                                     builder.append(appendStr(icp)).append(".");
@@ -130,6 +133,14 @@ public class ZhongMeiTest {
                                     builder.append(standby);
                                     String onlySign = builder.toString();
                                     data.setOnlySign(onlySign);
+                                    // 辅助核算
+                                    String auxiliaryAccounting = "";
+                                    if (icp != null){
+                                        auxiliaryAccounting += "-";
+                                    }else {
+                                        auxiliaryAccounting += data.getCustomerName() == null ? "" : data.getPersonalName() == null ? "-" : data.getPersonalName();
+                                    }
+                                    data.setAuxiliaryAccounting(auxiliaryAccounting);
                                     excels.add(data);
                                 }catch (Exception e){
 //                                    System.out.println("解析中南老系统明细数据出错: "+e.getMessage());

@@ -25,6 +25,8 @@ public class Step6OldDetailExcel {
     private String matchProject;
     @ExcelProperty("客商－名称")
     private String customerName;
+    @ExcelProperty("人员档案－名称")
+    private String personalName;
     @ExcelProperty("项目－名称")
     private String eventName;
     @ExcelProperty("借方金额")
@@ -45,6 +47,9 @@ public class Step6OldDetailExcel {
     // 新系统公司段代码
     @ExcelIgnore
     private String companyCode;
+    // 辅助核算段
+    @ExcelIgnore
+    private String auxiliaryAccounting;
 
     public Boolean getUsed(){
         return used != null && used;
