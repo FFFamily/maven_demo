@@ -132,8 +132,9 @@ public class ZhongMeiTest {
                                     data.setOnlySign(onlySign);
                                     excels.add(data);
                                 }catch (Exception e){
-                                    System.out.println("解析中南老系统明细数据出错: "+e.getMessage());
+//                                    System.out.println("解析中南老系统明细数据出错: "+e.getMessage());
                                     System.out.println(data);
+                                    e.printStackTrace();
                                 }
 
                             }
