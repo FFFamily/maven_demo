@@ -290,6 +290,8 @@ public class Step6Test {
                                     }
                                     // 其他货币基金只取 9-12月
                                     if (projectName.startsWith("其他货币基金") && !(date.isBefore(DateUtil.parse("2023-09-01")) || date.isAfter(DateUtil.parse("2023-12-31")))){
+                                        System.out.println("过滤：");
+                                        System.out.println(data);
                                         continue;
                                     }
                                     // 摘要
