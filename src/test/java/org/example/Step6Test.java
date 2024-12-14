@@ -47,7 +47,19 @@ public class Step6Test {
             }
             List<Step6OldDetailExcel> list = companyMap.get(companyName);
             String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" like '%NCC%'";
-            List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class));
+            List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
+                    .stream()
+                    .peek(item -> {
+                        String newProject = getNewProject(item);
+                        item.setActualProject(newProject);
+                        if (newProject.contains("合同负债") || newProject.contains("预收账款")){
+                            item.setMatchProject("合同负债/预收账款");
+                        }else {
+                            item.setMatchProject(newProject);
+                        }
+                    })
+                    .filter(item -> isBackProject(item.getActualProject()))
+                    .collect(Collectors.toList());
             // 按月进行分组
             Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
                 DateTime date = DateUtil.date(item.getTime());
@@ -63,8 +75,8 @@ public class Step6Test {
             for (String timeKey : allTimeKey) {
                 List<Step6OldDetailExcel>  timeGroupOld = timeOldCollect.get(timeKey);
                 List<OracleData> timeGroupNew = timeNewCollect.get(timeKey);
-                Map<String, List<Step6OldDetailExcel>> projectOldMap = timeGroupOld.stream().collect(Collectors.groupingBy(item -> item.getProjectName().split("－")[0]));
-                Map<String, List<OracleData>> projectNewMap = timeGroupNew.stream().collect(Collectors.groupingBy(item -> item.get科目段描述().split("-")[0]));
+                Map<String, List<Step6OldDetailExcel>> projectOldMap = timeGroupOld.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getMatchProject));
+                Map<String, List<OracleData>> projectNewMap = timeGroupNew.stream().collect(Collectors.groupingBy(OracleData::getMatchProject));
                 List<String> allProjectKey = Stream.of(projectOldMap.keySet(), projectNewMap.keySet()).flatMap(Collection::stream).distinct().collect(Collectors.toList());
                 for (String projectKey : allProjectKey) {
                     List<Step6OldDetailExcel>  projectOld = projectOldMap.getOrDefault(projectKey,new ArrayList<>());
@@ -74,14 +86,7 @@ public class Step6Test {
                     BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(CommonUtil.getBigDecimalValue(curr.get输入贷方()))), (l, r) -> l);
                     if (oldSum.compareTo(newSum) != 0) {
                         // 两个余额不相等
-                        Step6Result1 step6Result1 = new Step6Result1();
-                        step6Result1.setCompanyName(companyName);
-                        step6Result1.setOldProject(projectKey);
-                        step6Result1.setNewProject(projectKey);
-                        step6Result1.setOldMoney(oldSum);
-                        step6Result1.setNewMoney(newSum);
-                        step6Result1.setTime(timeKey);
-                        step6Result1.setSubMoney(oldSum.subtract(newSum));
+                        Step6Result1 step6Result1 = create(companyName,timeKey,projectKey,oldSum,newSum);
                         step6Result1.setRemark("余额不相等");
                         result1s.add(step6Result1);
                         // 找到造成差额的明细账
@@ -176,15 +181,7 @@ public class Step6Test {
                             }
                         }
                     }else {
-                        Step6Result1 step6Result1 = new Step6Result1();
-                        step6Result1.setCompanyName(companyName);
-                        step6Result1.setOldProject(projectKey);
-                        step6Result1.setNewProject(projectKey);
-                        step6Result1.setOldMoney(oldSum);
-                        step6Result1.setNewMoney(newSum);
-                        step6Result1.setTime(timeKey);
-                        step6Result1.setSubMoney(oldSum.subtract(newSum));
-                        step6Result1.setRemark("余额相等");
+                        Step6Result1 step6Result1 = create(companyName,timeKey,projectKey,oldSum,newSum);
                         result1s.add(step6Result1);
                     }
                     result3s.addAll(projectOld);
@@ -216,6 +213,37 @@ public class Step6Test {
         return CommonUtil.getBigDecimalValue(newData.get输入借方()).subtract(CommonUtil.getBigDecimalValue(newData.get输入贷方()));
     }
 
+    private Step6Result1 create(String companyName,String timeKey,String projectKey,BigDecimal oldSum,BigDecimal newSum){
+        Step6Result1 step6Result1 = new Step6Result1();
+        step6Result1.setCompanyName(companyName);
+        step6Result1.setOldProject(projectKey);
+        step6Result1.setNewProject(projectKey);
+        step6Result1.setOldMoney(oldSum);
+        step6Result1.setNewMoney(newSum);
+        step6Result1.setTime(timeKey);
+        step6Result1.setSubMoney(oldSum.subtract(newSum));
+        return step6Result1;
+    }
+
+    private String getOldProject(Step6OldDetailExcel excel){
+        return excel.getProjectName().split("－")[0];
+    }
+
+    private String getNewProject(OracleData oracleData){
+        return oracleData.get科目段描述().split("-")[0];
+    }
+
+    private Boolean isBackProject(String projectName){
+        return projectName.startsWith("应付账款")
+                || projectName.startsWith("预付账款")
+                || projectName.startsWith("合同负债")
+                || projectName.startsWith("预收账款")
+                || projectName.startsWith("应收账款")
+                || projectName.startsWith("其他应付款")
+                || projectName.startsWith("其他应收款")
+                || projectName.startsWith("其他货币基金");
+    }
+
 
 
 
@@ -244,14 +272,7 @@ public class Step6Test {
                                     }
                                     // 科目
                                     String projectName = data.getProjectName();
-                                    if (!(projectName.startsWith("应付账款")
-                                            || projectName.startsWith("预付账款")
-                                            || projectName.startsWith("合同负债")
-                                            || projectName.startsWith("预收账款")
-                                            || projectName.startsWith("应收账款")
-                                            || projectName.startsWith("其他应付款")
-                                            || projectName.startsWith("其他应收款")
-                                            || projectName.startsWith("其他货币基金"))){
+                                    if (!isBackProject(projectName)){
                                         // 只需要7大往来
                                         continue;
                                     }
@@ -259,6 +280,16 @@ public class Step6Test {
                                     String match = data.getMatch();
                                     if (match.contains("资金归集")){
                                         continue;
+                                    }
+
+                                    String oldProject = getOldProject(data);
+                                    data.setActualProject(oldProject);
+                                    if (oldProject.startsWith("其他应收款") || oldProject.startsWith("其他货币基金")){
+                                        data.setMatchProject("其他应收款");
+                                    }else if (oldProject.startsWith("合同负债") || oldProject.startsWith("预收账款")){
+                                        data.setMatchProject("合同负债/预收账款");
+                                    } else {
+                                        data.setMatchProject(oldProject);
                                     }
                                     excels.add(data);
                                 }catch (Exception e){

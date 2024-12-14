@@ -15,6 +15,10 @@ public class Step6OldDetailExcel {
     private Date time;
     @ExcelProperty("科目名称")
     private String projectName;
+    @ExcelProperty("实际科目")
+    private String actualProject;
+    @ExcelProperty("匹配科目")
+    private String matchProject;
     @ExcelProperty("借方金额")
     private BigDecimal v;
     @ExcelProperty("贷方金额")
@@ -23,7 +27,10 @@ public class Step6OldDetailExcel {
     private String match;
     @ExcelProperty("备注")
     private String remark;
+//    @ExcelProperty("组合")
+//    private String group;
     // 是否被使用
     @ExcelIgnore
     private Boolean used;
+
 }

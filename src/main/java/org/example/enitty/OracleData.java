@@ -18,6 +18,8 @@ public class OracleData {
     private String 公司段描述;
     private String 科目代码;
     private String 科目段描述;
+    private String actualProject;
+    private String matchProject;
     private String 报账单号;
     private String 交易对象;
     private String 交易对象名称;
@@ -57,6 +59,7 @@ public class OracleData {
     private String 额外字段;
     private String 科目;
     private String 借正贷负;
+//    private String group;
     private String 备注;
     public Boolean getUsed(){
         return this.used != null && this.used;
