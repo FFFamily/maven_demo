@@ -253,7 +253,7 @@ public class Step6Test {
                 || projectName.startsWith("应收账款")
                 || projectName.startsWith("其他应付款")
                 || projectName.startsWith("其他应收款")
-                || projectName.startsWith("其他货币基金");
+                || projectName.startsWith("其他货币资金");
     }
 
 
@@ -289,7 +289,7 @@ public class Step6Test {
                                         continue;
                                     }
                                     // 其他货币基金只取 9-12月
-                                    if (projectName.startsWith("其他货币基金") && !(date.isBefore(DateUtil.parse("2023-09-01")) || date.isAfter(DateUtil.parse("2023-12-31")))){
+                                    if (projectName.startsWith("其他货币资金") && !(date.isBefore(DateUtil.parse("2023-09-01")) || date.isAfter(DateUtil.parse("2023-12-31")))){
                                         System.out.println("过滤：");
                                         System.out.println(data);
                                         continue;
@@ -302,7 +302,7 @@ public class Step6Test {
 
                                     String oldProject = getOldProject(data);
                                     data.setActualProject(oldProject);
-                                    if (oldProject.startsWith("其他应收款") || oldProject.startsWith("其他货币基金")){
+                                    if (oldProject.startsWith("其他应收款") || oldProject.startsWith("其他货币资金")){
                                         data.setMatchProject("其他应收款");
                                     }else if (oldProject.startsWith("合同负债") || oldProject.startsWith("预收账款")){
                                         data.setMatchProject("合同负债/预收账款");
