@@ -59,6 +59,8 @@ public class ZhongMeiTest {
             }
             String fileName = "组合余额表-"+companyName + ".xlsx";
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(results);
+            String fileName2 = "组合余额表-总账-"+companyName + ".xlsx";
+            EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(allCompanyList);
         }
     }
 
