@@ -165,6 +165,7 @@ public class Step6Test {
             }
             for (int i = newSize; i < oldSize; i++) {
                 Step6OldDetailExcel data = projectOld.get(i);
+                data.setRemark("多余数据");
                 result3s.add(data);
             }
         }else {
@@ -264,6 +265,7 @@ public class Step6Test {
             }
             for (int i = oldSize; i < newSize; i++) {
                 OracleData data = projectNew.get(i);
+                data.set备注("多余数据");
                 result2s.add(data);
             }
         }
