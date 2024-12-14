@@ -30,9 +30,11 @@ public class ZhongMeiTest {
         List<Step6OldDetailExcel> excels = readPropertyExcel();
         Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
         for (String companyName : collect.keySet()) {
-            if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
+            String nowCompanyName = companyName.split("-")[0];
+            if (!nowCompanyName.equals("江苏中南物业服务有限公司温州分公司")){
                 continue;
             }
+            System.out.println(nowCompanyName);
             List<NewBalanceExcelResult> results = new ArrayList<>();
             List<Step6OldDetailExcel> allCompanyList = collect.get(companyName);
             String findPiSQL = "SELECT  * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' ";
