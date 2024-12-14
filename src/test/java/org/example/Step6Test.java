@@ -288,7 +288,7 @@ public class Step6Test {
                                         continue;
                                     }
                                     // 其他货币基金只取 9-12月
-                                    if (projectName.startsWith("其他货币资金") && !(date.isBefore(DateUtil.parse("2023-09-01")) || date.isAfter(DateUtil.parse("2023-12-31")))){
+                                    if (projectName.startsWith("其他货币资金") && (date.isBefore(DateUtil.parse("2023-09-01")) || date.isAfter(DateUtil.parse("2023-12-31")))){
                                         System.out.println("过滤："+DateUtil.date(date));
                                         System.out.println(data);
                                         continue;
