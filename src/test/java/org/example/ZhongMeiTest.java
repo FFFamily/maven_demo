@@ -81,6 +81,10 @@ public class ZhongMeiTest {
                                     if (data.getV() == null && data.getW() == null){
                                         throw new RuntimeException("无法计算金额");
                                     }
+                                    String projectName = data.getProjectName();
+                                    if (!isBackProject2022(projectName)){
+                                        continue;
+                                    }
                                     Date time = data.getTime();
                                     DateTime date = DateUtil.date(time);
                                     if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
@@ -156,5 +160,16 @@ public class ZhongMeiTest {
 
     public String appendStr(String str){
         return  str == null ? "0" : str;
+    }
+
+    private Boolean isBackProject2022(String projectName) {
+        return projectName.startsWith("应付账款")
+                || projectName.startsWith("预付账款")
+                || projectName.startsWith("合同负债")
+                || projectName.startsWith("预收账款")
+                || projectName.startsWith("应收账款")
+                || projectName.startsWith("其他应付款")
+                || projectName.startsWith("其他应收款")
+                || projectName.startsWith("应收票据");
     }
 }
