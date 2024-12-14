@@ -10,9 +10,6 @@ import org.example.enitty.Assistant;
 import org.example.enitty.zhong_nan.OldZNAuxiliaryBalanceSheet;
 import org.example.enitty.zhong_nan.OldZNChronologicalAccount2022;
 import org.example.utils.CommonUtil;
-import org.example.utils.ExcelDataUtil;
-import org.example.utils.LevelUtil;
-import org.example.分类.entity.DraftFormatTemplate;
 import org.example.寻找等级.FindLevel;
 import org.example.寻找等级.OtherInfo3;
 import org.junit.jupiter.api.Test;
@@ -23,14 +20,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.example.utils.CommonUtil.getZ;
 
 @SpringBootTest
-public class Step2Test {
+public class Step4Test {
     @Resource
     private FindLevel findLevel;
     @Test
