@@ -73,8 +73,8 @@ public class Step6Test {
             // 所有的时间
             List<String> allTimeKey = Stream.of(timeOldKeyCollect, timeNewKeyCollect).flatMap(Collection::stream).distinct().collect(Collectors.toList());
             for (String timeKey : allTimeKey) {
-                List<Step6OldDetailExcel>  timeGroupOld = timeOldCollect.get(timeKey);
-                List<OracleData> timeGroupNew = timeNewCollect.get(timeKey);
+                List<Step6OldDetailExcel>  timeGroupOld = timeOldCollect.getOrDefault(timeKey,new ArrayList<>());
+                List<OracleData> timeGroupNew = timeNewCollect.getOrDefault(timeKey,new ArrayList<>());
                 Map<String, List<Step6OldDetailExcel>> projectOldMap = timeGroupOld.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getMatchProject));
                 Map<String, List<OracleData>> projectNewMap = timeGroupNew.stream().collect(Collectors.groupingBy(OracleData::getMatchProject));
                 List<String> allProjectKey = Stream.of(projectOldMap.keySet(), projectNewMap.keySet()).flatMap(Collection::stream).distinct().collect(Collectors.toList());
@@ -199,6 +199,7 @@ public class Step6Test {
             }
         }
     }
+
 
     private void findNew(List<Step6OldDetailExcel>  projectOld,List<OracleData> projectNew,List<OracleData> result2s){
         // 找到造成差额的明细账
