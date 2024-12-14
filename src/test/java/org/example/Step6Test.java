@@ -42,7 +42,7 @@ public class Step6Test {
             List<OracleData> result2s = new ArrayList<>();
             List<Step6OldDetailExcel> result3s = new ArrayList<>();
             System.out.println("当前公司为： "+companyName);
-            if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
+            if (!companyName.equals("江苏中南物业服务有限公司")){
                 continue;
             }
             List<Step6OldDetailExcel> list = companyMap.get(companyName);
@@ -84,9 +84,9 @@ public class Step6Test {
                     BigDecimal oldSum = projectOld.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.getV()).subtract(CommonUtil.getBigDecimalValue(curr.getW()))), (l, r) -> l);
                     BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(CommonUtil.getBigDecimalValue(curr.get输入贷方()))), (l, r) -> l);
                     if (oldSum.compareTo(newSum) != 0) {
-                        if (!(timeKey.equals("") && projectKey.equals(""))){
-                            continue;
-                        }
+//                        if (!(timeKey.equals("") && projectKey.equals(""))){
+//                            continue;
+//                        }
                         // 两个余额不相等
                         findOld(projectOld,projectNew,result3s);
                         findNew(projectOld,projectNew,result2s);
@@ -318,17 +318,23 @@ public class Step6Test {
      */
     public List<Step6OldDetailExcel> readPropertyExcel(){
         List<Step6OldDetailExcel> excels = new ArrayList<>();
+        Map<String,String> companyMapping = new HashMap<>();
+        companyMapping.put("江苏中南物业服务有限公司（总部）","江苏中南物业服务有限公司");
+        companyMapping.put("江苏中南物业服务有限公司（商管）","江苏中南物业服务有限公司");
+        companyMapping.put("江苏中南物业服务有限公司（住宅）","江苏中南物业服务有限公司");
+        companyMapping.put("江苏中南物业服务有限公司平湖分公司","江苏中南物业服务有限公司");
         // 读取旧系统的余额信息 2022年
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/物业杭州公司 - 副本.xlsx", Step6OldDetailExcel.class,
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/物业上海公司.xlsx", Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
                                 try {
                                     if (data.getV() == null && data.getW() == null){
                                         throw new RuntimeException("无法计算金额");
                                     }
+
                                     String companyName = data.getCompanyName();
                                     String realCompanyName = companyName.split("-")[0];
-                                    data.setCompanyName(realCompanyName);
+                                    data.setCompanyName(companyMapping.getOrDefault(realCompanyName, realCompanyName));
                                     Date time = data.getTime();
                                     DateTime date = DateUtil.date(time);
                                     if (date.isBefore(DateUtil.parse("2023-07-01")) || date.isAfter(DateUtil.parse("2023-12-31"))) {
@@ -343,8 +349,8 @@ public class Step6Test {
                                     }
                                     // 其他货币基金只取 9-12月
                                     if (projectName.startsWith("其他货币资金") && (date.isBefore(DateUtil.parse("2023-09-01")) || date.isAfter(DateUtil.parse("2023-12-31")))){
-                                        System.out.println("过滤："+DateUtil.date(date));
-                                        System.out.println(data);
+//                                        System.out.println("过滤："+DateUtil.date(date));
+//                                        System.out.println(data);
                                         continue;
                                     }
                                     // 摘要
@@ -364,7 +370,7 @@ public class Step6Test {
                                     }
                                     excels.add(data);
                                 }catch (Exception e){
-                                    System.out.println("解析中南老系统明细数据出错");
+                                    System.out.println("解析中南老系统明细数据出错: "+e.getMessage());
                                     System.out.println(data);
                                 }
 
