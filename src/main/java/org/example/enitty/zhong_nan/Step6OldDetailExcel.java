@@ -8,6 +8,8 @@ import java.util.Date;
 
 @Data
 public class Step6OldDetailExcel {
+    @ExcelProperty("编号")
+    private String id;
     @ExcelProperty("账套名称")
     private String companyName;
     @ExcelProperty("日期")
@@ -20,4 +22,8 @@ public class Step6OldDetailExcel {
     private BigDecimal w;
     @ExcelProperty("摘要")
     private String match;
+    @ExcelProperty("备注")
+    private String remark;
+    // 是否被使用
+    private Boolean used;
 }

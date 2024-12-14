@@ -20,5 +20,8 @@ public class Step6Result1 {
     private BigDecimal newMoney;
     @ExcelProperty("差额")
     private BigDecimal subMoney;
+    @ExcelProperty("备注")
+    private String remark;
+
 }
 
