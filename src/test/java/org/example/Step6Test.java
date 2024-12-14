@@ -121,11 +121,11 @@ public class Step6Test {
                             Map<String, List<OracleData>> collect = projectNew.stream().collect(Collectors.groupingBy(item -> item.get行说明()));
                             for (int i = 0; i < oldSize; i++) {
                                 Step6OldDetailExcel oldData = projectOld.get(i);
-                                BigDecimal oldBalance = CommonUtil.getBigDecimalValue(oldData.getV()).subtract(CommonUtil.getBigDecimalValue(oldData.getW()));
-                                List<OracleData> newDataList = collect.get(oldData.getMatch());
+                                BigDecimal oldBalance = getOldBalance(oldData);
+                                List<OracleData> newDataList = collect.getOrDefault(oldData.getMatch(),new ArrayList<>());
                                 if (newDataList.size() == 1){
                                     OracleData newData = newDataList.get(0);
-                                    BigDecimal newBalance = CommonUtil.getBigDecimalValue(newData.get输入借方()).subtract(CommonUtil.getBigDecimalValue(newData.get输入贷方()));
+                                    BigDecimal newBalance = getNewBalance(newData);
                                     if (oldBalance.compareTo(newBalance) != 0) {
                                         // 余额不相等
                                         newData.set备注(timeKey+projectKey+"：金额不相等");
@@ -152,11 +152,11 @@ public class Step6Test {
                             Map<String, List<OracleData>> collect = projectNew.stream().collect(Collectors.groupingBy(item -> item.get行说明()));
                             for (int i = 0; i < oldSize; i++) {
                                 Step6OldDetailExcel oldData = projectOld.get(i);
-                                BigDecimal oldBalance = CommonUtil.getBigDecimalValue(oldData.getV()).subtract(CommonUtil.getBigDecimalValue(oldData.getW()));
-                                List<OracleData> newDataList = collect.get(oldData.getMatch());
+                                BigDecimal oldBalance = getOldBalance(oldData);
+                                List<OracleData> newDataList = collect.getOrDefault(oldData.getMatch(),new ArrayList<>());
                                 if (newDataList.size() == 1){
                                     OracleData newData = newDataList.get(0);
-                                    BigDecimal newBalance = CommonUtil.getBigDecimalValue(newData.get输入借方()).subtract(CommonUtil.getBigDecimalValue(newData.get输入贷方()));
+                                    BigDecimal newBalance = getNewBalance(newData);
                                     if (oldBalance.compareTo(newBalance) != 0) {
                                         // 余额不相等
                                         newData.set备注(timeKey+projectKey+"：金额不相等");
