@@ -58,7 +58,7 @@ public class ZhongMeiTest {
                 results.add(newBalanceExcelResult);
             }
             String fileName = "组合余额表-"+companyName + ".xlsx";
-            EasyExcel.write(fileName, OracleData.class).sheet("旧系统").doWrite(results);
+            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(results);
         }
     }
 
@@ -103,15 +103,15 @@ public class ZhongMeiTest {
                                     String projectCode = data.getProjectCode();
                                     ZNProjectMapping znProjectMapping = findNccZhongNanLevel.znProjectMapping.get(projectCode);
                                     String fmsProjectCode =  znProjectMapping.getFmsProjectCode();
-                                    builder.append(fmsProjectCode).append(".");
+                                    builder.append(appendStr(fmsProjectCode) ).append(".");
                                     // 4-子目
                                     String fmsChildProjectCode = znProjectMapping.getFmsChildProjectCode();
-                                    builder.append(fmsChildProjectCode).append(".");
+                                    builder.append(appendStr(fmsChildProjectCode) ).append(".");
                                     // 5-产品代码
                                     String eventName = data.getEventName();
                                     ZNEventMapping znEventMapping = findNccZhongNanLevel.znEventMapping.get(companyName + eventName);
                                     String fmsProductCode = znEventMapping == null ? "0": znEventMapping.getFmsProductCode();
-                                    builder.append(fmsProductCode).append(".");
+                                    builder.append(appendStr(fmsProductCode) ).append(".");
                                     // 6-地区代码
                                     String fmsAreaCode = "0";
                                     builder.append(fmsAreaCode).append(".");
@@ -124,10 +124,10 @@ public class ZhongMeiTest {
                                     String icp = znipcMapping == null ? "0" : znipcMapping.getFmsICPCode();
 //                                    ZNCompanyMapping znCompanyMapping1 = findNccZhongNanLevel.znCustomerMapping.get(customerName);
 //                                    String icp = znCompanyMapping1.getFMSCompanyCode() == null ? "0" : znCompanyMapping1.getFMSCompanyCode();
-                                    builder.append(icp).append(".");
+                                    builder.append(appendStr(icp)).append(".");
                                     // 9-项目代码
                                     String fmsEventCode = znEventMapping == null ? "0" : znEventMapping.getFmsEventCode();
-                                    builder.append(fmsEventCode).append(".");
+                                    builder.append(appendStr(fmsEventCode) ).append(".");
                                     // 10-备用
                                     String standby  = "0";
                                     builder.append(standby);
@@ -144,5 +144,9 @@ public class ZhongMeiTest {
                         }))
                 .sheet("综合查询表").headRowNumber(3).doRead();
         return excels;
+    }
+
+    public String appendStr(String str){
+        return  str == null ? "0" : str;
     }
 }
