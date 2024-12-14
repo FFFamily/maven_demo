@@ -76,9 +76,13 @@ public class ZhongMeiTest {
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
                                 try {
-
                                     if (data.getV() == null && data.getW() == null){
                                         throw new RuntimeException("无法计算金额");
+                                    }
+                                    Date time = data.getTime();
+                                    DateTime date = DateUtil.date(time);
+                                    if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
+                                        continue;
                                     }
                                     StringBuilder builder = new StringBuilder();
                                     // 1- 机构代码
