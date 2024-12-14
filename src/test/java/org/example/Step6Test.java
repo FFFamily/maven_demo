@@ -370,6 +370,7 @@ public class Step6Test {
                                         data.setMatchProject(oldProject);
                                     }
                                     excels.add(data);
+                                    System.out.println(excels.size());
                                 }catch (Exception e){
                                     System.out.println("解析中南老系统明细数据出错: "+e.getMessage());
                                     System.out.println(data);
