@@ -37,16 +37,16 @@ public class ZhongMeiTest {
             System.out.println(nowCompanyName);
             List<NewBalanceExcelResult> results = new ArrayList<>();
             List<Step6OldDetailExcel> allCompanyList = collect.get(companyName);
-            String findPiSQL = "SELECT  * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+allCompanyList.get(0).getCompanyCode()+"' ";
+//            String findPiSQL = "SELECT  * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+allCompanyList.get(0).getCompanyCode()+"' ";
 //                        "companyAND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' ";
-            List<Step6OldDetailExcel> sqlData = jdbcTemplate.query(findPiSQL, (row, c) -> {
-                Step6OldDetailExcel data = new Step6OldDetailExcel();
-                data.setOnlySign(row.getString("账户组合"));
-                data.setV(row.getBigDecimal("输入借方"));
-                data.setW(row.getBigDecimal("输入贷方"));
-                return data;
-            });
-            allCompanyList.addAll(sqlData);
+//            List<Step6OldDetailExcel> sqlData = jdbcTemplate.query(findPiSQL, (row, c) -> {
+//                Step6OldDetailExcel data = new Step6OldDetailExcel();
+//                data.setOnlySign(row.getString("账户组合"));
+//                data.setV(row.getBigDecimal("输入借方"));
+//                data.setW(row.getBigDecimal("输入贷方"));
+//                return data;
+//            });
+//            allCompanyList.addAll(sqlData);
             Map<String, List<Step6OldDetailExcel>> result =
                     allCompanyList.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getOnlySign));
             for (String onlySign : result.keySet()) {
@@ -70,13 +70,8 @@ public class ZhongMeiTest {
      */
     public List<Step6OldDetailExcel> readPropertyExcel(){
         List<Step6OldDetailExcel> excels = new ArrayList<>();
-        Map<String,String> companyMapping = new HashMap<>();
-        companyMapping.put("江苏中南物业服务有限公司（总部）","江苏中南物业服务有限公司");
-        companyMapping.put("江苏中南物业服务有限公司（商管）","江苏中南物业服务有限公司");
-        companyMapping.put("江苏中南物业服务有限公司（住宅）","江苏中南物业服务有限公司");
-        companyMapping.put("江苏中南物业服务有限公司平湖分公司","江苏中南物业服务有限公司");
         // 读取旧系统的余额信息 2022年
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/物业上海公司.xlsx", Step6OldDetailExcel.class,
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/物业杭州公司 - 副本.xlsx", Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
                                 try {

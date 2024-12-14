@@ -31,7 +31,7 @@ public class FindNccLangJiLevel {
     HashMap<String, MappingCustomerExcel> mappingCustomerExcelHashMap;
 
 
-    @PostConstruct
+//    @PostConstruct
     public void init(){
         mappingNccToFmsExcels = new HashMap<>();
         mappingProjectExcels = new HashMap<>();

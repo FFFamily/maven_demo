@@ -9,6 +9,7 @@ import org.example.enitty.zhong_nan.*;
 import org.example.utils.OldExcelDataUtil;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,10 +30,9 @@ public class FindNccZhongNanLevel {
     // ICP
     public HashMap<String, ZNIPCMapping> znipcMapping = new HashMap<>();
 
-
+    @PostConstruct
     public void init(){
-
-        try (ExcelReader excelReader = EasyExcel.read("").build()) {
+        try (ExcelReader excelReader = EasyExcel.read("src/main/java/org/example/excel/zhong_nan/2-中南NCC与FMS映射表(1).xlsx").build()) {
             initZnProjectMapping(excelReader);
             initZnCompanyMapping(excelReader);
             initZnOrgMapping(excelReader);
