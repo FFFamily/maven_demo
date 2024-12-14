@@ -104,7 +104,7 @@ public class Step6Test {
                                 }else {
                                     for (OracleData newData : newDataList) {
                                         BigDecimal newBalance = getNewBalance(newData);
-                                        if (!oldData.getUsed() && newBalance.compareTo(oldBalance) == 0){
+                                        if (!newData.getUsed() && newBalance.compareTo(oldBalance) == 0){
                                             oldData.setUsed(true);
                                             newData.setUsed(true);
                                             oldData.setRemark(timeKey+projectKey+"：存在多个匹配，但余额相等");
