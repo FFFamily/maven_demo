@@ -5,10 +5,12 @@ import lombok.Data;
 // 项目映射
 @Data
 public class ZNEventMapping {
-    @ExcelProperty("NCC项目段")
-    private String  nccEventName;
-    @ExcelProperty("FMS机构")
-    private String fmsOrg;
+    @ExcelProperty("核算账簿名称")
+    private String nccCompanyName;
+    @ExcelProperty("项目段")
+    private String nccEventName;
     @ExcelProperty("FMS项目段编码")
     private String fmsEventCode;
+    @ExcelProperty("产品段代码")
+    private String fmsProductCode;
 }

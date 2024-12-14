@@ -5,17 +5,10 @@ import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import org.example.enitty.Assistant;
-import org.example.enitty.zhong_nan.ZNProjectMapping;
-import org.example.utils.CommonUtil;
-import org.example.utils.LevelUtil;
+import org.example.enitty.zhong_nan.*;
 import org.example.utils.OldExcelDataUtil;
-import org.example.寻找等级.old_excel.MappingCustomerExcel;
-import org.example.寻找等级.old_excel.MappingNccToFmsExcel;
-import org.example.寻找等级.old_excel.MappingProjectExcel;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,31 +17,95 @@ import java.util.stream.Collectors;
 @Component
 public class FindNccZhongNanLevel {
     // 科目映射
-    HashMap<String,ZNProjectMapping> znProjectMapping = new HashMap<>();
+    public HashMap<String,ZNProjectMapping> znProjectMapping = new HashMap<>();
+    // 公司
+    public HashMap<String, ZNCompanyMapping> znCompanyMapping = new HashMap<>();
+    // 部门
+    public HashMap<String, ZNOrgMapping> znOrgMapping = new HashMap<>();
+    // 项目
+    public HashMap<String, ZNEventMapping> znEventMapping = new HashMap<>();
+    // 客商
+    public HashMap<String,ZNCompanyMapping> znCustomerMapping = new HashMap<>();
+    // ICP
+    public HashMap<String, ZNIPCMapping> znipcMapping = new HashMap<>();
 
 
     public void init(){
-        initZnProjectMapping();
+
+        try (ExcelReader excelReader = EasyExcel.read("").build()) {
+            initZnProjectMapping(excelReader);
+            initZnCompanyMapping(excelReader);
+            initZnOrgMapping(excelReader);
+            initZnEventMapping(excelReader);
+        }
+        initZnipcMapping();
+    }
+
+    private void initZnipcMapping() {
+        EasyExcel.read("", ZNIPCMapping.class, new PageReadListener<ZNIPCMapping>(dataList -> {
+            for (ZNIPCMapping data : dataList) {
+                znipcMapping.put(data.getNccCustomerName(),data);
+            }
+        }));
+    }
+
+    private void initZnEventMapping(ExcelReader excelReader) {
+        ReadSheet readSheet1 = EasyExcel.readSheet("2-项目段").head(ZNEventMapping.class).registerReadListener(new PageReadListener<ZNEventMapping>(dataList -> {
+            for (ZNEventMapping data : dataList) {
+                String nccCompanyName = data.getNccCompanyName();
+                String nccEventName = data.getNccEventName();
+                znEventMapping.put(nccCompanyName+nccEventName,data);
+            }
+        })).build();
+        excelReader.read(readSheet1);
+    }
+
+    private void initZnOrgMapping(ExcelReader excelReader) {
+        ReadSheet readSheet1 = EasyExcel.readSheet("3-成本中心").head(ZNOrgMapping.class).registerReadListener(new PageReadListener<ZNOrgMapping>(dataList -> {
+            for (ZNOrgMapping data : dataList) {
+                String nccCompanyName = data.getNCCCompanyName();
+                String nccAssistantName = data.getNCCAssistantName();
+                String regex = "【部门：(.*?)】";
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(nccAssistantName);
+                if (matcher.find()) {
+                    String result = matcher.group(1);
+                    znOrgMapping.put(nccCompanyName+result,data);
+                }
+            }
+        })).build();
+        excelReader.read(readSheet1);
+    }
+
+    private void initZnCompanyMapping(ExcelReader excelReader) {
+        ReadSheet readSheet1 = EasyExcel.readSheet(0).head(ZNCompanyMapping.class).registerReadListener(new PageReadListener<ZNCompanyMapping>(dataList -> {
+            for (ZNCompanyMapping data : dataList) {
+                znCompanyMapping.put(data.getNCCCompanyName(),data);
+                znCustomerMapping.put(data.getNCCCompanyNameCopy(),data);
+            }
+        })).build();
+        excelReader.read(readSheet1);
+
     }
 
     /**
      * 通过公司名称获取
      */
     public List<OtherInfo3> getOldCachedDataListByCompanyName(String companyName){
+        // 读取老系统的序时账
+        // 对老系统进行转换而非直接拿
         List<OtherInfo3> result = OldExcelDataUtil.getOldExcel("src/main/java/org/example/excel/lang_ji/2023年1-11月序时簿.xlsx", companyName);
         result.addAll(OldExcelDataUtil.getOldExcel("src/main/java/org/example/excel/lang_ji/2022.xlsx", companyName));
         return result;
     }
 
-    public void initZnProjectMapping() {
-        try (ExcelReader excelReader = EasyExcel.read("").build()) {
-            ReadSheet readSheet1 = EasyExcel.readSheet(0).head(ZNProjectMapping.class).registerReadListener(new PageReadListener<ZNProjectMapping>(dataList -> {
-                for (ZNProjectMapping znProjectMapping : dataList) {
+    public void initZnProjectMapping(ExcelReader excelReader) {
+        ReadSheet readSheet1 = EasyExcel.readSheet(0).head(ZNProjectMapping.class).registerReadListener(new PageReadListener<ZNProjectMapping>(dataList -> {
+            for (ZNProjectMapping znProjectMapping : dataList) {
 
-                }
-            })).build();
-            excelReader.read(readSheet1);
-        }
+            }
+        })).build();
+        excelReader.read(readSheet1);
     }
 
     public Set<OtherInfo3> findNccZhongNanList(List<OtherInfo3> oldCachedDataList,OtherInfo3 parentItem, Assistant assistant){
