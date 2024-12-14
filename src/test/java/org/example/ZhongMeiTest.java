@@ -138,7 +138,7 @@ public class ZhongMeiTest {
                                     if (icp != null){
                                         auxiliaryAccounting += "-";
                                     }else {
-                                        auxiliaryAccounting += data.getCustomerName() == null ? "" : data.getPersonalName() == null ? "-" : data.getPersonalName();
+                                        auxiliaryAccounting += data.getCustomerName() != null ? data.getCustomerName() : data.getPersonalName() == null ? "-" : data.getPersonalName();
                                     }
                                     data.setAuxiliaryAccounting(auxiliaryAccounting);
                                     excels.add(data);
