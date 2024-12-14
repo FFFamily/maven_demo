@@ -135,68 +135,47 @@ public class Step6Test {
         int newSize = projectNew.size();
         // 先从旧系统出发
         if (oldSize > newSize) {
-            Map<String, List<OracleData>> collect = projectNew.stream().collect(Collectors.groupingBy(OracleData::get行说明));
-            for (int i = 0; i < newSize; i++) {
-                Step6OldDetailExcel oldData = projectOld.get(i);
-                BigDecimal oldBalance = getOldBalance(oldData);
-                List<OracleData> newDataList = collect.getOrDefault(oldData.getMatch(),new ArrayList<>());
-                if (newDataList.size() == 1){
-                    OracleData newData = newDataList.get(0);
-                    BigDecimal newBalance = getNewBalance(newData);
-                    if (oldBalance.compareTo(newBalance) != 0) {
-                        // 余额不相等
-                        result3s.add(oldData);
-                    }
-                }else {
-                    boolean flag = true;
-                    for (OracleData newData : newDataList) {
-                        BigDecimal newBalance = getNewBalance(newData);
-                        if (!newData.getUsed() && newBalance.compareTo(oldBalance) == 0){
-                            newData.setUsed(true);
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag){
-                        oldData.setRemark("未能匹配多个数据");
-                        result3s.add(oldData);
-                    }
-                }
-            }
+            matchOld(projectOld,projectNew,result3s,newSize);
             for (int i = newSize; i < oldSize; i++) {
                 Step6OldDetailExcel data = projectOld.get(i);
                 data.setRemark("多余数据");
                 result3s.add(data);
             }
         }else {
-            Map<String, List<OracleData>> collect = projectNew.stream().collect(Collectors.groupingBy(item -> item.get行说明()));
-            for (int i = 0; i < oldSize; i++) {
-                Step6OldDetailExcel oldData = projectOld.get(i);
-                BigDecimal oldBalance = getOldBalance(oldData);
-                List<OracleData> newDataList = collect.getOrDefault(oldData.getMatch(),new ArrayList<>());
-                if (newDataList.size() == 1){
-                    OracleData newData = newDataList.get(0);
+            matchOld(projectOld,projectNew,result3s,oldSize);
+        }
+    }
+
+    private void matchOld(List<Step6OldDetailExcel>  projectOld,List<OracleData> projectNew,List<Step6OldDetailExcel> result3s,int size){
+        Map<String, List<OracleData>> collect = projectNew.stream().collect(Collectors.groupingBy(item -> item.get行说明()));
+        for (int i = 0; i < size; i++) {
+            Step6OldDetailExcel oldData = projectOld.get(i);
+            BigDecimal oldBalance = getOldBalance(oldData);
+            List<OracleData> newDataList = collect.getOrDefault(oldData.getMatch(),new ArrayList<>());
+            if (newDataList.size() == 1){
+                OracleData newData = newDataList.get(0);
+                BigDecimal newBalance = getNewBalance(newData);
+                if (oldBalance.compareTo(newBalance) != 0) {
+                    // 余额不相等
+//                    result3s.add(oldData);
+                    oldData.setRemark("和新系统余额不相等");
+                }
+            }else {
+                boolean flag = true;
+                for (OracleData newData : newDataList) {
                     BigDecimal newBalance = getNewBalance(newData);
-                    if (oldBalance.compareTo(newBalance) != 0) {
-                        // 余额不相等
-                        result3s.add(oldData);
-                    }
-                }else {
-                    boolean flag = true;
-                    for (OracleData newData : newDataList) {
-                        BigDecimal newBalance = getNewBalance(newData);
-                        if (!newData.getUsed() && newBalance.compareTo(oldBalance) == 0){
-                            flag = false;
-                            newData.setUsed(true);
-                            break;
-                        }
-                    }
-                    if (flag){
-                        oldData.setRemark("未能匹配多个数据");
-                        result3s.add(oldData);
+                    if (!newData.getUsed() && newBalance.compareTo(oldBalance) == 0){
+                        flag = false;
+                        newData.setUsed(true);
+                        break;
                     }
                 }
+                if (flag){
+                    oldData.setRemark("未能匹配多个数据");
+//                    result3s.add(oldData);
+                }
             }
+            result3s.add(oldData);
         }
     }
 
@@ -207,68 +186,47 @@ public class Step6Test {
         int newSize = projectNew.size();
         // 先从旧系统出发
         if (oldSize >= newSize) {
-            Map<String, List<Step6OldDetailExcel>> collect = projectOld.stream().collect(Collectors.groupingBy(item -> item.getMatch()));
-            for (int i = 0; i < newSize; i++) {
-                OracleData newData = projectNew.get(i);
-                BigDecimal newBalance = getNewBalance(newData);
-                List<Step6OldDetailExcel> oldDataList = collect.getOrDefault(newData.get行说明(), new ArrayList<>());
-                if (oldDataList.size() == 1){
-                    Step6OldDetailExcel oldData = oldDataList.get(0);
-                    BigDecimal oldBalance = getOldBalance(oldData);
-                    if (oldBalance.compareTo(newBalance) != 0) {
-                        // 余额不相等
-                        result2s.add(newData);
-                    }
-                }else {
-                    boolean flag = true;
-                    for (Step6OldDetailExcel oldData : oldDataList) {
-                        BigDecimal oldBalance = getOldBalance(oldData);
-                        if (!oldData.getUsed() && newBalance.compareTo(oldBalance) == 0){
-                            oldData.setUsed(true);
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag){
-                        newData.set备注("未能匹配多个数据");
-                        result2s.add(newData);
-                    }
-                }
-            }
+            matchNew(projectOld,projectNew,result2s,newSize);
         }else {
-            Map<String, List<Step6OldDetailExcel>> collect = projectOld.stream().collect(Collectors.groupingBy(item -> item.getMatch()));
-            for (int i = 0; i < oldSize; i++) {
-                OracleData newData = projectNew.get(i);
-                BigDecimal newBalance = getNewBalance(newData);
-                List<Step6OldDetailExcel> oldDataList = collect.getOrDefault(newData.get行说明(), new ArrayList<>());
-                if (oldDataList.size() == 1){
-                    Step6OldDetailExcel oldData = oldDataList.get(0);
-                    BigDecimal oldBalance = getOldBalance(oldData);
-                    if (oldBalance.compareTo(newBalance) != 0) {
-                        // 余额不相等
-                        result2s.add(newData);
-                    }
-                }else {
-                    boolean flag = true;
-                    for (Step6OldDetailExcel oldData : oldDataList) {
-                        BigDecimal oldBalance = getOldBalance(oldData);
-                        if (!oldData.getUsed() && newBalance.compareTo(oldBalance) == 0){
-                            oldData.setUsed(true);
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag){
-                        newData.set备注("未能匹配多个数据");
-                        result2s.add(newData);
-                    }
-                }
-            }
+            matchNew(projectOld,projectNew,result2s,oldSize);
             for (int i = oldSize; i < newSize; i++) {
                 OracleData data = projectNew.get(i);
                 data.set备注("多余数据");
                 result2s.add(data);
             }
+        }
+    }
+
+    private void matchNew(List<Step6OldDetailExcel>  projectOld,List<OracleData> projectNew,List<OracleData> result2s,int size){
+        Map<String, List<Step6OldDetailExcel>> collect = projectOld.stream().collect(Collectors.groupingBy(item -> item.getMatch()));
+        for (int i = 0; i < size; i++) {
+            OracleData newData = projectNew.get(i);
+            BigDecimal newBalance = getNewBalance(newData);
+            List<Step6OldDetailExcel> oldDataList = collect.getOrDefault(newData.get行说明(), new ArrayList<>());
+            if (oldDataList.size() == 1){
+                Step6OldDetailExcel oldData = oldDataList.get(0);
+                BigDecimal oldBalance = getOldBalance(oldData);
+                if (oldBalance.compareTo(newBalance) != 0) {
+                    // 余额不相等
+//                    result2s.add(newData);
+                    newData.set备注("和旧系统余额不相等");
+                }
+            }else {
+                boolean flag = true;
+                for (Step6OldDetailExcel oldData : oldDataList) {
+                    BigDecimal oldBalance = getOldBalance(oldData);
+                    if (!oldData.getUsed() && newBalance.compareTo(oldBalance) == 0){
+                        oldData.setUsed(true);
+                        flag = false;
+                        break;
+                    }
+                }
+                if (flag){
+                    newData.set备注("未能匹配多个数据");
+//                    result2s.add(newData);
+                }
+            }
+            result2s.add(newData);
         }
     }
 
