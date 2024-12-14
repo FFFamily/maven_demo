@@ -252,8 +252,7 @@ public class Step6Test {
                 || projectName.startsWith("预收账款")
                 || projectName.startsWith("应收账款")
                 || projectName.startsWith("其他应付款")
-                || projectName.startsWith("其他应收款")
-                || projectName.startsWith("其他货币资金");
+                || projectName.startsWith("其他应收款");
     }
 
 
@@ -284,7 +283,7 @@ public class Step6Test {
                                     }
                                     // 科目
                                     String projectName = data.getProjectName();
-                                    if (!isBackProject(projectName)){
+                                    if (!isBackProject(projectName) || projectName.startsWith("其他货币资金")){
                                         // 只需要7大往来
                                         continue;
                                     }
