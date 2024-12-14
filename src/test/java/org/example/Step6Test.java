@@ -283,7 +283,7 @@ public class Step6Test {
                                     }
                                     // 科目
                                     String projectName = data.getProjectName();
-                                    if (!isBackProject(projectName) || !projectName.startsWith("其他货币资金")){
+                                    if (!(isBackProject(projectName) || projectName.startsWith("其他货币资金"))){
                                         // 只需要7大往来
                                         continue;
                                     }
