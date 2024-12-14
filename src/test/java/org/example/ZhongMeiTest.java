@@ -99,7 +99,7 @@ public class ZhongMeiTest {
                                     // 3-科目代码
                                     String projectCode = data.getProjectCode();
                                     ZNProjectMapping znProjectMapping = findNccZhongNanLevel.znProjectMapping.get(projectCode);
-                                    String fmsProjectCode = znProjectMapping.getFmsProjectCode();
+                                    String fmsProjectCode =  znProjectMapping.getFmsProjectCode();
                                     builder.append(fmsProjectCode).append(".");
                                     // 4-子目
                                     String fmsChildProjectCode = znProjectMapping.getFmsChildProjectCode();
@@ -118,7 +118,7 @@ public class ZhongMeiTest {
                                     // 8-ICP
                                     String customerName = data.getCustomerName();
                                     ZNIPCMapping znipcMapping = findNccZhongNanLevel.znipcMapping.get(customerName);
-                                    String icp = znipcMapping.getFmsICPCode();
+                                    String icp = znipcMapping == null ? "0" : znipcMapping.getFmsICPCode();
 //                                    ZNCompanyMapping znCompanyMapping1 = findNccZhongNanLevel.znCustomerMapping.get(customerName);
 //                                    String icp = znCompanyMapping1.getFMSCompanyCode() == null ? "0" : znCompanyMapping1.getFMSCompanyCode();
                                     builder.append(icp).append(".");
