@@ -276,6 +276,10 @@ public class Step6Test {
                                         // 只需要7大往来
                                         continue;
                                     }
+                                    // 其他货币基金只取 9-12月
+                                    if (projectName.startsWith("其他货币基金") && !(date.isBefore(DateUtil.parse("2023-09-01")) || date.isAfter(DateUtil.parse("2023-12-31")))){
+                                        continue;
+                                    }
                                     // 摘要
                                     String match = data.getMatch();
                                     if (match.contains("资金归集")){
