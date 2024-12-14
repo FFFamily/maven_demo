@@ -87,10 +87,11 @@ public class ZhongMeiTest {
                                     String fmsCompanyCode = znCompanyMapping.getFMSCompanyCode();
                                     builder.append(fmsCompanyCode).append(".");
                                     // 2- 部门
-                                    String orgName = data.getOrgName();
-                                    ZNOrgMapping znOrgMapping = findNccZhongNanLevel.znOrgMapping.get(orgName);
-                                    String fmsOrgCode = znOrgMapping.getFMSOrgCode();
-                                    builder.append(fmsOrgCode).append(".");
+//                                    String orgName = data.getOrgName();
+//                                    ZNOrgMapping znOrgMapping = findNccZhongNanLevel.znOrgMapping.get(orgName);
+//                                    String fmsOrgCode = znOrgMapping.getFMSOrgCode();
+//                                    builder.append(fmsOrgCode).append(".");
+                                    builder.append("0").append(".");
                                     // 3-科目代码
                                     String projectCode = data.getProjectCode();
                                     ZNProjectMapping znProjectMapping = findNccZhongNanLevel.znProjectMapping.get(projectCode);
