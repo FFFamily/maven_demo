@@ -42,11 +42,11 @@ public class FindNccZhongNanLevel {
     }
 
     private void initZnipcMapping() {
-        EasyExcel.read("", ZNIPCMapping.class, new PageReadListener<ZNIPCMapping>(dataList -> {
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/ICP名单.xlsx", ZNIPCMapping.class, new PageReadListener<ZNIPCMapping>(dataList -> {
             for (ZNIPCMapping data : dataList) {
                 znipcMapping.put(data.getNccCustomerName(),data);
             }
-        }));
+        })).sheet("ICP名单").doRead();
     }
 
     private void initZnEventMapping(ExcelReader excelReader) {
@@ -78,7 +78,7 @@ public class FindNccZhongNanLevel {
     }
 
     private void initZnCompanyMapping(ExcelReader excelReader) {
-        ReadSheet readSheet1 = EasyExcel.readSheet(0).head(ZNCompanyMapping.class).registerReadListener(new PageReadListener<ZNCompanyMapping>(dataList -> {
+        ReadSheet readSheet1 = EasyExcel.readSheet("1-机构").head(ZNCompanyMapping.class).registerReadListener(new PageReadListener<ZNCompanyMapping>(dataList -> {
             for (ZNCompanyMapping data : dataList) {
                 znCompanyMapping.put(data.getNCCCompanyName(),data);
                 znCustomerMapping.put(data.getNCCCompanyNameCopy(),data);
@@ -100,7 +100,7 @@ public class FindNccZhongNanLevel {
     }
 
     public void initZnProjectMapping(ExcelReader excelReader) {
-        ReadSheet readSheet1 = EasyExcel.readSheet(0).head(ZNProjectMapping.class).registerReadListener(new PageReadListener<ZNProjectMapping>(dataList -> {
+        ReadSheet readSheet1 = EasyExcel.readSheet("0-科目映射").head(ZNProjectMapping.class).registerReadListener(new PageReadListener<ZNProjectMapping>(dataList -> {
             for (ZNProjectMapping znProjectMapping : dataList) {
 
             }
