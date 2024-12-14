@@ -84,6 +84,9 @@ public class Step6Test {
                     BigDecimal oldSum = projectOld.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.getV()).subtract(CommonUtil.getBigDecimalValue(curr.getW()))), (l, r) -> l);
                     BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(CommonUtil.getBigDecimalValue(curr.get输入贷方()))), (l, r) -> l);
                     if (oldSum.compareTo(newSum) != 0) {
+                        if (!(timeKey.equals("") && projectKey.equals(""))){
+                            continue;
+                        }
                         // 两个余额不相等
                         findOld(projectOld,projectNew,result3s);
                         findNew(projectOld,projectNew,result2s);
