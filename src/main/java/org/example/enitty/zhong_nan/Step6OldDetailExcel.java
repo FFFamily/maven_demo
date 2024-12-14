@@ -1,5 +1,6 @@
 package org.example.enitty.zhong_nan;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 
@@ -8,8 +9,6 @@ import java.util.Date;
 
 @Data
 public class Step6OldDetailExcel {
-    @ExcelProperty("编号")
-    private String id;
     @ExcelProperty("账套名称")
     private String companyName;
     @ExcelProperty("日期")
@@ -25,5 +24,6 @@ public class Step6OldDetailExcel {
     @ExcelProperty("备注")
     private String remark;
     // 是否被使用
+    @ExcelIgnore
     private Boolean used;
 }
