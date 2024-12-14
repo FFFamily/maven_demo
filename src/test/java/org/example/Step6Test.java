@@ -197,11 +197,11 @@ public class Step6Test {
             // 这里 指定文件
             try (ExcelWriter excelWriter = EasyExcel.write(fileName).build()) {
                 // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
-                WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板" + 0).head(Step6Result1.class).build();
+                WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
                 excelWriter.write(result1s, writeSheet1);
-                WriteSheet writeSheet2 = EasyExcel.writerSheet(1, "模板" + 1).head(OracleData.class).build();
+                WriteSheet writeSheet2 = EasyExcel.writerSheet(1, "新系统").head(OracleData.class).build();
                 excelWriter.write(result2s, writeSheet2);
-                WriteSheet writeSheet3 = EasyExcel.writerSheet(2, "模板" + 2).head(Step6OldDetailExcel.class).build();
+                WriteSheet writeSheet3 = EasyExcel.writerSheet(2, "旧系统").head(Step6OldDetailExcel.class).build();
                 excelWriter.write(result3s, writeSheet3);
             }
         }
