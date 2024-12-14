@@ -37,7 +37,7 @@ public class ZhongMeiTest {
             System.out.println(nowCompanyName);
             List<NewBalanceExcelResult> results = new ArrayList<>();
             List<Step6OldDetailExcel> allCompanyList = collect.get(companyName);
-            String findPiSQL = "SELECT  * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' ";
+            String findPiSQL = "SELECT  * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+allCompanyList.get(0).getCompanyCode()+"' ";
 //                        "companyAND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' ";
             List<Step6OldDetailExcel> sqlData = jdbcTemplate.query(findPiSQL, (row, c) -> {
                 Step6OldDetailExcel data = new Step6OldDetailExcel();
@@ -92,6 +92,7 @@ public class ZhongMeiTest {
                                     ZNCompanyMapping znCompanyMapping = findNccZhongNanLevel.znCompanyMapping.get(companyName);
                                     String fmsCompanyCode = znCompanyMapping.getFMSCompanyCode();
                                     builder.append(fmsCompanyCode).append(".");
+                                    data.setCompanyCode(fmsCompanyCode);
                                     // 2- 部门
 //                                    String orgName = data.getOrgName();
 //                                    ZNOrgMapping znOrgMapping = findNccZhongNanLevel.znOrgMapping.get(orgName);

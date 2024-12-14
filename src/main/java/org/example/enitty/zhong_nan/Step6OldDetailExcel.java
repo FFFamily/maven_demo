@@ -42,6 +42,9 @@ public class Step6OldDetailExcel {
     // 是否被使用
     @ExcelIgnore
     private Boolean used;
+    // 新系统公司段代码
+    @ExcelIgnore
+    private String companyCode;
 
     public Boolean getUsed(){
         return used != null && used;
