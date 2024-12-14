@@ -107,7 +107,7 @@ public class ZhongMeiTest {
                                     // 5-产品代码
                                     String eventName = data.getEventName();
                                     ZNEventMapping znEventMapping = findNccZhongNanLevel.znEventMapping.get(companyName + eventName);
-                                    String fmsProductCode = znEventMapping.getFmsProductCode();
+                                    String fmsProductCode = znEventMapping == null ? "0": znEventMapping.getFmsProductCode();
                                     builder.append(fmsProductCode).append(".");
                                     // 6-地区代码
                                     String fmsAreaCode = "0";
@@ -123,7 +123,7 @@ public class ZhongMeiTest {
 //                                    String icp = znCompanyMapping1.getFMSCompanyCode() == null ? "0" : znCompanyMapping1.getFMSCompanyCode();
                                     builder.append(icp).append(".");
                                     // 9-项目代码
-                                    String fmsEventCode = znEventMapping.getFmsEventCode();
+                                    String fmsEventCode = znEventMapping == null ? "0" : znEventMapping.getFmsEventCode();
                                     builder.append(fmsEventCode).append(".");
                                     // 10-备用
                                     String standby  = "0";
