@@ -81,11 +81,12 @@ public class Step6Test {
                 for (String projectKey : allProjectKey) {
                     List<Step6OldDetailExcel>  projectOld = projectOldMap.getOrDefault(projectKey,new ArrayList<>());
                     List<OracleData> projectNew = projectNewMap.getOrDefault(projectKey,new ArrayList<>());
-
                     BigDecimal oldSum = projectOld.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.getV()).subtract(CommonUtil.getBigDecimalValue(curr.getW()))), (l, r) -> l);
                     BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(CommonUtil.getBigDecimalValue(curr.get输入贷方()))), (l, r) -> l);
                     if (oldSum.compareTo(newSum) != 0) {
                         // 两个余额不相等
+                        findOld(projectOld,projectNew,result3s);
+                        findNew(projectOld,projectNew,result2s);
                         Step6Result1 step6Result1 = create(
                                 companyName,
                                 timeKey,
@@ -95,8 +96,6 @@ public class Step6Test {
                                 newSum);
                         step6Result1.setRemark("余额不相等");
                         result1s.add(step6Result1);
-
-
                     }else {
                         Step6Result1 step6Result1 = create(
                                 companyName,
