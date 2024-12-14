@@ -187,6 +187,8 @@ public class Step6Test {
                         step6Result1.setRemark("余额相等");
                         result1s.add(step6Result1);
                     }
+                    result3s.addAll(projectOld);
+                    result2s.addAll(projectNew);
                 }
             }
 
