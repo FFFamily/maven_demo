@@ -86,7 +86,13 @@ public class Step6Test {
                     BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(CommonUtil.getBigDecimalValue(curr.get输入贷方()))), (l, r) -> l);
                     if (oldSum.compareTo(newSum) != 0) {
                         // 两个余额不相等
-                        Step6Result1 step6Result1 = create(companyName,timeKey,projectKey,oldSum,newSum);
+                        Step6Result1 step6Result1 = create(
+                                companyName,
+                                timeKey,
+                                projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
+                                projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
+                                oldSum,
+                                newSum);
                         step6Result1.setRemark("余额不相等");
                         result1s.add(step6Result1);
                         // 找到造成差额的明细账
@@ -181,7 +187,13 @@ public class Step6Test {
                             }
                         }
                     }else {
-                        Step6Result1 step6Result1 = create(companyName,timeKey,projectKey,oldSum,newSum);
+                        Step6Result1 step6Result1 = create(
+                                companyName,
+                                timeKey,
+                                projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
+                                projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
+                                oldSum,
+                                newSum);
                         result1s.add(step6Result1);
                     }
                     result3s.addAll(projectOld);
@@ -213,11 +225,11 @@ public class Step6Test {
         return CommonUtil.getBigDecimalValue(newData.get输入借方()).subtract(CommonUtil.getBigDecimalValue(newData.get输入贷方()));
     }
 
-    private Step6Result1 create(String companyName,String timeKey,String projectKey,BigDecimal oldSum,BigDecimal newSum){
+    private Step6Result1 create(String companyName,String timeKey,String oldProjectKey,String newProjectKey,BigDecimal oldSum,BigDecimal newSum){
         Step6Result1 step6Result1 = new Step6Result1();
         step6Result1.setCompanyName(companyName);
-        step6Result1.setOldProject(projectKey);
-        step6Result1.setNewProject(projectKey);
+        step6Result1.setOldProject(oldProjectKey);
+        step6Result1.setNewProject(newProjectKey);
         step6Result1.setOldMoney(oldSum);
         step6Result1.setNewMoney(newSum);
         step6Result1.setTime(timeKey);
