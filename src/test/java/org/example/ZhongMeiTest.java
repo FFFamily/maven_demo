@@ -80,7 +80,7 @@ public class ZhongMeiTest {
             NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
             newBalanceExcelResult.setCompanyName(companyName);
             String onlySign = step6OldDetailExcel.getOnlySign();
-            newBalanceExcelResult.setOnlySign(onlySign);
+            newBalanceExcelResult.setProjectCode(onlySign);
             String project = onlySign.split("\\.")[2].substring(0,4);
             switch (project) {
                 case "1122":
@@ -217,9 +217,10 @@ public class ZhongMeiTest {
             // 使用默认
         }else if (year == 2023 && month >= 1 && month <= 6){
             String customerName = data.getCustomerName();
-            ZNRelationProjectMapping znRelationProjectMapping = findNccZhongNanLevel.znRelationProjectMapping.get(customerName);
-            if (znRelationProjectMapping != null){
+            ZNRelationMapping znRelationMapping = findNccZhongNanLevel.znRelationMapping.get(customerName);
+            if (znRelationMapping != null){
                 System.out.println("原中南关联表存在对应的客商");
+                ZNRelationProjectMapping znRelationProjectMapping = findNccZhongNanLevel.znRelationProjectMapping.get(fmsProjectCode);
                 fmsProjectCode = znRelationProjectMapping.getFmsProjectCode();
                 fmsChildProjectCode = znRelationProjectMapping.getFmsChildProjectCode();
             }

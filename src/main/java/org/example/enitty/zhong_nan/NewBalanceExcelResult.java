@@ -18,8 +18,6 @@ public class NewBalanceExcelResult {
     private String projectName;
     @ExcelProperty("辅助核算段")
     private String auxiliaryAccounting;
-    @ExcelProperty("匹配段")
-    private String onlySign;
     @ExcelProperty("本期借方")
     private BigDecimal v;
     @ExcelProperty("本期贷方")
