@@ -55,6 +55,7 @@ public class FindNccZhongNanLevel {
             }
         })).build();
         excelReader.read(readSheet1);
+        System.out.println("11-原关联方中南集团映射 读取完成");
     }
 
     private void initZnRelationMapping() {
@@ -63,6 +64,7 @@ public class FindNccZhongNanLevel {
                 znRelationMapping.put(data.getSupplierName(),data);
             }
         })).sheet("新的工作表").doRead();
+        System.out.println("ICP名单 读取完成");
 
     }
 
@@ -72,6 +74,7 @@ public class FindNccZhongNanLevel {
                 znipcMapping.put(data.getNccCustomerName(),data);
             }
         })).sheet("ICP名单").doRead();
+        System.out.println("ICP名单 读取完成");
     }
 
     private void initZnEventMapping(ExcelReader excelReader) {
@@ -83,6 +86,7 @@ public class FindNccZhongNanLevel {
             }
         })).build();
         excelReader.read(readSheet1);
+        System.out.println("2-项目段 读取完成");
     }
 
     private void initZnOrgMapping(ExcelReader excelReader) {
@@ -100,6 +104,7 @@ public class FindNccZhongNanLevel {
             }
         })).build();
         excelReader.read(readSheet1);
+        System.out.println("3-成本中心 读取完成");
     }
 
     private void initZnCompanyMapping(ExcelReader excelReader) {
@@ -110,7 +115,7 @@ public class FindNccZhongNanLevel {
             }
         })).build();
         excelReader.read(readSheet1);
-
+        System.out.println("1-机构读取完成");
     }
 
     /**
@@ -131,6 +136,7 @@ public class FindNccZhongNanLevel {
             }
         })).build();
         excelReader.read(readSheet1);
+        System.out.println("0-科目映射 读取完成");
     }
 
     public Set<OtherInfo3> findNccZhongNanList(List<OtherInfo3> oldCachedDataList,OtherInfo3 parentItem, Assistant assistant){

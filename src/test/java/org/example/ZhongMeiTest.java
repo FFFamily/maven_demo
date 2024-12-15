@@ -189,8 +189,7 @@ public class ZhongMeiTest {
         // 4-子目
         String fmsChildProjectCode = znProjectMapping.getFmsChildProjectCode();
         if (year == 2022){
-            builder.append(appendStr(fmsProjectCode) ).append(".");
-            builder.append(appendStr(fmsChildProjectCode) ).append(".");
+            // 使用默认
         }else if (year == 2023 && month >= 1 && month <= 6){
             String customerName = data.getCustomerName();
             ZNRelationMapping znRelationMapping = findNccZhongNanLevel.znRelationMapping.get(customerName);
@@ -199,10 +198,13 @@ public class ZhongMeiTest {
                 ZNRelationProjectMapping znRelationProjectMapping = findNccZhongNanLevel.znRelationProjectMapping.get(fmsProjectCode);
                 fmsProjectCode = znRelationProjectMapping.getFmsProjectCode();
                 fmsChildProjectCode = znRelationProjectMapping.getFmsChildProjectCode();
-                builder.append(appendStr(fmsProjectCode) ).append(".");
-                builder.append(appendStr(fmsChildProjectCode) ).append(".");
+            }else {
+                fmsProjectCode = null;
+                fmsChildProjectCode = null;
             }
         }
+        builder.append(appendStr(fmsProjectCode) ).append(".");
+        builder.append(appendStr(fmsChildProjectCode) ).append(".");
 
     }
 
