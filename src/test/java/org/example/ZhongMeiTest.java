@@ -95,7 +95,7 @@ public class ZhongMeiTest {
     public List<Step6OldDetailExcel> readPropertyExcel(){
         List<Step6OldDetailExcel> excels = new ArrayList<>();
         // 读取旧系统的余额信息 2022年
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/物业杭州公司 - 副本.xlsx", Step6OldDetailExcel.class,
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx", Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
                                 try {
@@ -111,7 +111,7 @@ public class ZhongMeiTest {
 //                                    if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
 //                                        continue;
 //                                    }
-                                    if (date.isBefore(DateUtil.parse("2023-01-01")) || date.isAfter(DateUtil.parse("2022-06-30"))) {
+                                    if (date.isBefore(DateUtil.parse("2023-01-01")) || date.isAfter(DateUtil.parse("2023-06-30"))) {
                                         continue;
                                     }
                                     // 年
@@ -177,7 +177,7 @@ public class ZhongMeiTest {
 
                             }
                         }))
-                .sheet("综合查询表").headRowNumber(3).doRead();
+                .sheet("综合查询表").doRead();
         return excels;
     }
 

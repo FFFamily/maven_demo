@@ -36,7 +36,7 @@ public class FindNccZhongNanLevel {
 
     @PostConstruct
     public void init(){
-        try (ExcelReader excelReader = EasyExcel.read("src/main/java/org/example/excel/zhong_nan/2-中南NCC与FMS映射表(1).xlsx").build()) {
+        try (ExcelReader excelReader = EasyExcel.read("src/main/java/org/example/excel/zhong_nan/2-中南NCC与FMS映射表.xlsx").build()) {
             initZnProjectMapping(excelReader);
             initZnCompanyMapping(excelReader);
             initZnOrgMapping(excelReader);
@@ -59,12 +59,12 @@ public class FindNccZhongNanLevel {
     }
 
     private void initZnRelationMapping() {
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/ICP名单.xlsx", ZNRelationMapping.class, new PageReadListener<ZNRelationMapping>(dataList -> {
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/原中南关联方.xlsx", ZNRelationMapping.class, new PageReadListener<ZNRelationMapping>(dataList -> {
             for (ZNRelationMapping data : dataList) {
                 znRelationMapping.put(data.getSupplierName(),data);
             }
         })).sheet("新的工作表").doRead();
-        System.out.println("ICP名单 读取完成");
+        System.out.println("原中南关联方 读取完成");
 
     }
 
