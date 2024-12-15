@@ -65,7 +65,7 @@ public class ZMMergeTest {
             List<NewBalanceExcelResult> result = new ArrayList<>();
             List<OracleData> list1 = map1.getOrDefault(company, new ArrayList<>());
             List<OracleData> list2 = map2.getOrDefault(company, new ArrayList<>());
-            Map<String, List<OracleData>> group = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.groupingBy(item -> item.get账户组合() + getStr(item.get交易对象())));
+            Map<String, List<OracleData>> group = Stream.of(list1, list2,list3).flatMap(Collection::stream).collect(Collectors.groupingBy(item -> item.get账户组合() + getStr(item.get交易对象())));
             for (String key : group.keySet()) {
                 List<OracleData> all = group.get(key);
                 OracleData one = all.get(0);

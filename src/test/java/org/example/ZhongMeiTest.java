@@ -164,8 +164,8 @@ public class ZhongMeiTest {
                                     builder.append(appendStr(icp)).append(".");
                                     nameBuilder.append(appendNameStr(znipcMapping == null ? null : customerName)).append(".");
                                     // 9-项目代码
-                                    String fmsEventCode = znEventMapping == null ? "0" : znEventMapping.getFmsEventCode();
-                                    String fmsEventName = znEventMapping == null ? "0" : znEventMapping.getFmsEventName();
+                                    String fmsEventCode = znEventMapping == null ? null : znEventMapping.getFmsEventCode();
+                                    String fmsEventName = znEventMapping == null ? null : znEventMapping.getFmsEventName();
                                     builder.append(appendStr(fmsEventCode) ).append(".");
                                     nameBuilder.append(appendNameStr(fmsEventName) ).append(".");
                                     // 10-备用

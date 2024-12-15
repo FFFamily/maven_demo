@@ -11,6 +11,7 @@ import java.util.Date;
 public class Step6OldDetailExcel {
     @ExcelProperty("账套名称")
     private String companyName;
+
     @ExcelProperty("部门－名称")
     private String orgName;
     @ExcelProperty("日期")
@@ -37,6 +38,7 @@ public class Step6OldDetailExcel {
     private String match;
     @ExcelProperty("备注")
     private String remark;
+
 //    @ExcelProperty("组合")
 //    private String group;
     // 是否被使用
@@ -46,7 +48,7 @@ public class Step6OldDetailExcel {
     @ExcelIgnore
     private String companyCode;
     // 辅助核算段
-    @ExcelIgnore
+    @ExcelProperty("生成的辅助核算段")
     private String auxiliaryAccounting;
     // 科目
     @ExcelIgnore
