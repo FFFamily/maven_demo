@@ -74,11 +74,37 @@ public class ZhongMeiTest {
         List<Step6OldDetailExcel> allCompanyList = collect.get(companyName);
         Map<String, List<Step6OldDetailExcel>> result =
                 allCompanyList.stream().collect(Collectors.groupingBy(item -> item.getOnlySign()+item.getAuxiliaryAccounting()));
-        for (String onlySign : result.keySet()) {
-            List<Step6OldDetailExcel> all = result.get(onlySign);
+        for (String key : result.keySet()) {
+            List<Step6OldDetailExcel> all = result.get(key);
             Step6OldDetailExcel step6OldDetailExcel = all.get(0);
             NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
-            newBalanceExcelResult.setOnlySign(step6OldDetailExcel.getOnlySign());
+            newBalanceExcelResult.setCompanyName(companyName);
+            String onlySign = step6OldDetailExcel.getOnlySign();
+            newBalanceExcelResult.setOnlySign(onlySign);
+            String project = onlySign.split("\\.")[2].substring(0,4);
+            switch (project) {
+                case "1122":
+                    newBalanceExcelResult.setProject("应收账款");
+                    break;
+                case "2202":
+                    newBalanceExcelResult.setProject("应付账款");
+                    break;
+                case "2203":
+                    newBalanceExcelResult.setProject("合同负债");
+                    break;
+                case "2205":
+                    newBalanceExcelResult.setProject("预收账款");
+                    break;
+                case "1123":
+                    newBalanceExcelResult.setProject("预付账款");
+                    break;
+                case "1221":
+                    newBalanceExcelResult.setProject("其他应收款");
+                    break;
+                case "2241":
+                    newBalanceExcelResult.setProject("其他应付款");
+                    break;
+            }
             newBalanceExcelResult.setAuxiliaryAccounting(step6OldDetailExcel.getAuxiliaryAccounting());
             newBalanceExcelResult.setV(all.stream().map(Step6OldDetailExcel::getV).reduce(BigDecimal.ZERO, (prev,curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)),(l, r) ->l));
             newBalanceExcelResult.setW(all.stream().map(Step6OldDetailExcel::getW).reduce(BigDecimal.ZERO, (prev,curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)),(l, r) ->l));
@@ -131,14 +157,13 @@ public class ZhongMeiTest {
 //                                    String fmsOrgCode = znOrgMapping.getFMSOrgCode();
 //                                    builder.append(fmsOrgCode).append(".");
                                     builder.append("0").append(".");
-
+                                    // 3-科目代码 4-子目代码
+                                    findProjectInfoByTime(data,year,month,builder);
                                     // 5-产品代码
                                     String eventName = data.getEventName();
                                     ZNEventMapping znEventMapping = findNccZhongNanLevel.znEventMapping.get(companyName + eventName);
                                     String fmsProductCode = znEventMapping == null ? "0": znEventMapping.getFmsProductCode();
                                     builder.append(appendStr(fmsProductCode) ).append(".");
-                                    // 3-科目代码 4-子目代码
-                                    findProjectInfoByTime(data,year,month,builder);
                                     // 6-地区代码
                                     String fmsAreaCode = "0";
                                     builder.append(fmsAreaCode).append(".");
@@ -192,15 +217,11 @@ public class ZhongMeiTest {
             // 使用默认
         }else if (year == 2023 && month >= 1 && month <= 6){
             String customerName = data.getCustomerName();
-            ZNRelationMapping znRelationMapping = findNccZhongNanLevel.znRelationMapping.get(customerName);
-            if (znRelationMapping != null){
+            ZNRelationProjectMapping znRelationProjectMapping = findNccZhongNanLevel.znRelationProjectMapping.get(customerName);
+            if (znRelationProjectMapping != null){
                 System.out.println("原中南关联表存在对应的客商");
-                ZNRelationProjectMapping znRelationProjectMapping = findNccZhongNanLevel.znRelationProjectMapping.get(fmsProjectCode);
                 fmsProjectCode = znRelationProjectMapping.getFmsProjectCode();
                 fmsChildProjectCode = znRelationProjectMapping.getFmsChildProjectCode();
-            }else {
-                fmsProjectCode = null;
-                fmsChildProjectCode = null;
             }
         }
         builder.append(appendStr(fmsProjectCode) ).append(".");
