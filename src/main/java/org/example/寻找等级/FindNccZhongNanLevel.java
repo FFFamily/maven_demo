@@ -29,6 +29,10 @@ public class FindNccZhongNanLevel {
     public HashMap<String,ZNCompanyMapping> znCustomerMapping = new HashMap<>();
     // ICP
     public HashMap<String, ZNIPCMapping> znipcMapping = new HashMap<>();
+    // 原中南关联方
+    public HashMap<String,ZNRelationMapping> znRelationMapping = new HashMap<>();
+    // 原中南关联方科目映射
+    public HashMap<String,ZNRelationProjectMapping> znRelationProjectMapping = new HashMap<>();
 
     @PostConstruct
     public void init(){
@@ -37,8 +41,29 @@ public class FindNccZhongNanLevel {
             initZnCompanyMapping(excelReader);
             initZnOrgMapping(excelReader);
             initZnEventMapping(excelReader);
+            initZnRelationProjectMapping(excelReader);
         }
         initZnipcMapping();
+        initZnRelationMapping();
+    }
+
+    private void initZnRelationProjectMapping(ExcelReader excelReader) {
+        ReadSheet readSheet1 = EasyExcel.readSheet("11-原关联方中南集团映射").head(ZNRelationProjectMapping.class).registerReadListener(new PageReadListener<ZNRelationProjectMapping>(dataList -> {
+            for (ZNRelationProjectMapping data : dataList) {
+                String nccProjectCode = data.getNccProjectCode();
+                znRelationProjectMapping.put(nccProjectCode,data);
+            }
+        })).build();
+        excelReader.read(readSheet1);
+    }
+
+    private void initZnRelationMapping() {
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/ICP名单.xlsx", ZNRelationMapping.class, new PageReadListener<ZNRelationMapping>(dataList -> {
+            for (ZNRelationMapping data : dataList) {
+                znRelationMapping.put(data.getSupplierName(),data);
+            }
+        })).sheet("新的工作表").doRead();
+
     }
 
     private void initZnipcMapping() {

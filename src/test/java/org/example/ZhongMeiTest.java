@@ -87,9 +87,16 @@ public class ZhongMeiTest {
                                     }
                                     Date time = data.getTime();
                                     DateTime date = DateUtil.date(time);
-                                    if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
+//                                    if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
+//                                        continue;
+//                                    }
+                                    if (date.isBefore(DateUtil.parse("2023-01-01")) || date.isAfter(DateUtil.parse("2022-06-30"))) {
                                         continue;
                                     }
+                                    // 年
+                                    int year = date.year();
+                                    // 月
+                                    int month = date.month() + 1;
                                     StringBuilder builder = new StringBuilder();
                                     // 1- 机构代码
                                     String companyName = data.getCompanyName();
@@ -103,19 +110,14 @@ public class ZhongMeiTest {
 //                                    String fmsOrgCode = znOrgMapping.getFMSOrgCode();
 //                                    builder.append(fmsOrgCode).append(".");
                                     builder.append("0").append(".");
-                                    // 3-科目代码
-                                    String projectCode = data.getProjectCode();
-                                    ZNProjectMapping znProjectMapping = findNccZhongNanLevel.znProjectMapping.get(projectCode);
-                                    String fmsProjectCode =  znProjectMapping.getFmsProjectCode();
-                                    builder.append(appendStr(fmsProjectCode) ).append(".");
-                                    // 4-子目
-                                    String fmsChildProjectCode = znProjectMapping.getFmsChildProjectCode();
-                                    builder.append(appendStr(fmsChildProjectCode) ).append(".");
+
                                     // 5-产品代码
                                     String eventName = data.getEventName();
                                     ZNEventMapping znEventMapping = findNccZhongNanLevel.znEventMapping.get(companyName + eventName);
                                     String fmsProductCode = znEventMapping == null ? "0": znEventMapping.getFmsProductCode();
                                     builder.append(appendStr(fmsProductCode) ).append(".");
+                                    // 3-科目代码 4-子目代码
+                                    findProjectInfoByTime(data,year,month,builder);
                                     // 6-地区代码
                                     String fmsAreaCode = "0";
                                     builder.append(fmsAreaCode).append(".");
@@ -157,6 +159,32 @@ public class ZhongMeiTest {
                 .sheet("综合查询表").headRowNumber(3).doRead();
         return excels;
     }
+
+    private void findProjectInfoByTime(Step6OldDetailExcel data ,int year,int month,StringBuilder builder){
+        // 3-科目代码
+        String projectCode = data.getProjectCode();
+        ZNProjectMapping znProjectMapping = findNccZhongNanLevel.znProjectMapping.get(projectCode);
+        String fmsProjectCode =  znProjectMapping.getFmsProjectCode();
+        // 4-子目
+        String fmsChildProjectCode = znProjectMapping.getFmsChildProjectCode();
+        if (year == 2022){
+            builder.append(appendStr(fmsProjectCode) ).append(".");
+            builder.append(appendStr(fmsChildProjectCode) ).append(".");
+        }else if (year == 2023 && month >= 1 && month <= 6){
+            String customerName = data.getCustomerName();
+            ZNRelationMapping znRelationMapping = findNccZhongNanLevel.znRelationMapping.get(customerName);
+            if (znRelationMapping != null){
+                System.out.println("原中南关联表存在对应的客商");
+                ZNRelationProjectMapping znRelationProjectMapping = findNccZhongNanLevel.znRelationProjectMapping.get(fmsProjectCode);
+                fmsProjectCode = znRelationProjectMapping.getFmsProjectCode();
+                fmsChildProjectCode = znRelationProjectMapping.getFmsChildProjectCode();
+                builder.append(appendStr(fmsProjectCode) ).append(".");
+                builder.append(appendStr(fmsChildProjectCode) ).append(".");
+            }
+        }
+
+    }
+
 
     public String appendStr(String str){
         return  str == null ? "0" : str;
