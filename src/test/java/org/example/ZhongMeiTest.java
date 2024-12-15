@@ -215,6 +215,9 @@ public class ZhongMeiTest {
             if (znRelationMapping != null){
                 System.out.println("原中南关联表存在对应的客商");
                 String project = getDataProject(fmsProjectCode);
+                if (project.equals("合同负债")){
+                    project = "预收账款";
+                }
                 ZNRelationProjectMapping znRelationProjectMapping = findNccZhongNanLevel.znRelationProjectMapping.get(project);
                 fmsProjectCode = znRelationProjectMapping.getFmsProjectCode();
                 fmsProjectName = znRelationProjectMapping.getFmsProjectName();
