@@ -50,8 +50,8 @@ public class FindNccZhongNanLevel {
     private void initZnRelationProjectMapping(ExcelReader excelReader) {
         ReadSheet readSheet1 = EasyExcel.readSheet("11-原关联方中南集团映射").head(ZNRelationProjectMapping.class).registerReadListener(new PageReadListener<ZNRelationProjectMapping>(dataList -> {
             for (ZNRelationProjectMapping data : dataList) {
-                String nccProjectCode = data.getNccProjectCode();
-                znRelationProjectMapping.put(nccProjectCode,data);
+                String project = data.getProject();
+                znRelationProjectMapping.put(project,data);
             }
         })).build();
         excelReader.read(readSheet1);

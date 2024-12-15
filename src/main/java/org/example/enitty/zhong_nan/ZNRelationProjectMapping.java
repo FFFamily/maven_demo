@@ -9,8 +9,14 @@ public class ZNRelationProjectMapping {
     private String  nccProjectCode;
     @ExcelProperty("NCC科目名称")
     private String  nccProjectName;
+    @ExcelProperty("科目")
+    private String project;
     @ExcelProperty("FMS科目代码")
     private String fmsProjectCode;
+    @ExcelProperty("FMS科目名称")
+    private String fmsProjectName;
     @ExcelProperty("FMS子目代码")
     private String fmsChildProjectCode;
+    @ExcelProperty("FMS子目名称")
+    private String fmsChildProjectName;
 }

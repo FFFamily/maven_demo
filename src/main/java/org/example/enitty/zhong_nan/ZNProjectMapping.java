@@ -11,6 +11,10 @@ public class ZNProjectMapping {
     private String  nccProjectName;
     @ExcelProperty("FMS科目代码")
     private String fmsProjectCode;
+    @ExcelProperty("FMS科目")
+    private String fmsProjectName;
     @ExcelProperty("FMS子目代码")
     private String fmsChildProjectCode;
+    @ExcelProperty("FMS子目")
+    private String fmsChildProjectName;
 }

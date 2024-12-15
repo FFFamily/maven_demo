@@ -50,6 +50,12 @@ public class Step6OldDetailExcel {
     // 辅助核算段
     @ExcelIgnore
     private String auxiliaryAccounting;
+    // 科目
+    @ExcelIgnore
+    private String project;
+    // 唯一匹配段名称
+    @ExcelIgnore
+    private String onlySignName;
 
     public Boolean getUsed(){
         return used != null && used;

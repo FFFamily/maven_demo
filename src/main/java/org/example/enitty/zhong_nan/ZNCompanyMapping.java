@@ -14,5 +14,7 @@ public class ZNCompanyMapping {
     private String NCCCompanyNameCopy;
     @ExcelProperty("机构代码")
     private String FMSCompanyCode;
+    @ExcelProperty("FMS机构")
+    private String FMSCompanyName;
 }
 
