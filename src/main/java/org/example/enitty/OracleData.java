@@ -1,15 +1,14 @@
 package org.example.enitty;
 
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
 public class OracleData {
-    // 编号
-    private String oracleId;
-    private Boolean used;
+
     private String 帐套;
     private String 批名;
     private String 批说明;
@@ -61,6 +60,8 @@ public class OracleData {
     private String 借正贷负;
 //    private String group;
     private String 备注;
+    @ExcelIgnore
+    private Boolean used;
     public Boolean getUsed(){
         return this.used != null && this.used;
     }

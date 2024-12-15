@@ -37,8 +37,6 @@ public class Step6OldDetailExcel {
     private String match;
     @ExcelProperty("备注")
     private String remark;
-    @ExcelProperty("唯一匹配段")
-    private String onlySign;
 //    @ExcelProperty("组合")
 //    private String group;
     // 是否被使用
@@ -53,8 +51,10 @@ public class Step6OldDetailExcel {
     // 科目
     @ExcelIgnore
     private String project;
+    @ExcelProperty("账户组合")
+    private String onlySign;
     // 唯一匹配段名称
-    @ExcelIgnore
+    @ExcelProperty("账户组合描述")
     private String onlySignName;
 
     public Boolean getUsed(){
