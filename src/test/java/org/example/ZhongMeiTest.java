@@ -146,7 +146,7 @@ public class ZhongMeiTest {
                                     String fmsProductCode = znEventMapping == null ?  null : znEventMapping.getFmsProductCode();
                                     String fmsProductName = znEventMapping == null ?  null : znEventMapping.getFmsProductName();
                                     builder.append(appendStr(fmsProductCode) ).append(".");
-                                    nameBuilder.append(appendStr(fmsProductName) ).append(".");
+                                    nameBuilder.append(appendNameStr(fmsProductName) ).append(".");
                                     // 6-地区代码
                                     String fmsAreaCode = "0";
                                     builder.append(fmsAreaCode).append(".");
