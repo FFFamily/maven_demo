@@ -4,6 +4,8 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
+import lombok.Builder;
+import lombok.Data;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.*;
 import org.example.utils.CommonUtil;
@@ -25,8 +27,14 @@ public class ZhongMeiTest {
     private FindNccZhongNanLevel findNccZhongNanLevel;
     @Resource
     private JdbcTemplate jdbcTemplate;
+    @Data
+    @Builder
+    private static class Result{
+        List<NewBalanceExcelResult> results;
+        List<Step6OldDetailExcel> allCompanyList;
+    }
     @Test
-    void test1() {
+    void test2022() {
         List<Step6OldDetailExcel> excels = readPropertyExcel();
         Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
         for (String companyName : collect.keySet()) {
@@ -35,36 +43,49 @@ public class ZhongMeiTest {
                 continue;
             }
             System.out.println(nowCompanyName);
-            List<NewBalanceExcelResult> results = new ArrayList<>();
-            List<Step6OldDetailExcel> allCompanyList = collect.get(companyName);
-//            String findPiSQL = "SELECT  * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段代码\" = '"+allCompanyList.get(0).getCompanyCode()+"' ";
-//                        "companyAND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' ";
-//            List<Step6OldDetailExcel> sqlData = jdbcTemplate.query(findPiSQL, (row, c) -> {
-//                Step6OldDetailExcel data = new Step6OldDetailExcel();
-//                data.setOnlySign(row.getString("账户组合"));
-//                data.setV(row.getBigDecimal("输入借方"));
-//                data.setW(row.getBigDecimal("输入贷方"));
-//                return data;
-//            });
-//            allCompanyList.addAll(sqlData);
-            Map<String, List<Step6OldDetailExcel>> result =
-                    allCompanyList.stream().collect(Collectors.groupingBy(item -> item.getOnlySign()+item.getAuxiliaryAccounting()));
-            for (String onlySign : result.keySet()) {
-                List<Step6OldDetailExcel> all = result.get(onlySign);
-                Step6OldDetailExcel step6OldDetailExcel = all.get(0);
-                NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
-                newBalanceExcelResult.setOnlySign(step6OldDetailExcel.getOnlySign());
-                newBalanceExcelResult.setAuxiliaryAccounting(step6OldDetailExcel.getAuxiliaryAccounting());
-                newBalanceExcelResult.setV(all.stream().map(Step6OldDetailExcel::getV).reduce(BigDecimal.ZERO, (prev,curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)),(l, r) ->l));
-                newBalanceExcelResult.setW(all.stream().map(Step6OldDetailExcel::getW).reduce(BigDecimal.ZERO, (prev,curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)),(l, r) ->l));
-
-                results.add(newBalanceExcelResult);
-            }
+            Result result = doTest(collect, companyName);
             String fileName = "组合余额表-"+companyName + ".xlsx";
-            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(results);
+            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
             String fileName2 = "组合余额表-总账-"+companyName + ".xlsx";
-            EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(allCompanyList);
+            EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
         }
+    }
+
+    @Test
+    void test20230106() {
+        List<Step6OldDetailExcel> excels = readPropertyExcel();
+        Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
+        for (String companyName : collect.keySet()) {
+            String nowCompanyName = companyName.split("-")[0];
+            if (!nowCompanyName.equals("江苏中南物业服务有限公司温州分公司")){
+                continue;
+            }
+            System.out.println(nowCompanyName);
+            Result result = doTest(collect, companyName);
+            String fileName = "组合余额表-23(1-6)-"+companyName + ".xlsx";
+            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
+            String fileName2 = "组合余额表-23(1-6)-总账-"+companyName + ".xlsx";
+            EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
+        }
+    }
+
+    public Result doTest(Map<String, List<Step6OldDetailExcel>> collect,String companyName){
+        List<NewBalanceExcelResult> results = new ArrayList<>();
+        List<Step6OldDetailExcel> allCompanyList = collect.get(companyName);
+        Map<String, List<Step6OldDetailExcel>> result =
+                allCompanyList.stream().collect(Collectors.groupingBy(item -> item.getOnlySign()+item.getAuxiliaryAccounting()));
+        for (String onlySign : result.keySet()) {
+            List<Step6OldDetailExcel> all = result.get(onlySign);
+            Step6OldDetailExcel step6OldDetailExcel = all.get(0);
+            NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
+            newBalanceExcelResult.setOnlySign(step6OldDetailExcel.getOnlySign());
+            newBalanceExcelResult.setAuxiliaryAccounting(step6OldDetailExcel.getAuxiliaryAccounting());
+            newBalanceExcelResult.setV(all.stream().map(Step6OldDetailExcel::getV).reduce(BigDecimal.ZERO, (prev,curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)),(l, r) ->l));
+            newBalanceExcelResult.setW(all.stream().map(Step6OldDetailExcel::getW).reduce(BigDecimal.ZERO, (prev,curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)),(l, r) ->l));
+
+            results.add(newBalanceExcelResult);
+        }
+        return Result.builder().results(results).allCompanyList(allCompanyList).build();
     }
 
     /**
