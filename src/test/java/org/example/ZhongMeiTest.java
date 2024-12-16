@@ -56,6 +56,7 @@ public class ZhongMeiTest {
     void test2022() {
         for (String path : pathList) {
             List<Step6OldDetailExcel> excels = readPropertyExcel(path,"2022");
+            List<NewBalanceExcelResult> pathResult = new ArrayList<>();
             Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : collect.keySet()) {
 //            String nowCompanyName = companyName.split("-")[0];
@@ -64,8 +65,7 @@ public class ZhongMeiTest {
 //            }
                 System.out.println(companyName);
                 Result result = doTest(collect, companyName);
-                String fileName = "组合余额表-2022-"+companyName + ".xlsx";
-                EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
+                pathResult.addAll(result.getResults());
                 String fileName2 = "组合余额表-2022-总账-"+companyName + ".xlsx";
                 File file = new File(fileName2);
                 if (file.exists()){
@@ -78,8 +78,9 @@ public class ZhongMeiTest {
                 }else {
                     EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
                 }
-
             }
+            String fileName = path+".xlsx";
+            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(pathResult);
         }
     }
 
