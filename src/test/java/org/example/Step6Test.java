@@ -37,13 +37,13 @@ public class Step6Test {
 
     @Test
     void test1() {
-        File file = new File("src/main/java/org/example/excel/zhong_nan");
+        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
         for (String fileName : Objects.requireNonNull(file.list())) {
             String name = fileName.replace(".xlsx", "");
-            if (!name.equals("")){
-                continue;
-            }
             System.out.println("当前文件："+name);
+//            if (!name.equals("物业上海公司1")){
+//                continue;
+//            }
             List<Step6OldDetailExcel> excels = readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> item.getCompanyName()));
             for (String companyName : companyMap.keySet()) {
@@ -51,9 +51,9 @@ public class Step6Test {
                 List<OracleData> result2s = new ArrayList<>();
                 List<Step6OldDetailExcel> result3s = new ArrayList<>();
                 System.out.println("当前公司为： "+companyName);
-                if (!companyName.equals("江苏中南物业服务有限公司")){
-                    continue;
-                }
+//                if (!companyName.equals("江苏中南物业服务有限公司")){
+//                    continue;
+//                }
                 List<Step6OldDetailExcel> list = companyMap.get(companyName);
                 String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" like '%NCC%'";
                 List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
@@ -271,9 +271,6 @@ public class Step6Test {
                 || projectName.startsWith("其他应收款");
     }
 
-
-
-
     /**
      * 读取物业excel
      * @return
@@ -282,7 +279,7 @@ public class Step6Test {
         List<Step6OldDetailExcel> excels = new ArrayList<>();
 
         // 读取旧系统的余额信息 2022年
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan"+fileName, Step6OldDetailExcel.class,
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/detail/"+fileName, Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
                                 try {
@@ -326,7 +323,6 @@ public class Step6Test {
                                         data.setMatchProject(oldProject);
                                     }
                                     excels.add(data);
-                                    System.out.println(excels.size());
                                 }catch (Exception e){
                                     System.out.println("解析中南老系统明细数据出错: "+e.getMessage());
                                     System.out.println(data);
@@ -334,7 +330,7 @@ public class Step6Test {
 
                             }
                         }))
-                .sheet("综合查询表").headRowNumber(3).doRead();
+                .sheet("综合查询表").doRead();
         return excels;
     }
 }

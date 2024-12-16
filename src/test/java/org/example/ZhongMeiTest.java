@@ -31,24 +31,24 @@ public class ZhongMeiTest {
     @Resource
     private JdbcTemplate jdbcTemplate;
 
-//    public List<String> pathList = Lists.newArrayList(
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业北京公司.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司1.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司2.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业厦门公司.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业合肥公司.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业成都公司.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业沈阳公司.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业济南公司.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业深圳公司.xlsx",
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业重庆公司.xlsx"
-//    );
     public List<String> pathList = Lists.newArrayList(
-            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx"
+            "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业北京公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司1.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司2.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业厦门公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业合肥公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业成都公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业沈阳公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业济南公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业深圳公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业重庆公司.xlsx"
     );
+//    public List<String> pathList = Lists.newArrayList(
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx"
+//    );
     @Data
     @Builder
     private static class Result{
@@ -91,20 +91,33 @@ public class ZhongMeiTest {
     @Test
     void test20230106() {
         for (String path : pathList) {
+            System.out.println("当前path"+path);
             List<Step6OldDetailExcel> excels = readPropertyExcel(path,"2023");
+            List<NewBalanceExcelResult> pathResult = new ArrayList<>();
             Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : collect.keySet()) {
-//            String nowCompanyName = companyName.split("-")[0];
-                if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
-                    continue;
-                }
+//                if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
+//                    continue;
+//                }
                 System.out.println(companyName);
                 Result result = doTest(collect, companyName);
-                String fileName = "组合余额表-23(1-6)-"+companyName + ".xlsx";
-                EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
-                String fileName2 = "组合余额表-23(1-6)-总账-"+companyName + ".xlsx";
-                EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
+                pathResult.addAll(result.getResults());
+                String fileName2 = "组合余额表-2023-1-6-总账-"+companyName + ".xlsx";
+                File file = new File(fileName2);
+                if (file.exists()){
+                    System.out.println("文件存在");
+                    List<Step6OldDetailExcel> list = new ArrayList<>();
+                    EasyExcel.read(file, Step6OldDetailExcel.class,
+                            new PageReadListener<Step6OldDetailExcel>(list::addAll));
+                    list.addAll(result.getAllCompanyList());
+                    EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(list);
+                }else {
+                    EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
+                }
             }
+            String[] split = path.split("/");
+            String fileName ="余额表-"+split[split.length -1];
+            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(pathResult);
         }
 
     }
