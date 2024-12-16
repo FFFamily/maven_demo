@@ -222,12 +222,16 @@ public class ZhongMeiTest {
                                     data.setOnlySignName(onlySignName);
                                     // 辅助核算
                                     String auxiliaryAccounting = "";
+                                    String auxiliaryAccountingCode = "";
                                     if (icp != null){
                                         auxiliaryAccounting += "-";
+                                        auxiliaryAccountingCode += "0";
                                     }else {
                                         auxiliaryAccounting += data.getCustomerName() != null ? data.getCustomerName() : data.getPersonalName() == null ? "-" : data.getPersonalName();
+                                        auxiliaryAccountingCode += data.getCustomerName() != null ? data.getCustomerCode() : data.getPersonalName() == null ? "-" : data.getPersonalCode();
                                     }
                                     data.setAuxiliaryAccounting(auxiliaryAccounting);
+                                    data.setAuxiliaryAccountingCode(auxiliaryAccountingCode);
                                     excels.add(data);
                                 }catch (Exception e){
 //                                    System.out.println("解析中南老系统明细数据出错: "+e.getMessage());

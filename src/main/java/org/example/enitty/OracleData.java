@@ -54,6 +54,15 @@ public class OracleData {
     private String 账户描述;
     private String actualProject;
     private String matchProject;
+    private String form;
+    // 旧系统才有
+    private String 对方科目;
+    // 旧系统才有
+    private String 对方科目名称;
+    // 旧系统才有
+    private String 部门代码;
+    // 旧系统才有
+    private String 部门名称;
     private String 额外字段;
     private String 科目;
     private String 借正贷负;
