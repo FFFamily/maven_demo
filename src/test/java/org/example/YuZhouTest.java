@@ -35,7 +35,7 @@ public class YuZhouTest {
     private FindLevel findLevel;
     @Test
     void test1() {
-        File file = new File("");
+        File file = new File("src/main/java/org/example/excel/yu_zhou/balance");
         for (String fileName : file.list()) {
             System.out.println("当前文件："+fileName);
             // 余额
@@ -78,7 +78,7 @@ public class YuZhouTest {
         List<Assistant> balanceExcels = new ArrayList<>();
         // 读取旧系统的余额信息 2022年
         // src/main/java/org/example/excel/yu_zhou/01禹州南京-D类客商映射表.xlsx
-        EasyExcel.read(fileName,
+        EasyExcel.read("src/main/java/org/example/excel/yu_zhou/balance/"+fileName,
                         YuZhouOldBalanceExcel.class,
                         new PageReadListener<YuZhouOldBalanceExcel>(dataList -> {
                             for (YuZhouOldBalanceExcel data : dataList) {
@@ -117,11 +117,10 @@ public class YuZhouTest {
     public List<OtherInfo3> readDetailExcel(String fileName,String companyName){
         List<OtherInfo3> result = new ArrayList<>();
         // src/main/java/org/example/excel/yu_zhou/序时账-20-22年4月-调整数字格式.xls
-        EasyExcel.read(fileName,
+        EasyExcel.read("src/main/java/org/example/excel/yu_zhou/detail/"+fileName,
                         YuZhouOldDetailExcel.class,
                         new PageReadListener<YuZhouOldDetailExcel>(dataList -> {
                             for (YuZhouOldDetailExcel data : dataList) {
-
                                 try {
                                     if (data.getA() == null || data.getB() == null || data.getC() == null) {
                                         System.out.println("错误的格式："+data);
