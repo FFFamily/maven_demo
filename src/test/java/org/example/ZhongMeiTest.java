@@ -32,11 +32,11 @@ public class ZhongMeiTest {
     private JdbcTemplate jdbcTemplate;
 
     public List<String> pathList = Lists.newArrayList(
+            "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业北京公司.xlsx",
             "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司1.xlsx",
             "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司2.xlsx",
             "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业北京公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
             "src/main/java/org/example/excel/zhong_nan/detail/物业厦门公司.xlsx",
             "src/main/java/org/example/excel/zhong_nan/detail/物业合肥公司.xlsx",
             "src/main/java/org/example/excel/zhong_nan/detail/物业成都公司.xlsx",
@@ -55,6 +55,7 @@ public class ZhongMeiTest {
     @Test
     void test2022() {
         for (String path : pathList) {
+            System.out.println("当前path"+path);
             List<Step6OldDetailExcel> excels = readPropertyExcel(path,"2022");
             List<NewBalanceExcelResult> pathResult = new ArrayList<>();
             Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
@@ -79,7 +80,8 @@ public class ZhongMeiTest {
                     EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
                 }
             }
-            String fileName = path+".xlsx";
+            String[] split = path.split("/");
+            String fileName ="余额表-"+split[split.length -1];
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(pathResult);
         }
     }
@@ -146,8 +148,8 @@ public class ZhongMeiTest {
                                     if (!isBackProject2022(projectName)){
                                         continue;
                                     }
-                                    Date time = data.getTime();
-                                    DateTime date = DateUtil.date(time);
+                                    String time = data.getTime();
+                                    DateTime date = DateUtil.parseDate(time);
                                     if (startTime.equals("2022")){
                                         if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
                                             continue;

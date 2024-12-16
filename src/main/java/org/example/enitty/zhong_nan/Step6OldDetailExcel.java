@@ -15,7 +15,7 @@ public class Step6OldDetailExcel {
     @ExcelProperty("部门－名称")
     private String orgName;
     @ExcelProperty("日期")
-    private Date time;
+    private String time;
     @ExcelProperty("科目代码")
     private String projectCode;
     @ExcelProperty("科目名称")

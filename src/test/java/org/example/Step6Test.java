@@ -63,7 +63,7 @@ public class Step6Test {
                     .collect(Collectors.toList());
             // 按月进行分组
             Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
-                DateTime date = DateUtil.date(item.getTime());
+                DateTime date = DateUtil.parseDate(item.getTime());
                 int year = date.year();
                 int month = date.month() + 1;
                 return year + "-" + (month > 9 ? month : "0" + month);
@@ -290,8 +290,8 @@ public class Step6Test {
                                     String companyName = data.getCompanyName();
                                     String realCompanyName = companyName.split("-")[0];
                                     data.setCompanyName(CompanyConstant.getNewCompanyByOldCompany(realCompanyName));
-                                    Date time = data.getTime();
-                                    DateTime date = DateUtil.date(time);
+                                    String time = data.getTime();
+                                    DateTime date = DateUtil.parseDate(time);
                                     if (date.isBefore(DateUtil.parse("2023-07-01")) || date.isAfter(DateUtil.parse("2023-12-31"))) {
                                         // 只需要 07-12 月的
                                         continue;
