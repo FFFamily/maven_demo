@@ -52,12 +52,13 @@ public class ZhongMeiTest {
             File file = new File(fileName2);
             if (file.exists()){
                 System.out.println("文件存在");
-            }else {
                 List<Step6OldDetailExcel> list = new ArrayList<>();
                 EasyExcel.read(file, Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(list::addAll));
                 list.addAll(result.getAllCompanyList());
                 EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(list);
+            }else {
+                EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
             }
 
         }
