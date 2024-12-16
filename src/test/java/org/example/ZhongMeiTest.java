@@ -6,6 +6,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import lombok.Builder;
 import lombok.Data;
+import org.assertj.core.util.Lists;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.*;
 import org.example.utils.CommonUtil;
@@ -29,6 +30,11 @@ public class ZhongMeiTest {
     private FindNccZhongNanLevel findNccZhongNanLevel;
     @Resource
     private JdbcTemplate jdbcTemplate;
+
+    public List<String> pathList = Lists.newArrayList(
+            "src/main/java/org/example/excel/zhong_nan/merge/22年调整.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/merge/22年应收账款预估收缴率调整.xlsx"
+    );
     @Data
     @Builder
     private static class Result{
@@ -37,49 +43,54 @@ public class ZhongMeiTest {
     }
     @Test
     void test2022() {
-        List<Step6OldDetailExcel> excels = readPropertyExcel("2022");
-        Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
-        for (String companyName : collect.keySet()) {
+        for (String path : pathList) {
+            List<Step6OldDetailExcel> excels = readPropertyExcel(path,"2022");
+            Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
+            for (String companyName : collect.keySet()) {
 //            String nowCompanyName = companyName.split("-")[0];
 //            if (!nowCompanyName.equals("江苏中南物业服务有限公司温州分公司")){
 //                continue;
 //            }
-            System.out.println(companyName);
-            Result result = doTest(collect, companyName);
-            String fileName = "组合余额表-2022-"+companyName + ".xlsx";
-            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
-            String fileName2 = "组合余额表-2022-总账-"+companyName + ".xlsx";
-            File file = new File(fileName2);
-            if (file.exists()){
-                System.out.println("文件存在");
-                List<Step6OldDetailExcel> list = new ArrayList<>();
-                EasyExcel.read(file, Step6OldDetailExcel.class,
-                        new PageReadListener<Step6OldDetailExcel>(list::addAll));
-                list.addAll(result.getAllCompanyList());
-                EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(list);
-            }else {
-                EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
-            }
+                System.out.println(companyName);
+                Result result = doTest(collect, companyName);
+                String fileName = "组合余额表-2022-"+companyName + ".xlsx";
+                EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
+                String fileName2 = "组合余额表-2022-总账-"+companyName + ".xlsx";
+                File file = new File(fileName2);
+                if (file.exists()){
+                    System.out.println("文件存在");
+                    List<Step6OldDetailExcel> list = new ArrayList<>();
+                    EasyExcel.read(file, Step6OldDetailExcel.class,
+                            new PageReadListener<Step6OldDetailExcel>(list::addAll));
+                    list.addAll(result.getAllCompanyList());
+                    EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(list);
+                }else {
+                    EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
+                }
 
+            }
         }
     }
 
     @Test
     void test20230106() {
-        List<Step6OldDetailExcel> excels = readPropertyExcel("2023");
-        Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
-        for (String companyName : collect.keySet()) {
+        for (String path : pathList) {
+            List<Step6OldDetailExcel> excels = readPropertyExcel(path,"2023");
+            Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
+            for (String companyName : collect.keySet()) {
 //            String nowCompanyName = companyName.split("-")[0];
-            if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
-                continue;
+                if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
+                    continue;
+                }
+                System.out.println(companyName);
+                Result result = doTest(collect, companyName);
+                String fileName = "组合余额表-23(1-6)-"+companyName + ".xlsx";
+                EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
+                String fileName2 = "组合余额表-23(1-6)-总账-"+companyName + ".xlsx";
+                EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
             }
-            System.out.println(companyName);
-            Result result = doTest(collect, companyName);
-            String fileName = "组合余额表-23(1-6)-"+companyName + ".xlsx";
-            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
-            String fileName2 = "组合余额表-23(1-6)-总账-"+companyName + ".xlsx";
-            EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
         }
+
     }
 
     public Result doTest(Map<String, List<Step6OldDetailExcel>> collect,String companyName){
@@ -109,10 +120,10 @@ public class ZhongMeiTest {
      * 读取物业excel
      * @return
      */
-    public List<Step6OldDetailExcel> readPropertyExcel(String startTime){
+    public List<Step6OldDetailExcel> readPropertyExcel(String path,String startTime){
         List<Step6OldDetailExcel> excels = new ArrayList<>();
         // 读取旧系统的余额信息 2022年
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx", Step6OldDetailExcel.class,
+        EasyExcel.read(path, Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
                                 try {
