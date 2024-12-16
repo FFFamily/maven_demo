@@ -93,7 +93,7 @@ public class ZMMergeTest {
                     oracleData.set科目段描述(data.getProjectName());
                     oracleData.set对方科目(data.getOtherProjectCode());
                     oracleData.set对方科目名称(data.getOtherProjectName());
-                    oracleData.set行说明(data.getAbstractName());
+                    oracleData.set行说明(data.getMatch());
                     oracleData.set项目(data.getEventCode());
                     oracleData.set项目段描述(data.getEventName());
                     oracleData.set部门代码(data.getOrgCode());
