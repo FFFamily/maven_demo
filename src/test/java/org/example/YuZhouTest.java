@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,45 +35,50 @@ public class YuZhouTest {
     private FindLevel findLevel;
     @Test
     void test1() {
-        // 余额
-        Map<String, List<Assistant>> collect = readBalanceExcel().stream().collect(Collectors.groupingBy(item -> item.getE()));
-        for (String company : collect.keySet()) {
-            List<Assistant> assistants = collect.get(company);
-            List<OtherInfo3> result = new ArrayList<>();
-            System.out.println("当前公司："+company);
-            // 便利余额
-            for (int i = 0; i < assistants.size(); i++) {
-                Assistant assistant = assistants.get(i);
-                String companyName = assistant.getE();
+        File file = new File("");
+        for (String fileName : file.list()) {
+            System.out.println("当前文件："+fileName);
+            // 余额
+            Map<String, List<Assistant>> collect = readBalanceExcel(fileName).stream().collect(Collectors.groupingBy(Assistant::getE));
 
-                // 这个公司的所有明细
-                List<OtherInfo3> otherInfo3s = readDetailExcel(companyName);
-                List<OtherInfo3> startCollect = otherInfo3s.stream().filter(item -> item.getOnlySign().equals(assistant.getOnlySign())).collect(Collectors.toList());
-                List<OtherInfo3> res = findLevel.doMain(
-                        true,
-                        false,
-                        false,
-                        otherInfo3s,
-                        null,
-                        startCollect,
-                        assistant.getZ(),
-                        assistant
-                );
-                int finalI = i;
-                res.forEach(item -> {
-                    item.setA(String.valueOf(finalI));
-                });
-                result.addAll(res);
+            for (String company : collect.keySet()) {
+                List<Assistant> assistants = collect.get(company);
+                List<OtherInfo3> result = new ArrayList<>();
+                System.out.println("当前公司："+company);
+                // 便利余额
+                for (int i = 0; i < assistants.size(); i++) {
+                    Assistant assistant = assistants.get(i);
+                    String companyName = assistant.getE();
+
+                    // 这个公司的所有明细
+                    List<OtherInfo3> otherInfo3s = readDetailExcel(fileName,companyName);
+                    List<OtherInfo3> startCollect = otherInfo3s.stream().filter(item -> item.getOnlySign().equals(assistant.getOnlySign())).collect(Collectors.toList());
+                    List<OtherInfo3> res = findLevel.doMain(
+                            true,
+                            false,
+                            false,
+                            otherInfo3s,
+                            null,
+                            startCollect,
+                            assistant.getZ(),
+                            assistant
+                    );
+                    int finalI = i;
+                    res.forEach(item -> {
+                        item.setA(String.valueOf(finalI));
+                    });
+                    result.addAll(res);
+                }
+                EasyExcel.write("禹州老系统分级-"+company+ ".xlsx", OtherInfo3.class).sheet("模板").doWrite(result);
             }
-            String fileName = "禹州老系统分级-"+company+ ".xlsx";
-            EasyExcel.write(fileName, OtherInfo3.class).sheet("模板").doWrite(result);
         }
     }
     // 读取余额表
-    public List<Assistant> readBalanceExcel(){
+    public List<Assistant> readBalanceExcel(String fileName){
         List<Assistant> balanceExcels = new ArrayList<>();
         // 读取旧系统的余额信息 2022年
-        EasyExcel.read("src/main/java/org/example/excel/yu_zhou/01禹州南京-D类客商映射表.xlsx",
+        // src/main/java/org/example/excel/yu_zhou/01禹州南京-D类客商映射表.xlsx
+        EasyExcel.read(fileName,
                         YuZhouOldBalanceExcel.class,
                         new PageReadListener<YuZhouOldBalanceExcel>(dataList -> {
                             for (YuZhouOldBalanceExcel data : dataList) {
@@ -96,12 +102,11 @@ public class YuZhouTest {
                                 }catch (Exception e){
                                     System.out.println("解析禹州数据出错");
                                     System.out.println(data);
-//                                    e.printStackTrace();
+                                    e.printStackTrace();
                                 }
-
                             }
                         }))
-                .sheet("3六大往来明细表-禹州南京分公司").headRowNumber(2).doRead();
+                .sheet("余额表").headRowNumber(2).doRead();
         return balanceExcels;
     }
 
@@ -109,9 +114,10 @@ public class YuZhouTest {
      * 明细账
      * @return
      */
-    public List<OtherInfo3> readDetailExcel(String companyName){
+    public List<OtherInfo3> readDetailExcel(String fileName,String companyName){
         List<OtherInfo3> result = new ArrayList<>();
-        EasyExcel.read("src/main/java/org/example/excel/yu_zhou/序时账-20-22年4月-调整数字格式.xls",
+        // src/main/java/org/example/excel/yu_zhou/序时账-20-22年4月-调整数字格式.xls
+        EasyExcel.read(fileName,
                         YuZhouOldDetailExcel.class,
                         new PageReadListener<YuZhouOldDetailExcel>(dataList -> {
                             for (YuZhouOldDetailExcel data : dataList) {
