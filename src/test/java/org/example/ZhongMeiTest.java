@@ -50,9 +50,14 @@ public class ZhongMeiTest {
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
             String fileName2 = "组合余额表-2022-总账-"+companyName + ".xlsx";
             File file = new File(fileName2);
-            if (!file.exists()){
-                System.out.println("文件不存在");
-                EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
+            if (file.exists()){
+                System.out.println("文件存在");
+            }else {
+                List<Step6OldDetailExcel> list = new ArrayList<>();
+                EasyExcel.read(file, Step6OldDetailExcel.class,
+                        new PageReadListener<Step6OldDetailExcel>(list::addAll));
+                list.addAll(result.getAllCompanyList());
+                EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(list);
             }
 
         }
