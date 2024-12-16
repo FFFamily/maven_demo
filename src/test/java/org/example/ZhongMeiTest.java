@@ -32,8 +32,19 @@ public class ZhongMeiTest {
     private JdbcTemplate jdbcTemplate;
 
     public List<String> pathList = Lists.newArrayList(
-            "src/main/java/org/example/excel/zhong_nan/merge/22年调整.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/merge/22年应收账款预估收缴率调整.xlsx"
+            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司1.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司2.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业北京公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业厦门公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业合肥公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业成都公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业沈阳公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业济南公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业深圳公司.xlsx",
+            "src/main/java/org/example/excel/zhong_nan/detail/物业重庆公司.xlsx"
     );
     @Data
     @Builder
