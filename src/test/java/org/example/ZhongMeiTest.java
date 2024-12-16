@@ -149,7 +149,7 @@ public class ZhongMeiTest {
                                     builder.append(fmsCompanyCode).append(".");
                                     nameBuilder.append(appendNameStr(znCompanyMapping.getFMSCompanyName())).append(".");
                                     data.setCompanyCode(fmsCompanyCode);
-                                    data.setCustomerName(CompanyConstant.getNewCompanyByOldCompany(data.getCompanyName().split("-")[0]));
+                                    data.setCompanyName(CompanyConstant.getNewCompanyByOldCompany(data.getCompanyName().split("-")[0]));
                                     // 2- 部门
 //                                    String orgName = data.getOrgName();
 //                                    ZNOrgMapping znOrgMapping = findNccZhongNanLevel.znOrgMapping.get(orgName);
