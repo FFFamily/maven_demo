@@ -1,7 +1,9 @@
 package org.example;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.read.listener.PageReadListener;
+import lombok.Data;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.Merge22Result;
 import org.example.enitty.zhong_nan.NewBalanceExcelResult;
@@ -70,6 +72,7 @@ public class ZMMergeTest {
                 List<OracleData> all = group.get(key);
                 OracleData one = all.get(0);
                 NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
+                newBalanceExcelResult.setForm("2022");
                 newBalanceExcelResult.setCompanyName(company);
                 newBalanceExcelResult.setProjectCode(one.get账户组合());
                 newBalanceExcelResult.setProjectName(one.get账户描述());
@@ -77,14 +80,66 @@ public class ZMMergeTest {
                 newBalanceExcelResult.setAuxiliaryAccounting(one.get交易对象());
                 newBalanceExcelResult.setV(all.stream().map(OracleData::get输入借方).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                 newBalanceExcelResult.setW(all.stream().map(OracleData::get输入贷方).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
+                newBalanceExcelResult.setBalance(newBalanceExcelResult.getV().subtract(newBalanceExcelResult.getW()));
                 result.add(newBalanceExcelResult);
             }
             String fileName = "组合结果-"+company + ".xlsx";
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result);
+
+
+            List<NewBalanceExcelResult> list4 = new ArrayList<>();
+            EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/中南22期初.xlsx", OldBalance.class, new PageReadListener<OldBalance>(dataList -> {
+                for (OldBalance data : dataList) {
+                    NewBalanceExcelResult oracleData = new NewBalanceExcelResult();
+                    oracleData.setForm("期初");
+                    oracleData.setCompanyName(data.getCompanyName());
+                    oracleData.setProjectCode(data.getOnlySign());
+//                    oracleData.setProjectName(data.getOnlySign());
+                    oracleData.setAuxiliaryAccounting(data.getAuxiliaryAccounting());
+                    oracleData.setBalance(data.getBalance());
+                    list4.add(oracleData);
+                }
+            })).sheet("期初").doRead();
+
+            List<NewBalanceExcelResult> finalRes = new ArrayList<>();
+            Map<String, List<NewBalanceExcelResult>> collect = Stream.of(result, list4).flatMap(Collection::stream).collect(Collectors.groupingBy(NewBalanceExcelResult::getCompanyName));
+            for (String companyName : collect.keySet()) {
+                if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
+                    continue;
+                }
+                List<NewBalanceExcelResult> results = collect.get(companyName);
+                Map<String, List<NewBalanceExcelResult>> cGroup = results.stream().collect(Collectors.groupingBy(item -> item.getProjectCode() + item.getAuxiliaryAccounting()));
+                for (String s : cGroup.keySet()) {
+                    List<NewBalanceExcelResult> results1 = cGroup.get(s);
+                    NewBalanceExcelResult re = new NewBalanceExcelResult();
+                    re.setForm(results1.stream().map(NewBalanceExcelResult::getForm).distinct().collect(Collectors.joining("、")));
+                    re.setCompanyName(results1.stream().map(NewBalanceExcelResult::getCompanyName).distinct().collect(Collectors.joining("、")));
+                    re.setProjectCode(results1.stream().map(NewBalanceExcelResult::getProjectCode).distinct().collect(Collectors.joining("、")));
+                    re.setProjectName(results1.stream().map(NewBalanceExcelResult::getProjectName).distinct().collect(Collectors.joining("、")));
+                    re.setAuxiliaryAccounting(results1.stream().map(NewBalanceExcelResult::getAuxiliaryAccounting).distinct().collect(Collectors.joining("、")));
+                    re.setV(results1.stream().map(NewBalanceExcelResult::getV).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
+                    re.setW(results1.stream().map(NewBalanceExcelResult::getW).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
+                    re.setBalance(results1.stream().map(NewBalanceExcelResult::getBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
+                    re.setPreBalance(results1.stream().filter(item -> item.getForm().equals("期初")).map(NewBalanceExcelResult::getBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
+                    finalRes.add(re);
+                }
+            }
+            EasyExcel.write("最终组合结果-"+company + ".xlsx", NewBalanceExcelResult.class).sheet("组合").doWrite(finalRes);
         }
-
     }
-
+    @Data
+    public static class OldBalance{
+        @ExcelProperty("主体")
+        private String companyName;
+        @ExcelProperty("科目编码")
+        private String onlySign;
+//        @ExcelProperty("科目编码")
+//        private String onlySignName;
+        @ExcelProperty("辅助核算段")
+        private String auxiliaryAccounting;
+        @ExcelProperty("旧系统22期初余额")
+        private BigDecimal balance;
+    }
     private static String getStr(String str){
         return str == null ?"":str;
     }

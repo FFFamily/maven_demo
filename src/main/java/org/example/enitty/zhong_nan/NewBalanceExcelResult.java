@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 // 新的辅助余额表
 @Data
 public class NewBalanceExcelResult {
+    @ExcelProperty("数据来源")
+    private String form;
     @ExcelProperty("公司名称")
     private String companyName;
     @ExcelProperty("科目")
@@ -24,4 +26,6 @@ public class NewBalanceExcelResult {
     private BigDecimal w;
     @ExcelProperty("期末余额")
     private BigDecimal balance;
+    @ExcelProperty("期初余额")
+    private BigDecimal preBalance;
 }

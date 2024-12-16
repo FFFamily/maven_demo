@@ -51,7 +51,7 @@ public class Step6OldDetailExcel {
     @ExcelProperty("生成的辅助核算段")
     private String auxiliaryAccounting;
     // 科目
-    @ExcelIgnore
+    @ExcelProperty("科目")
     private String project;
     @ExcelProperty("账户组合")
     private String onlySign;
