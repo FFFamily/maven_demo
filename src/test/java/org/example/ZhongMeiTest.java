@@ -9,6 +9,7 @@ import lombok.Data;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.*;
 import org.example.utils.CommonUtil;
+import org.example.utils.CompanyConstant;
 import org.example.寻找等级.FindNccZhongNanLevel;
 import org.example.新老系统.Step1;
 import org.junit.jupiter.api.Test;
@@ -38,15 +39,15 @@ public class ZhongMeiTest {
         List<Step6OldDetailExcel> excels = readPropertyExcel("2022");
         Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
         for (String companyName : collect.keySet()) {
-            String nowCompanyName = companyName.split("-")[0];
+//            String nowCompanyName = companyName.split("-")[0];
 //            if (!nowCompanyName.equals("江苏中南物业服务有限公司温州分公司")){
 //                continue;
 //            }
-            System.out.println(nowCompanyName);
+            System.out.println(companyName);
             Result result = doTest(collect, companyName);
-            String fileName = "组合余额表-2022-"+nowCompanyName + ".xlsx";
+            String fileName = "组合余额表-2022-"+companyName + ".xlsx";
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
-            String fileName2 = "组合余额表-2022-总账-"+nowCompanyName + ".xlsx";
+            String fileName2 = "组合余额表-2022-总账-"+companyName + ".xlsx";
             EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
         }
     }
@@ -56,11 +57,11 @@ public class ZhongMeiTest {
         List<Step6OldDetailExcel> excels = readPropertyExcel("2023");
         Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
         for (String companyName : collect.keySet()) {
-            String nowCompanyName = companyName.split("-")[0];
-            if (!nowCompanyName.equals("江苏中南物业服务有限公司温州分公司")){
+//            String nowCompanyName = companyName.split("-")[0];
+            if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
                 continue;
             }
-            System.out.println(nowCompanyName);
+            System.out.println(companyName);
             Result result = doTest(collect, companyName);
             String fileName = "组合余额表-23(1-6)-"+companyName + ".xlsx";
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
@@ -136,6 +137,7 @@ public class ZhongMeiTest {
                                     builder.append(fmsCompanyCode).append(".");
                                     nameBuilder.append(appendNameStr(znCompanyMapping.getFMSCompanyName())).append(".");
                                     data.setCompanyCode(fmsCompanyCode);
+                                    data.setCustomerName(CompanyConstant.getNewCompanyByOldCompany(data.getCompanyName().split("-")[0]));
                                     // 2- 部门
 //                                    String orgName = data.getOrgName();
 //                                    ZNOrgMapping znOrgMapping = findNccZhongNanLevel.znOrgMapping.get(orgName);

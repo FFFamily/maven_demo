@@ -12,6 +12,7 @@ import org.example.enitty.yu_zhou.YuZhouOldBalanceExcel;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.utils.CommonUtil;
+import org.example.utils.CompanyConstant;
 import org.example.新老系统.Step1;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -277,11 +278,7 @@ public class Step6Test {
      */
     public List<Step6OldDetailExcel> readPropertyExcel(){
         List<Step6OldDetailExcel> excels = new ArrayList<>();
-        Map<String,String> companyMapping = new HashMap<>();
-        companyMapping.put("江苏中南物业服务有限公司（总部）","江苏中南物业服务有限公司");
-        companyMapping.put("江苏中南物业服务有限公司（商管）","江苏中南物业服务有限公司");
-        companyMapping.put("江苏中南物业服务有限公司（住宅）","江苏中南物业服务有限公司");
-        companyMapping.put("江苏中南物业服务有限公司平湖分公司","江苏中南物业服务有限公司");
+
         // 读取旧系统的余额信息 2022年
         EasyExcel.read("src/main/java/org/example/excel/zhong_nan/物业上海公司.xlsx", Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
@@ -290,10 +287,9 @@ public class Step6Test {
                                     if (data.getV() == null && data.getW() == null){
                                         throw new RuntimeException("无法计算金额");
                                     }
-
                                     String companyName = data.getCompanyName();
                                     String realCompanyName = companyName.split("-")[0];
-                                    data.setCompanyName(companyMapping.getOrDefault(realCompanyName, realCompanyName));
+                                    data.setCompanyName(CompanyConstant.getNewCompanyByOldCompany(realCompanyName));
                                     Date time = data.getTime();
                                     DateTime date = DateUtil.date(time);
                                     if (date.isBefore(DateUtil.parse("2023-07-01")) || date.isAfter(DateUtil.parse("2023-12-31"))) {
