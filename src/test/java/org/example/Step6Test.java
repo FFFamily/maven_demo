@@ -139,11 +139,11 @@ public class Step6Test {
         // 先从旧系统出发
         if (oldSize > newSize) {
             matchOld(projectOld,projectNew,result3s,newSize);
-            for (int i = newSize; i < oldSize; i++) {
-                Step6OldDetailExcel data = projectOld.get(i);
-                data.setRemark("多余数据");
-                result3s.add(data);
-            }
+//            for (int i = newSize; i < oldSize; i++) {
+//                Step6OldDetailExcel data = projectOld.get(i);
+//                data.setRemark("多余数据");
+//                result3s.add(data);
+//            }
         }else {
             matchOld(projectOld,projectNew,result3s,oldSize);
         }
@@ -192,11 +192,11 @@ public class Step6Test {
             matchNew(projectOld,projectNew,result2s,newSize);
         }else {
             matchNew(projectOld,projectNew,result2s,oldSize);
-            for (int i = oldSize; i < newSize; i++) {
-                OracleData data = projectNew.get(i);
-                data.set备注("多余数据");
-                result2s.add(data);
-            }
+//            for (int i = oldSize; i < newSize; i++) {
+//                OracleData data = projectNew.get(i);
+//                data.set备注("多余数据");
+//                result2s.add(data);
+//            }
         }
     }
 
