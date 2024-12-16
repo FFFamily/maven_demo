@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 public class NewBalanceExcelResult {
     @ExcelProperty("数据来源")
     private String form;
-    @ExcelProperty("公司名称")
+    @ExcelProperty("主体")
     private String companyName;
     @ExcelProperty("科目")
     private String project;
@@ -24,8 +24,8 @@ public class NewBalanceExcelResult {
     private BigDecimal v;
     @ExcelProperty("本期贷方")
     private BigDecimal w;
-    @ExcelProperty("期末余额")
-    private BigDecimal balance;
     @ExcelProperty("期初余额")
     private BigDecimal preBalance;
+    @ExcelProperty("期末余额")
+    private BigDecimal balance;
 }
