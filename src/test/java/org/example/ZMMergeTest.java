@@ -55,7 +55,7 @@ public class ZMMergeTest {
                 oracleData.setForm("期初");
                 oracleData.setCompanyName(data.getCompanyName());
                 oracleData.setProjectCode(data.getOnlySign());
-//                    oracleData.setProjectName(data.getOnlySign());
+                oracleData.setProjectName(data.getOnlySignName());
                 oracleData.setAuxiliaryAccounting(data.getAuxiliaryAccounting());
                 oracleData.setBalance(data.getBalance());
                 orDefault.add(oracleData);
@@ -68,17 +68,22 @@ public class ZMMergeTest {
             throw new RuntimeException("不是目录");
         }
         for (String fileName : file.list()) {
+            if (fileName.equals(".DS_Store")){
+                continue;
+            }
             List<OracleData> list3 = new ArrayList<>();
             String[] split = fileName.split("-");
             String company = split[split.length - 1].replace(".xlsx", "");
             System.out.println("当前公司："+company);
-            if (!company.equals("唐山中南国际旅游度假物业服务有限责任公司")){
-                continue;
-            }
+//            if (!company.equals("唐山中南国际旅游度假物业服务有限责任公司")){
+//                continue;
+//            }
+
             EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company/"+fileName, Step6OldDetailExcel.class, new PageReadListener<Step6OldDetailExcel>(dataList -> {
                 for (Step6OldDetailExcel data : dataList) {
                     OracleData oracleData = new OracleData();
                     oracleData.setForm("22年序时账");
+                    oracleData.set公司段描述(data.getCompanyName());
                     oracleData.set账户组合(data.getOnlySign());
                     oracleData.set账户描述(data.getOnlySignName());
                     oracleData.set交易对象(data.getAuxiliaryAccountingCode());
@@ -114,9 +119,9 @@ public class ZMMergeTest {
                 newBalanceExcelResult.setForm("2022");
                 newBalanceExcelResult.setCompanyName(company);
                 newBalanceExcelResult.setProjectCode(one.get账户组合());
-                newBalanceExcelResult.setProjectName(one.get账户描述());
+                newBalanceExcelResult.setProjectName(one.get账户描述()+".");
                 newBalanceExcelResult.setProject(one.get科目段描述());
-                newBalanceExcelResult.setAuxiliaryAccounting(one.get交易对象());
+                newBalanceExcelResult.setAuxiliaryAccounting(one.get交易对象名称());
                 newBalanceExcelResult.setV(all.stream().map(OracleData::get输入借方).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                 newBalanceExcelResult.setW(all.stream().map(OracleData::get输入贷方).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                 newBalanceExcelResult.setBalance(newBalanceExcelResult.getV().subtract(newBalanceExcelResult.getW()));
@@ -131,7 +136,8 @@ public class ZMMergeTest {
                 re.setForm(results1.stream().map(NewBalanceExcelResult::getForm).distinct().collect(Collectors.joining("、")));
                 re.setCompanyName(results1.stream().map(NewBalanceExcelResult::getCompanyName).distinct().collect(Collectors.joining("、")));
                 re.setProjectCode(results1.stream().map(NewBalanceExcelResult::getProjectCode).distinct().collect(Collectors.joining("、")));
-                re.setProjectName(results1.stream().map(NewBalanceExcelResult::getProjectName).distinct().collect(Collectors.joining("、")));
+                // todo 后续有个. 要处理
+               re.setProjectName(results1.stream().map(NewBalanceExcelResult::getProjectName).distinct().collect(Collectors.joining("、")));
                 re.setAuxiliaryAccounting(results1.stream().map(NewBalanceExcelResult::getAuxiliaryAccounting).distinct().collect(Collectors.joining("、")));
                 re.setV(results1.stream().map(NewBalanceExcelResult::getV).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                 re.setW(results1.stream().map(NewBalanceExcelResult::getW).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
@@ -139,7 +145,6 @@ public class ZMMergeTest {
                 re.setPreBalance(results1.stream().filter(item -> item.getForm().equals("期初")).map(NewBalanceExcelResult::getBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                 finalExcel.add(re);
             }
-            break;
         }
         EasyExcel.write( "最终组合结果-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
 
@@ -150,8 +155,8 @@ public class ZMMergeTest {
         private String companyName;
         @ExcelProperty("科目编码")
         private String onlySign;
-//        @ExcelProperty("科目编码")
-//        private String onlySignName;
+        @ExcelProperty("科目编码名称映射")
+        private String onlySignName;
         @ExcelProperty("辅助核算段")
         private String auxiliaryAccounting;
         @ExcelProperty("旧系统22期初余额")
