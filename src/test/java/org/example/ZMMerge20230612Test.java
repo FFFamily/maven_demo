@@ -126,7 +126,7 @@ public class ZMMerge20230612Test {
 //            if (company.equals("青岛中南物业管理有限公司")){
 //                EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
 //            }
-            EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
+//            EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
             List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(company,new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
             Map<String, List<NewBalanceExcelResult>> cGroup = results.stream().collect(Collectors.groupingBy(item -> item.getProjectCode() + item.getAuxiliaryAccounting()));
             for (String s : cGroup.keySet()) {
