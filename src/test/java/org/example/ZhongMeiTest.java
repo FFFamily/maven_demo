@@ -35,7 +35,7 @@ public class ZhongMeiTest {
     }
     @Test
     void test2022() {
-        List<Step6OldDetailExcel> excels = readPropertyExcel();
+        List<Step6OldDetailExcel> excels = readPropertyExcel("2022");
         Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
         for (String companyName : collect.keySet()) {
             String nowCompanyName = companyName.split("-")[0];
@@ -44,16 +44,16 @@ public class ZhongMeiTest {
             }
             System.out.println(nowCompanyName);
             Result result = doTest(collect, companyName);
-            String fileName = "组合余额表-"+companyName + ".xlsx";
+            String fileName = "组合余额表-2022-"+companyName + ".xlsx";
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
-            String fileName2 = "组合余额表-总账-"+companyName + ".xlsx";
+            String fileName2 = "组合余额表-2022-总账-"+companyName + ".xlsx";
             EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
         }
     }
 
     @Test
     void test20230106() {
-        List<Step6OldDetailExcel> excels = readPropertyExcel();
+        List<Step6OldDetailExcel> excels = readPropertyExcel("2023");
         Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
         for (String companyName : collect.keySet()) {
             String nowCompanyName = companyName.split("-")[0];
@@ -96,7 +96,7 @@ public class ZhongMeiTest {
      * 读取物业excel
      * @return
      */
-    public List<Step6OldDetailExcel> readPropertyExcel(){
+    public List<Step6OldDetailExcel> readPropertyExcel(String startTime){
         List<Step6OldDetailExcel> excels = new ArrayList<>();
         // 读取旧系统的余额信息 2022年
         EasyExcel.read("src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx", Step6OldDetailExcel.class,
@@ -112,11 +112,16 @@ public class ZhongMeiTest {
                                     }
                                     Date time = data.getTime();
                                     DateTime date = DateUtil.date(time);
-//                                    if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
-//                                        continue;
-//                                    }
-                                    if (date.isBefore(DateUtil.parse("2023-01-01")) || date.isAfter(DateUtil.parse("2023-06-30"))) {
-                                        continue;
+                                    if (startTime.equals("2022")){
+                                        if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
+                                            continue;
+                                        }
+                                    }else if (startTime.equals("2023")){
+                                        if (date.isBefore(DateUtil.parse("2023-01-01")) || date.isAfter(DateUtil.parse("2023-06-30"))) {
+                                            continue;
+                                        }
+                                    }else {
+                                        throw new RuntimeException();
                                     }
                                     // 年
                                     int year = date.year();
@@ -213,7 +218,6 @@ public class ZhongMeiTest {
             String customerName = data.getCustomerName();
             ZNRelationMapping znRelationMapping = findNccZhongNanLevel.znRelationMapping.get(customerName);
             if (znRelationMapping != null){
-                System.out.println("原中南关联表存在对应的客商");
                 String project = getDataProject(fmsProjectCode);
                 if (project.equals("合同负债")){
                     project = "预收账款";
@@ -233,7 +237,7 @@ public class ZhongMeiTest {
     }
 
     private String getDataProject(String fmsProjectCode){
-        String project = fmsProjectCode.split("\\.")[2].substring(0,4);
+        String project = fmsProjectCode.substring(0,4);
         switch (project) {
             case "1122":
                 return "应收账款";

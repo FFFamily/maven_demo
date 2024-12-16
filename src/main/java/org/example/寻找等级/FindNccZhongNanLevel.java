@@ -36,7 +36,7 @@ public class FindNccZhongNanLevel {
 
     @PostConstruct
     public void init(){
-        try (ExcelReader excelReader = EasyExcel.read("src/main/java/org/example/excel/zhong_nan/2-中南NCC与FMS映射表.xlsx").build()) {
+        try (ExcelReader excelReader = EasyExcel.read("src/main/java/org/example/excel/zhong_nan/中南NCC与FMS映射表.xlsx").build()) {
             initZnProjectMapping(excelReader);
             initZnCompanyMapping(excelReader);
             initZnOrgMapping(excelReader);
