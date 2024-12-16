@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Resource;
 import java.awt.image.Kernel;
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,7 +49,12 @@ public class ZhongMeiTest {
             String fileName = "组合余额表-2022-"+companyName + ".xlsx";
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(result.getResults());
             String fileName2 = "组合余额表-2022-总账-"+companyName + ".xlsx";
-            EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
+            File file = new File(fileName2);
+            if (!file.exists()){
+                System.out.println("文件不存在");
+                EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
+            }
+
         }
     }
 
