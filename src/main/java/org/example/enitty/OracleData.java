@@ -65,7 +65,7 @@ public class OracleData {
     private String 部门名称;
     private String 额外字段;
     private String 科目;
-    private String 借正贷负;
+    private BigDecimal 借正贷负;
     private String 备注;
     @ExcelIgnore
     private Boolean used;
