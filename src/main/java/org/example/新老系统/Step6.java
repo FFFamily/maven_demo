@@ -74,8 +74,11 @@ public class Step6 {
                     || item.get日记账说明().equals(" FMS跑的计提与NCC重复")
                     || item.get日记账说明().equals("冲回-ZZTY2023092810121")))
                     .collect(Collectors.toList());
-        }else if (companyMap.equals("唐山中南国际旅游度假物业服务有限责任公司")){
-            oracleData = oracleData.stream().filter(item -> !item.get日记账说明().equals("YGCB2023120510075总账通用计提：NCC11月导入未配置交易对象，补录交易对象")).collect(Collectors.toList());
+        }else if (companyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
+            oracleData = oracleData
+                    .stream()
+                    .filter(item -> !item.get日记账说明().equals("YGCB2023120510075总账通用计提：NCC11月导入未配置交易对象，补录交易对象"))
+                    .collect(Collectors.toList());
         }
         // 按月进行分组
         Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
