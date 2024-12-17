@@ -43,7 +43,7 @@ public class Step5Test {
                 List<Map<String, Object>> sqlList = jdbcTemplate.queryForList(findPiSQL);
                 Map<String, List<Map<String, Object>>> map = sqlList.stream()
                         .filter(item -> {
-                            String time = (String)item.get("期间")+"-01";
+                            String time = item.get("期间") +"-01";
                             try {
                                 DateTime dataTime = DateUtil.parse(time);
                                 return dataTime.isAfter(DateUtil.parse("2023-07-01")) && dataTime.isBefore(DateUtil.parse("2023-12-01"));

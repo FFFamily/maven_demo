@@ -6,6 +6,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import lombok.Data;
 import org.example.enitty.Assistant;
 import org.example.enitty.OracleData;
 import org.example.enitty.yu_zhou.YuZhouOldBalanceExcel;
@@ -34,7 +35,20 @@ import static org.example.utils.CommonUtil.getZ;
 public class Step6Test {
     @Resource
     private JdbcTemplate jdbcTemplate;
+    @Data
+    public static class Step6TestResult{
+        List<Step6Result1> result1s;
+        List<OracleData> result2s;
+        List<Step6OldDetailExcel> result3s;
+        List<OracleData> oracleDataList;
 
+        public Step6TestResult(List<Step6Result1> result1s, List<OracleData> result2s, List<Step6OldDetailExcel> result3s,List<OracleData> oracleDataList) {
+            this.result1s = result1s;
+            this.result2s = result2s;
+            this.result3s = result3s;
+            this.oracleDataList = oracleDataList;
+        }
+    }
     @Test
     void test1() {
         File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
@@ -47,77 +61,10 @@ public class Step6Test {
             List<Step6OldDetailExcel> excels = readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> item.getCompanyName()));
             for (String companyName : companyMap.keySet()) {
-                List<Step6Result1> result1s = new ArrayList<>();
-                List<OracleData> result2s = new ArrayList<>();
-                List<Step6OldDetailExcel> result3s = new ArrayList<>();
-                System.out.println("当前公司为： "+companyName);
-//                if (!companyName.equals("江苏中南物业服务有限公司")){
-//                    continue;
-//                }
-                List<Step6OldDetailExcel> list = companyMap.get(companyName);
-                String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" like '%NCC%'";
-                List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
-                        .stream()
-                        .peek(item -> {
-                            String newProject = getNewProject(item);
-                            item.setActualProject(newProject);
-                            if (newProject.contains("合同负债") || newProject.contains("预收账款")){
-                                item.setMatchProject("合同负债/预收账款");
-                            }else {
-                                item.setMatchProject(newProject);
-                            }
-                        })
-                        .filter(item -> isBackProject(item.getActualProject()))
-                        .collect(Collectors.toList());
-                // 按月进行分组
-                Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
-                    DateTime date = DateUtil.parseDate(item.getTime());
-                    int year = date.year();
-                    int month = date.month() + 1;
-                    return year + "-" + (month > 9 ? month : "0" + month);
-                }));
-                Map<String, List<OracleData>> timeNewCollect = oracleData.stream().collect(Collectors.groupingBy(OracleData::get期间));
-                List<String> timeOldKeyCollect = new ArrayList<>(timeOldCollect.keySet());
-                List<String> timeNewKeyCollect = new ArrayList<>(timeNewCollect.keySet());
-                // 所有的时间
-                List<String> allTimeKey = Stream.of(timeOldKeyCollect, timeNewKeyCollect).flatMap(Collection::stream).distinct().collect(Collectors.toList());
-                for (String timeKey : allTimeKey) {
-                    List<Step6OldDetailExcel>  timeGroupOld = timeOldCollect.getOrDefault(timeKey,new ArrayList<>());
-                    List<OracleData> timeGroupNew = timeNewCollect.getOrDefault(timeKey,new ArrayList<>());
-                    Map<String, List<Step6OldDetailExcel>> projectOldMap = timeGroupOld.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getMatchProject));
-                    Map<String, List<OracleData>> projectNewMap = timeGroupNew.stream().collect(Collectors.groupingBy(OracleData::getMatchProject));
-                    List<String> allProjectKey = Stream.of(projectOldMap.keySet(), projectNewMap.keySet()).flatMap(Collection::stream).distinct().collect(Collectors.toList());
-                    for (String projectKey : allProjectKey) {
-                        List<Step6OldDetailExcel>  projectOld = projectOldMap.getOrDefault(projectKey,new ArrayList<>());
-                        List<OracleData> projectNew = projectNewMap.getOrDefault(projectKey,new ArrayList<>());
-                        BigDecimal oldSum = projectOld.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.getV()).subtract(CommonUtil.getBigDecimalValue(curr.getW()))), (l, r) -> l);
-                        BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(CommonUtil.getBigDecimalValue(curr.get输入贷方()))), (l, r) -> l);
-                        if (oldSum.compareTo(newSum) != 0) {
-                            // 两个余额不相等
-                            findOld(projectOld,projectNew,result3s);
-                            findNew(projectOld,projectNew,result2s);
-                            Step6Result1 step6Result1 = create(
-                                    companyName,
-                                    timeKey,
-                                    projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
-                                    projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
-                                    oldSum,
-                                    newSum);
-                            step6Result1.setRemark("余额不相等");
-                            result1s.add(step6Result1);
-                        }else {
-                            Step6Result1 step6Result1 = create(
-                                    companyName,
-                                    timeKey,
-                                    projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
-                                    projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
-                                    oldSum,
-                                    newSum);
-                            result1s.add(step6Result1);
-                        }
-                    }
-                }
-
+                Step6TestResult step6TestResult = step6Test(companyName, companyMap);
+                List<Step6Result1> result1s = step6TestResult.getResult1s();
+                List<OracleData> result2s = step6TestResult.getResult2s();
+                List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s();
                 // 这里 指定文件
                 try (ExcelWriter excelWriter = EasyExcel.write(name+"-"+companyName+"-第六步数据.xlsx").build()) {
                     // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
@@ -131,6 +78,82 @@ public class Step6Test {
             }
         }
     }
+
+
+    public Step6TestResult step6Test(String companyName,Map<String, List<Step6OldDetailExcel>> companyMap){
+        List<Step6Result1> result1s = new ArrayList<>();
+        List<OracleData> result2s = new ArrayList<>();
+        List<Step6OldDetailExcel> result3s = new ArrayList<>();
+        System.out.println("当前公司为： "+companyName);
+//                if (!companyName.equals("江苏中南物业服务有限公司")){
+//                    continue;
+//                }
+        List<Step6OldDetailExcel> list = companyMap.get(companyName);
+        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" like '%NCC%'";
+        List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
+                .stream()
+                .peek(item -> {
+                    String newProject = getNewProject(item);
+                    item.setActualProject(newProject);
+                    if (newProject.contains("合同负债") || newProject.contains("预收账款")){
+                        item.setMatchProject("合同负债/预收账款");
+                    }else {
+                        item.setMatchProject(newProject);
+                    }
+                })
+                .filter(item -> isBackProject(item.getActualProject()))
+                .collect(Collectors.toList());
+        // 按月进行分组
+        Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
+            DateTime date = DateUtil.parseDate(item.getTime());
+            int year = date.year();
+            int month = date.month() + 1;
+            return year + "-" + (month > 9 ? month : "0" + month);
+        }));
+        Map<String, List<OracleData>> timeNewCollect = oracleData.stream().collect(Collectors.groupingBy(OracleData::get期间));
+        List<String> timeOldKeyCollect = new ArrayList<>(timeOldCollect.keySet());
+        List<String> timeNewKeyCollect = new ArrayList<>(timeNewCollect.keySet());
+        // 所有的时间
+        List<String> allTimeKey = Stream.of(timeOldKeyCollect, timeNewKeyCollect).flatMap(Collection::stream).distinct().collect(Collectors.toList());
+        for (String timeKey : allTimeKey) {
+            List<Step6OldDetailExcel>  timeGroupOld = timeOldCollect.getOrDefault(timeKey,new ArrayList<>());
+            List<OracleData> timeGroupNew = timeNewCollect.getOrDefault(timeKey,new ArrayList<>());
+            Map<String, List<Step6OldDetailExcel>> projectOldMap = timeGroupOld.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getMatchProject));
+            Map<String, List<OracleData>> projectNewMap = timeGroupNew.stream().collect(Collectors.groupingBy(OracleData::getMatchProject));
+            List<String> allProjectKey = Stream.of(projectOldMap.keySet(), projectNewMap.keySet()).flatMap(Collection::stream).distinct().collect(Collectors.toList());
+            for (String projectKey : allProjectKey) {
+                List<Step6OldDetailExcel>  projectOld = projectOldMap.getOrDefault(projectKey,new ArrayList<>());
+                List<OracleData> projectNew = projectNewMap.getOrDefault(projectKey,new ArrayList<>());
+                BigDecimal oldSum = projectOld.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.getV()).subtract(CommonUtil.getBigDecimalValue(curr.getW()))), (l, r) -> l);
+                BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(CommonUtil.getBigDecimalValue(curr.get输入贷方()))), (l, r) -> l);
+                if (oldSum.compareTo(newSum) != 0) {
+                    // 两个余额不相等
+                    findOld(projectOld,projectNew,result3s);
+                    findNew(projectOld,projectNew,result2s);
+                    Step6Result1 step6Result1 = create(
+                            companyName,
+                            timeKey,
+                            projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
+                            projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
+                            oldSum,
+                            newSum);
+                    step6Result1.setRemark("余额不相等");
+                    result1s.add(step6Result1);
+                }else {
+                    Step6Result1 step6Result1 = create(
+                            companyName,
+                            timeKey,
+                            projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
+                            projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
+                            oldSum,
+                            newSum);
+                    result1s.add(step6Result1);
+                }
+            }
+        }
+        return new Step6TestResult(result1s,result2s,result3s,oracleData);
+    }
+
 
     private void findOld(List<Step6OldDetailExcel>  projectOld,List<OracleData> projectNew,List<Step6OldDetailExcel> result3s){
         // 找到造成差额的明细账
