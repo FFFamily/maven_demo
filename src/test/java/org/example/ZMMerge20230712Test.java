@@ -48,26 +48,25 @@ public class ZMMerge20230712Test {
                 }
                 List<Step6Result1> result1s = step6TestResult.getResult1s();
                 // 新系统处理后数据
-                List<OracleData> result2s = step6TestResult.getResult2s().stream().filter(item -> item.getForm() != null).collect(Collectors.toList());
-                // 新系统
-                List<OracleData> newDataList = step6TestResult.getOracleDataList();
-                for (OracleData item : result2s) {
-                    newDataList.remove(item);
-                }
+                List<OracleData> result2s = step6TestResult.getResult2s();
                 // 旧系统处理后数据
-                List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s().stream().filter(item -> item.getRemark() != null).collect(Collectors.toList());
+                List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s()
+                        .stream()
+                        .filter(item -> item.getRemark() != null)
+                        .collect(Collectors.toList());
                 // 旧系统
                 List<Step6OldDetailExcel> oldDataList = companyMap.get(companyName);
                 for (Step6OldDetailExcel item : result3s) {
                     oldDataList.remove(item);
                 }
+
                 // 数据过滤
                 try (ExcelWriter excelWriter = EasyExcel.write(name+"-"+companyName+"-剔除后的数据.xlsx").build()) {
                     // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
                     WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
                     excelWriter.write(result1s, writeSheet1);
                     WriteSheet writeSheet2 = EasyExcel.writerSheet(1, "新系统").head(OracleData.class).build();
-                    excelWriter.write(newDataList, writeSheet2);
+                    excelWriter.write(result2s, writeSheet2);
                     WriteSheet writeSheet3 = EasyExcel.writerSheet(2, "旧系统").head(Step6OldDetailExcel.class).build();
                     excelWriter.write(oldDataList, writeSheet3);
                 }
