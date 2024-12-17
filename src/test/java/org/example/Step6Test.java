@@ -14,6 +14,7 @@ import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
+import org.example.utils.CoverNewDate;
 import org.example.新老系统.Step1;
 import org.example.新老系统.Step6;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,8 @@ import static org.example.utils.CommonUtil.getZ;
 public class Step6Test {
     @Resource
     private Step6 step6;
+    @Resource
+    private CoverNewDate coverNewDate;
 
     @Test
     void test1() {
@@ -47,6 +50,7 @@ public class Step6Test {
                 continue;
             }
             List<Step6OldDetailExcel> excels = step6.readPropertyExcel(fileName);
+            excels.forEach(item -> coverNewDate.cover("2023-7-12",item));
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : companyMap.keySet()) {
 //                String[] split = companyName.split("-");

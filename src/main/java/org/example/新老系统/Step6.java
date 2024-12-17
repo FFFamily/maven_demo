@@ -11,6 +11,7 @@ import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.enitty.zhong_nan.ZNProjectMapping;
 import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
+import org.example.utils.CoverNewDate;
 import org.example.寻找等级.FindNccZhongNanLevel;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,6 +32,8 @@ public class Step6 {
     private Step5 step5;
     @Resource
     private JdbcTemplate jdbcTemplate;
+    @Resource
+    private CoverNewDate coverNewDate;
     @Resource
     private FindNccZhongNanLevel findNccZhongNanLevel;
     @Data
@@ -283,8 +286,6 @@ public class Step6 {
      */
     public List<Step6OldDetailExcel> readPropertyExcel(String fileName){
         List<Step6OldDetailExcel> excels = new ArrayList<>();
-
-        // 读取旧系统的余额信息 2022年
         EasyExcel.read("src/main/java/org/example/excel/zhong_nan/detail/"+fileName, Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
@@ -292,10 +293,6 @@ public class Step6 {
                                     if (data.getV() == null && data.getW() == null){
                                         throw new RuntimeException("无法计算金额");
                                     }
-//                                    String companyName = data.getCompanyName();
-//                                    String realCompanyName = companyName.split("-")[0];
-//                                    data.setCompanyName(realCompanyName);
-//                                    data.setCompanyName(CompanyConstant.getNewCompanyByOldCompany(realCompanyName));
                                     String time = data.getTime();
                                     DateTime date = DateUtil.parseDate(time);
                                     if (date.isBefore(DateUtil.parse("2023-07-01")) || date.isAfter(DateUtil.parse("2023-12-31"))) {

@@ -78,7 +78,7 @@ public class ZMMerge20230712Test {
 
                 List<OracleData> list3 = new ArrayList<>();
                 for (Step6OldDetailExcel data : oldDataList) {
-                    coverNewDate.cover("2023-7-12",data);
+//                    coverNewDate.cover("2023-7-12",data);
                     OracleData oracleData = new OracleData();
                     oracleData.setForm("23年7-12月序时账");
                     oracleData.set公司段描述(data.getCompanyName());
