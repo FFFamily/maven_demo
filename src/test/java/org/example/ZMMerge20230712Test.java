@@ -34,14 +34,17 @@ public class ZMMerge20230712Test {
         for (String fileName : Objects.requireNonNull(file.list())) {
             String name = fileName.replace(".xlsx", "");
             System.out.println("当前文件："+name);
-//            if (!name.equals("物业上海公司1")){
-//                continue;
-//            }
+            if (!name.equals("物业上海公司1")){
+                continue;
+            }
             // 旧系统
             List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : companyMap.keySet()) {
                 Step6Test.Step6TestResult step6TestResult = step6Test.step6Test(companyName, companyMap);
+                if (step6TestResult == null){
+                    continue;
+                }
                 List<Step6Result1> result1s = step6TestResult.getResult1s();
                 // 新系统处理后数据
                 List<OracleData> result2s = step6TestResult.getResult2s().stream().filter(item -> item.getForm() != null).collect(Collectors.toList());

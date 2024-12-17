@@ -55,9 +55,9 @@ public class Step6Test {
         for (String fileName : Objects.requireNonNull(file.list())) {
             String name = fileName.replace(".xlsx", "");
             System.out.println("当前文件："+name);
-//            if (!name.equals("物业上海公司1")){
-//                continue;
-//            }
+            if (!name.equals("物业北京公司")){
+                continue;
+            }
             List<Step6OldDetailExcel> excels = readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> item.getCompanyName()));
             for (String companyName : companyMap.keySet()) {
@@ -85,9 +85,9 @@ public class Step6Test {
         List<OracleData> result2s = new ArrayList<>();
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
         System.out.println("当前公司为： "+companyName);
-//                if (!companyName.equals("江苏中南物业服务有限公司")){
-//                    continue;
-//                }
+        if (!companyName.equals("江苏中南物业服务有限公司固安分公司")){
+            return null;
+        }
         List<Step6OldDetailExcel> list = companyMap.get(companyName);
         String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" like '%NCC%'";
         List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
