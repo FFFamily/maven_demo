@@ -8,8 +8,10 @@ import lombok.Data;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.enitty.zhong_nan.Step6Result1;
+import org.example.enitty.zhong_nan.ZNProjectMapping;
 import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
+import org.example.寻找等级.FindNccZhongNanLevel;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ import java.util.stream.Stream;
 public class Step6 {
     @Resource
     private JdbcTemplate jdbcTemplate;
+    @Resource
+    private FindNccZhongNanLevel findNccZhongNanLevel;
     @Data
     public static class Step6TestResult{
         List<Step6Result1> result1s;
@@ -46,11 +50,11 @@ public class Step6 {
         List<OracleData> result2s = new ArrayList<>();
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
         System.out.println("当前公司为： "+companyName);
-        if (!companyName.equals("江苏中南物业服务有限公司")){
+        if (!companyName.equals("江苏中南物业服务有限公司成都分公司")){
             return null;
         }
         List<Step6OldDetailExcel> list = companyMap.get(companyName);
-        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"批名\" like '%NCC系统导入%'";
+        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND ( z.\"批名\" like '%NCC系统导入%' or z.\"日记账说明\" like '%NCC系统导入%')";
         List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
                 .stream()
                 .peek(item -> {
@@ -305,6 +309,8 @@ public class Step6 {
                                     } else {
                                         data.setMatchProject(oldProject);
                                     }
+                                    ZNProjectMapping znProjectMapping = findNccZhongNanLevel.znProjectMapping.get(data.getProjectCode());
+                                    data.setProjectName(znProjectMapping.getFmsProjectName());
                                     excels.add(data);
                                 }catch (Exception e){
                                     System.out.println("解析中南老系统明细数据出错: "+e.getMessage());

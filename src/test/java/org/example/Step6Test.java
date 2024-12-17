@@ -43,13 +43,16 @@ public class Step6Test {
         for (String fileName : Objects.requireNonNull(file.list())) {
             String name = fileName.replace(".xlsx", "");
             System.out.println("当前文件："+name);
-            if (!name.equals("物业北京公司")){
+            if (!name.equals("物业成都公司")){
                 continue;
             }
             List<Step6OldDetailExcel> excels = step6.readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> item.getCompanyName()));
             for (String companyName : companyMap.keySet()) {
                 Step6.Step6TestResult step6TestResult = step6.step6Test(companyName, companyMap);
+                if (step6TestResult == null) {
+                    continue;
+                }
                 List<Step6Result1> result1s = step6TestResult.getResult1s();
                 List<OracleData> result2s = step6TestResult.getResult2s();
                 List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s();
