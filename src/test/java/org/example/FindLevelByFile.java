@@ -59,13 +59,13 @@ public class FindLevelByFile {
             // 读取旧系统的序时账
             Assistant Firstassistant = companyMap.get(companyCode).get(0);
             String companyName = Firstassistant.getE();
-            String companyType = CompanyTypeConstant.mapping.get(companyName);
-            if (!companyType.equals(CompanyTypeConstant.LANG_JI)){
-                System.out.println("不是朗基的公司，跳过");
-                continue;
-            }
-            List<OtherInfo3> oldCachedDataList = findNccLangJiLevel.getOldCachedDataListByCompanyName(companyName);
-            oldCachedDataList.forEach(LevelUtil::organizeDataItem);
+//            String companyType = CompanyTypeConstant.mapping.get(companyName);
+//            if (!companyType.equals(CompanyTypeConstant.LANG_JI)){
+//                System.out.println("不是朗基的公司，跳过");
+//                continue;
+//            }
+//            List<OtherInfo3> oldCachedDataList = findNccLangJiLevel.getOldCachedDataListByCompanyName(companyName);
+//            oldCachedDataList.forEach(LevelUtil::organizeDataItem);
             List<Assistant> realAssistantList = companyMap.get(companyCode);
             List<OtherInfo3> result1 = new ArrayList<>();
             System.out.println("共"+realAssistantList.size()+"条");
@@ -100,7 +100,7 @@ public class FindLevelByFile {
                         true,
                         false,
                         true,
-                        oldCachedDataList,
+                        null,
                         cachedDataList,
                         startCollect,
                         assistant.getZ(),
