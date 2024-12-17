@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.read.listener.PageReadListener;
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.enitty.Assistant;
 import org.example.enitty.SourceFileData;
@@ -31,13 +32,13 @@ public class FindLevelByFile {
     @Test
     void findLevel() {
         List<SourceFileData> sourceFileDataList = new ArrayList<>();
-        EasyExcel.read("",
+        EasyExcel.read("src/main/java/org/example/excel/江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助核算余额 _161224.xls",
                 new PageReadListener<Map<Integer, String>>(dataList -> {
                     for (Map<Integer, String> data : dataList) {
                         SourceFileData sourceFileData = new SourceFileData();
                         sourceFileDataList.add(sourceFileData);
                     }
-                }));
+                })).excelType(ExcelTypeEnum.XLS).sheet("江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助").doRead();
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
 //                .filter(item -> item.getCompanyCode().equals("WCRC0"))
