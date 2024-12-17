@@ -320,6 +320,7 @@ public class Step6 {
                                     }
 
 //                                    String oldProject = getOldProject(data);
+                                    data.setOldProject(getOldProject(data));
                                     String oldProject = coverNewDate.getProjectName(data).split("－")[0];
                                     data.setActualProject(oldProject);
                                     if (oldProject.startsWith("其他应收款") || oldProject.startsWith("其他货币资金")){

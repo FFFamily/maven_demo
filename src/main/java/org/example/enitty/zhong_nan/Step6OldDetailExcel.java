@@ -29,6 +29,8 @@ public class Step6OldDetailExcel {
     private String otherProjectName;
 //    @ExcelProperty("摘要")
 //    private String abstractName;
+    @ExcelProperty("原科目")
+    private String oldProject;
     @ExcelProperty("实际科目")
     private String actualProject;
     @ExcelProperty("匹配科目")
