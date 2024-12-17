@@ -115,7 +115,7 @@ public class ZMMerge20230712Test {
                             for (Step6OldDetailExcel data : dataList) {
 //                                coverNewDate.cover("2023-1-6",data);
                                 OracleData oracleData = new OracleData();
-                                oracleData.setForm("23年1-6月序时账");
+//                                oracleData.setForm("23年1-6月序时账");
                                 oracleData.set公司段描述(data.getCompanyName());
                                 oracleData.set账户组合(data.getOnlySign());
                                 oracleData.set账户描述(data.getOnlySignName());
