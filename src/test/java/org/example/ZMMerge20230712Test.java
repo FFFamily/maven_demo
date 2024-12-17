@@ -60,7 +60,6 @@ public class ZMMerge20230712Test {
                 if (step6TestResult == null){
                     continue;
                 }
-                List<Step6Result1> result1s = step6TestResult.getResult1s();
                 // 旧系统处理后数据
                 List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s()
                         .stream()
