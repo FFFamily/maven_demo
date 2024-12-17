@@ -43,7 +43,7 @@ public class Step6Test {
         for (String fileName : Objects.requireNonNull(file.list())) {
             String name = fileName.replace(".xlsx", "");
             System.out.println("当前文件："+name);
-            if (!name.equals("物业成都公司")){
+            if (!name.equals("物业北京公司")){
                 continue;
             }
             List<Step6OldDetailExcel> excels = step6.readPropertyExcel(fileName);
@@ -69,10 +69,4 @@ public class Step6Test {
             }
         }
     }
-
-
-
-
-
-
 }

@@ -50,11 +50,11 @@ public class Step6 {
         List<OracleData> result2s = new ArrayList<>();
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
         System.out.println("当前公司为： "+companyName);
-        if (!companyName.equals("江苏中南物业服务有限公司成都分公司")){
+        if (!companyName.equals("江苏中南物业服务有限公司天津分公司")){
             return null;
         }
         List<Step6OldDetailExcel> list = companyMap.get(companyName);
-        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND ( z.\"批名\" like '%NCC系统导入%' or z.\"日记账说明\" like '%NCC系统导入%')";
+        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"日记账说明\" like '%NCC%' ";
         List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
                 .stream()
                 .peek(item -> {
@@ -68,6 +68,15 @@ public class Step6 {
                 })
                 .filter(item -> isBackProject(item.getActualProject()))
                 .collect(Collectors.toList());
+        if (companyName.equals("江苏中南物业服务有限公司天津分公司")){
+            oracleData = oracleData.stream()
+                    .filter(item -> !(item.get日记账说明().equals("FYGD2023122610021_前期NCC凭证-冲销22年底计提审计费")
+                    || item.get日记账说明().equals(" FMS跑的计提与NCC重复")
+                    || item.get日记账说明().equals("冲回-ZZTY2023092810121")))
+                    .collect(Collectors.toList());
+        }else if (companyMap.equals("唐山中南国际旅游度假物业服务有限责任公司")){
+            oracleData = oracleData.stream().filter(item -> !item.get日记账说明().equals("YGCB2023120510075总账通用计提：NCC11月导入未配置交易对象，补录交易对象")).collect(Collectors.toList());
+        }
         // 按月进行分组
         Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
             DateTime date = DateUtil.parseDate(item.getTime());
