@@ -47,7 +47,7 @@ public class Step6Test {
                 continue;
             }
             List<Step6OldDetailExcel> excels = step6.readPropertyExcel(fileName);
-            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> item.getCompanyName()));
+            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> CompanyConstant.getNewCompanyByOldCompany( item.getCompanyName())));
             for (String companyName : companyMap.keySet()) {
                 Step6.Step6TestResult step6TestResult = step6.step6Test(companyName, companyMap);
                 if (step6TestResult == null) {

@@ -287,7 +287,8 @@ public class Step6 {
                                     }
                                     String companyName = data.getCompanyName();
                                     String realCompanyName = companyName.split("-")[0];
-                                    data.setCompanyName(CompanyConstant.getNewCompanyByOldCompany(realCompanyName));
+                                    data.setCompanyName(realCompanyName);
+//                                    data.setCompanyName(CompanyConstant.getNewCompanyByOldCompany(realCompanyName));
                                     String time = data.getTime();
                                     DateTime date = DateUtil.parseDate(time);
                                     if (date.isBefore(DateUtil.parse("2023-07-01")) || date.isAfter(DateUtil.parse("2023-12-31"))) {

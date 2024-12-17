@@ -14,6 +14,7 @@ import org.example.enitty.zhong_nan.NewBalanceExcelResult;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.utils.CommonUtil;
+import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
 import org.example.新老系统.Step6;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ public class ZMMerge20230712Test {
             }
             // 旧系统
             List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
-            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
+            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> CompanyConstant.getNewCompanyByOldCompany(item.getCompanyName())));
             for (String companyName : companyMap.keySet()) {
                 Step6.Step6TestResult step6TestResult = step6Test.step6Test(companyName, companyMap);
                 if (step6TestResult == null){
@@ -128,7 +129,7 @@ public class ZMMerge20230712Test {
 //                EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
 //            }
 //            EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
-                List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(companyName,new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
+                List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(CompanyConstant.getNewCompanyByOldCompany(companyName),new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
                 Map<String, List<NewBalanceExcelResult>> cGroup = results.stream().collect(Collectors.groupingBy(item -> item.getProjectCode() + item.getAuxiliaryAccounting()));
                 for (String s : cGroup.keySet()) {
                     List<NewBalanceExcelResult> results1 = cGroup.get(s);
