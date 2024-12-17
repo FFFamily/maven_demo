@@ -151,7 +151,7 @@ public class Step6 {
     }
 
     private void matchOld(List<Step6OldDetailExcel>  projectOld,List<OracleData> projectNew,List<Step6OldDetailExcel> result3s,int size){
-        Map<String, List<OracleData>> collect = projectNew.stream().collect(Collectors.groupingBy(item -> item.get行说明()));
+        Map<String, List<OracleData>> collect = projectNew.stream().collect(Collectors.groupingBy(OracleData::get行说明));
         for (int i = 0; i < size; i++) {
             Step6OldDetailExcel oldData = projectOld.get(i);
             BigDecimal oldBalance = getOldBalance(oldData);
@@ -305,8 +305,6 @@ public class Step6 {
                                     }
                                     // 其他货币基金只取 9-12月
                                     if (projectName.startsWith("其他货币资金") && (date.isBefore(DateUtil.parse("2023-09-01")) || date.isAfter(DateUtil.parse("2023-12-31")))){
-//                                        System.out.println("过滤："+DateUtil.date(date));
-//                                        System.out.println(data);
                                         continue;
                                     }
                                     // 摘要

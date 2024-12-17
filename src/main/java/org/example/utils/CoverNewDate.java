@@ -80,8 +80,6 @@ public class CoverNewDate {
             String customerName = data.getCustomerName();
             ZNIPCMapping znipcMapping = findNccZhongNanLevel.znipcMapping.get(customerName);
             String icp = znipcMapping == null ? null : znipcMapping.getFmsICPCode();
-//                                    ZNCompanyMapping znCompanyMapping1 = findNccZhongNanLevel.znCustomerMapping.get(customerName);
-//                                    String icp = znCompanyMapping1.getFMSCompanyCode() == null ? "0" : znCompanyMapping1.getFMSCompanyCode();
             builder.append(appendStr(icp)).append(".");
             nameBuilder.append(appendNameStr(znipcMapping == null ? null : customerName)).append(".");
             // 9-项目代码
@@ -130,7 +128,7 @@ public class CoverNewDate {
         String fmsChildProjectName = znProjectMapping.getFmsChildProjectName();
         if (year == 2022){
             // 使用默认
-        }else if (year == 2023 && month >= 1 && month <= 6){
+        }else if (year == 2023 || year == 2024){
             String customerName = data.getCustomerName();
             ZNRelationMapping znRelationMapping = findNccZhongNanLevel.znRelationMapping.get(customerName);
             if (znRelationMapping != null){

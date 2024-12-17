@@ -75,6 +75,7 @@ public class ZMMerge20230712Test {
                 for (Step6OldDetailExcel item : result3s) {
                     oldDataList.remove(item);
                 }
+
                 List<OracleData> list3 = new ArrayList<>();
                 for (Step6OldDetailExcel data : oldDataList) {
                     coverNewDate.cover("2023-7-12",data);
