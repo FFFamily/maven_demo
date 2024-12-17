@@ -116,7 +116,26 @@ public class CoverNewDate {
     }
 
 
-    private void findProjectInfoByTime(Step6OldDetailExcel data ,int year,int month,StringBuilder builder,StringBuilder nameBuilder){
+
+    public String getProjectName(Step6OldDetailExcel data) {
+        try {
+            String time = data.getTime();
+            DateTime date = DateUtil.parseDate(time);
+            // 年
+            int year = date.year();
+            // 月
+            int month = date.month() + 1;
+            StringBuilder builder = new StringBuilder();
+            StringBuilder nameBuilder = new StringBuilder();
+            // 3-科目代码 4-子目代码
+            return findProjectInfoByTime(data,year,month,builder,nameBuilder);
+        }catch (Exception e){
+            System.out.println(data);
+            e.printStackTrace();
+        }
+        return null;
+    }
+    private String findProjectInfoByTime(Step6OldDetailExcel data ,int year,int month,StringBuilder builder,StringBuilder nameBuilder){
 
         String projectCode = data.getProjectCode();
         ZNProjectMapping znProjectMapping = findNccZhongNanLevel.znProjectMapping.get(projectCode);
@@ -148,6 +167,7 @@ public class CoverNewDate {
         builder.append(appendStr(fmsChildProjectCode) ).append(".");
         nameBuilder.append(appendNameStr(fmsProjectName)).append(".");
         nameBuilder.append(appendNameStr(fmsChildProjectName)).append(".");
+        return appendNameStr(fmsProjectName);
     }
 
     private String getDataProject(String fmsProjectCode){
