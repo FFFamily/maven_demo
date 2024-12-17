@@ -71,12 +71,19 @@ public class FindLevelByFile {
             System.out.println("共"+realAssistantList.size()+"条");
             List<OtherInfo3> cachedDataList = new ArrayList<>();
             EasyExcel.read("src/main/java/org/example/excel/CRC_B00_GL_总帐凭证行查 _江苏中南物业服务有限公司常德分公司2021.1-2024.9.xlsx",
-                    new PageReadListener<Map<Integer, String>>(dataList -> {
-                        for (Map<Integer, String> data : dataList) {
+                    new AnalysisEventListener<Map<Integer,String>>() {
+                        @Override
+                        public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
                             OtherInfo3 otherInfo3 = new OtherInfo3();
                             cachedDataList.add(otherInfo3);
                         }
-                    }));
+
+                        @Override
+                        public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+
+                        }
+                    }
+            );
             cachedDataList.forEach(item -> {
                 LevelUtil.organizeDataItem(item);
                 item.setSystemForm("新系统");
