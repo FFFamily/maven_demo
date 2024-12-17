@@ -109,35 +109,43 @@ public class ZMMerge20230712Test {
                 }
 
                 // 新系统
+//                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
+//                        Step6OldDetailExcel.class,
+//                        new PageReadListener<Step6OldDetailExcel>(dataList -> {
+//                            for (Step6OldDetailExcel data : dataList) {
+//                                coverNewDate.cover("2023-1-6",data);
+//                                OracleData oracleData = new OracleData();
+////                                oracleData.setForm("23年1-6月序时账");
+//                                oracleData.set公司段描述(data.getCompanyName());
+//                                oracleData.set账户组合(data.getOnlySign());
+//                                oracleData.set账户描述(data.getOnlySignName());
+//                                oracleData.set交易对象(data.getAuxiliaryAccountingCode());
+//                                oracleData.set交易对象名称(data.getAuxiliaryAccounting());
+//                                oracleData.set输入借方(data.getV());
+//                                oracleData.set输入贷方(data.getW());
+//                                oracleData.set单据编号(data.getVoucherCode());
+//                                oracleData.set有效日期(data.getTime());
+//                                DateTime parse = DateUtil.parse(data.getTime());
+//                                oracleData.set期间(parse.year()+"-"+(parse.month()+1));
+//                                oracleData.set科目代码(data.getProjectCode());
+//                                oracleData.set科目段描述(data.getProjectName());
+//                                oracleData.set对方科目(data.getOtherProjectCode());
+//                                oracleData.set对方科目名称(data.getOtherProjectName());
+//                                oracleData.set行说明(data.getMatch());
+//                                oracleData.set项目(data.getEventCode());
+//                                oracleData.set项目段描述(data.getEventName());
+//                                oracleData.set部门代码(data.getOrgCode());
+//                                oracleData.set部门名称(data.getOrgName());
+//                                list3.add(oracleData);
+//                            }
+//                        })
+//                ).sheet("组合结果").doRead();
+
                 EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
-                        Step6OldDetailExcel.class,
-                        new PageReadListener<Step6OldDetailExcel>(dataList -> {
-                            for (Step6OldDetailExcel data : dataList) {
-                                coverNewDate.cover("2023-1-6",data);
-                                OracleData oracleData = new OracleData();
-//                                oracleData.setForm("23年1-6月序时账");
-                                oracleData.set公司段描述(data.getCompanyName());
-                                oracleData.set账户组合(data.getOnlySign());
-                                oracleData.set账户描述(data.getOnlySignName());
-                                oracleData.set交易对象(data.getAuxiliaryAccountingCode());
-                                oracleData.set交易对象名称(data.getAuxiliaryAccounting());
-                                oracleData.set输入借方(data.getV());
-                                oracleData.set输入贷方(data.getW());
-                                oracleData.set单据编号(data.getVoucherCode());
-                                oracleData.set有效日期(data.getTime());
-                                DateTime parse = DateUtil.parse(data.getTime());
-                                oracleData.set期间(parse.year()+"-"+(parse.month()+1));
-                                oracleData.set科目代码(data.getProjectCode());
-                                oracleData.set科目段描述(data.getProjectName());
-                                oracleData.set对方科目(data.getOtherProjectCode());
-                                oracleData.set对方科目名称(data.getOtherProjectName());
-                                oracleData.set行说明(data.getMatch());
-                                oracleData.set项目(data.getEventCode());
-                                oracleData.set项目段描述(data.getEventName());
-                                oracleData.set部门代码(data.getOrgCode());
-                                oracleData.set部门名称(data.getOrgName());
-                                list3.add(oracleData);
-                            }
+                        OracleData.class,
+                        new PageReadListener<OracleData>(dataList -> {
+                            //coverNewDate.cover("2023-1-6",data);
+                            list3.addAll(dataList);
                         })
                 ).sheet("组合结果").doRead();
 
