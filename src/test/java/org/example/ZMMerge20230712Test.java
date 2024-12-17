@@ -104,6 +104,11 @@ public class ZMMerge20230712Test {
                     list3.add(oracleData);
                 }
 
+                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/组合余额表-2023-1-6-总账-"+newCompanyName+".xlsx",
+                        OracleData.class,
+                        new PageReadListener<OracleData>(list3::addAll)
+                ).sheet("余额表").doRead();
+
                 List<NewBalanceExcelResult> result = new ArrayList<>();
                 List<OracleData> list1 = new ArrayList<>();
                 List<OracleData> list2 = new ArrayList<>();
@@ -130,7 +135,17 @@ public class ZMMerge20230712Test {
 //            if (company.equals("青岛中南物业管理有限公司")){
 //                EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
 //            }
-//            EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
+                File excelFile = new File(oldCompanyName + "-2023-7-12-组合序时账" + ".xlsx");
+                if (excelFile.exists()){
+                    System.out.println("文件存在");
+                    List<OracleData> list = new ArrayList<>();
+                    EasyExcel.read(excelFile, Step6OldDetailExcel.class,
+                            new PageReadListener<OracleData>(list::addAll));
+                    list.addAll(xsList);
+                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(list);
+                }else {
+                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
+                }
                 List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(newCompanyName,new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
                 Map<String, List<NewBalanceExcelResult>> cGroup = results.stream().collect(Collectors.groupingBy(item -> item.getProjectCode() + item.getAuxiliaryAccounting()));
                 for (String s : cGroup.keySet()) {
