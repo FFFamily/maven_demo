@@ -8,6 +8,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import lombok.Data;
+import org.apache.tomcat.Jar;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.Merge22Result;
 import org.example.enitty.zhong_nan.NewBalanceExcelResult;
@@ -19,6 +20,8 @@ import org.example.utils.CoverNewDate;
 import org.example.新老系统.Step6;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -31,7 +34,8 @@ import java.util.stream.Stream;
 public class ZMMerge20230712Test {
     @Resource
     private Step6 step6Test;
-
+    @Resource
+    private JdbcTemplate jdbcTemplate;
     @Resource
     private CoverNewDate coverNewDate;
     @Test
@@ -108,38 +112,37 @@ public class ZMMerge20230712Test {
                     list3.add(oracleData);
                 }
 
-                // 新系统
-//                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
-//                        Step6OldDetailExcel.class,
-//                        new PageReadListener<Step6OldDetailExcel>(dataList -> {
-//                            for (Step6OldDetailExcel data : dataList) {
-//                                coverNewDate.cover("2023-1-6",data);
-//                                OracleData oracleData = new OracleData();
-////                                oracleData.setForm("23年1-6月序时账");
-//                                oracleData.set公司段描述(data.getCompanyName());
-//                                oracleData.set账户组合(data.getOnlySign());
-//                                oracleData.set账户描述(data.getOnlySignName());
-//                                oracleData.set交易对象(data.getAuxiliaryAccountingCode());
-//                                oracleData.set交易对象名称(data.getAuxiliaryAccounting());
-//                                oracleData.set输入借方(data.getV());
-//                                oracleData.set输入贷方(data.getW());
-//                                oracleData.set单据编号(data.getVoucherCode());
-//                                oracleData.set有效日期(data.getTime());
-//                                DateTime parse = DateUtil.parse(data.getTime());
-//                                oracleData.set期间(parse.year()+"-"+(parse.month()+1));
-//                                oracleData.set科目代码(data.getProjectCode());
-//                                oracleData.set科目段描述(data.getProjectName());
-//                                oracleData.set对方科目(data.getOtherProjectCode());
-//                                oracleData.set对方科目名称(data.getOtherProjectName());
-//                                oracleData.set行说明(data.getMatch());
-//                                oracleData.set项目(data.getEventCode());
-//                                oracleData.set项目段描述(data.getEventName());
-//                                oracleData.set部门代码(data.getOrgCode());
-//                                oracleData.set部门名称(data.getOrgName());
-//                                list3.add(oracleData);
-//                            }
-//                        })
-//                ).sheet("组合结果").doRead();
+                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company/组合余额表-2022-总账"+newCompanyName+".xlsx",
+                        Step6OldDetailExcel.class,
+                        new PageReadListener<Step6OldDetailExcel>(dataList -> {
+                            for (Step6OldDetailExcel data : dataList) {
+                                coverNewDate.cover("2023-1-6",data);
+                                OracleData oracleData = new OracleData();
+                                oracleData.setForm("22年序时账");
+                                oracleData.set公司段描述(data.getCompanyName());
+                                oracleData.set账户组合(data.getOnlySign());
+                                oracleData.set账户描述(data.getOnlySignName());
+                                oracleData.set交易对象(data.getAuxiliaryAccountingCode());
+                                oracleData.set交易对象名称(data.getAuxiliaryAccounting());
+                                oracleData.set输入借方(data.getV());
+                                oracleData.set输入贷方(data.getW());
+                                oracleData.set单据编号(data.getVoucherCode());
+                                oracleData.set有效日期(data.getTime());
+                                DateTime parse = DateUtil.parse(data.getTime());
+                                oracleData.set期间(parse.year()+"-"+(parse.month()+1));
+                                oracleData.set科目代码(data.getProjectCode());
+                                oracleData.set科目段描述(data.getProjectName());
+                                oracleData.set对方科目(data.getOtherProjectCode());
+                                oracleData.set对方科目名称(data.getOtherProjectName());
+                                oracleData.set行说明(data.getMatch());
+                                oracleData.set项目(data.getEventCode());
+                                oracleData.set项目段描述(data.getEventName());
+                                oracleData.set部门代码(data.getOrgCode());
+                                oracleData.set部门名称(data.getOrgName());
+                                list3.add(oracleData);
+                            }
+                        })
+                ).sheet("组合结果").doRead();
 
                 EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
                         OracleData.class,
@@ -149,11 +152,16 @@ public class ZMMerge20230712Test {
                         })
                 ).sheet("组合结果").doRead();
 
+                String findSql = "select * from z where z.\"公司段描述\" = '" + newCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
+                List<OracleData> newDataList = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class));
+                for (OracleData data : newDataList) {
+                    OracleData oracleData = new OracleData();
+                    oracleData.setForm("24年1-9月序时账");
+                    list3.add(data);
+                }
                 List<NewBalanceExcelResult> result = new ArrayList<>();
                 List<OracleData> list1 = new ArrayList<>();
                 List<OracleData> list2 = new ArrayList<>();
-//                List<OracleData> list1 = map1.getOrDefault(company, new ArrayList<>());
-//                List<OracleData> list2 = map2.getOrDefault(company, new ArrayList<>());
                 List<OracleData> xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
                 Map<String, List<OracleData>> group = xsList.stream().collect(Collectors.groupingBy(item -> item.get账户组合() + getStr(item.get交易对象())));
                 for (String key : group.keySet()) {
