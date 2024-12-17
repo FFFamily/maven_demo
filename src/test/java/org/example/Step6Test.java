@@ -50,7 +50,6 @@ public class Step6Test {
                 continue;
             }
             List<Step6OldDetailExcel> excels = step6.readPropertyExcel(fileName);
-            excels.forEach(item -> coverNewDate.cover("2023-7-12",item));
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : companyMap.keySet()) {
 //                String[] split = companyName.split("-");
