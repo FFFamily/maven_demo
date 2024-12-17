@@ -34,7 +34,7 @@ public class FindLevelByFile {
     @Test
     void findLevel() {
         List<SourceFileData> sourceFileDataList = new ArrayList<>();
-        EasyExcel.read("src/main/java/org/example/excel/江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助核算余额 _161224.xls",
+        EasyExcel.read("src/main/java/org/example/excel/江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助核算余额 _161224.xlsx",
                 new AnalysisEventListener<Map<Integer,String>>() {
                     @Override
                     public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
@@ -46,7 +46,7 @@ public class FindLevelByFile {
                     public void doAfterAllAnalysed(AnalysisContext analysisContext) {
 
                     }
-                }).excelType(ExcelTypeEnum.XLS).sheet("江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助").doRead();
+                }).excelType(ExcelTypeEnum.XLSX).sheet("江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助").headRowNumber(2).doRead();
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
 //                .filter(item -> item.getCompanyCode().equals("WCRC0"))
@@ -70,7 +70,7 @@ public class FindLevelByFile {
             List<OtherInfo3> result1 = new ArrayList<>();
             System.out.println("共"+realAssistantList.size()+"条");
             List<OtherInfo3> cachedDataList = new ArrayList<>();
-            EasyExcel.read("",
+            EasyExcel.read("src/main/java/org/example/excel/CRC_B00_GL_总帐凭证行查 _江苏中南物业服务有限公司常德分公司2021.1-2024.9.xlsx",
                     new PageReadListener<Map<Integer, String>>(dataList -> {
                         for (Map<Integer, String> data : dataList) {
                             OtherInfo3 otherInfo3 = new OtherInfo3();
