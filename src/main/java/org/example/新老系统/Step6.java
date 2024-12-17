@@ -63,6 +63,7 @@ public class Step6 {
 //        List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
         List<OracleData> oracleData = step5.step5Test(newCompanyName)
                 .stream()
+                .filter(item -> item.get日记账说明().contains("NCC"))
                 .peek(item -> {
                     String newProject = getNewProject(item);
                     item.setActualProject(newProject);
