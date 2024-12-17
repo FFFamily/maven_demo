@@ -46,7 +46,7 @@ public class Step6 {
         List<OracleData> result2s = new ArrayList<>();
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
         System.out.println("当前公司为： "+companyName);
-        if (!companyName.equals("江苏中南物业服务有限公司固安分公司")){
+        if (!companyName.equals("江苏中南物业服务有限公司")){
             return null;
         }
         List<Step6OldDetailExcel> list = companyMap.get(companyName);

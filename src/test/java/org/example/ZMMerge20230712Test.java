@@ -62,7 +62,7 @@ public class ZMMerge20230712Test {
                     oldDataList.remove(item);
                 }
                 // 数据过滤
-                try (ExcelWriter excelWriter = EasyExcel.write(name+"-"+companyName+"-第六步数据.xlsx").build()) {
+                try (ExcelWriter excelWriter = EasyExcel.write(name+"-"+companyName+"-剔除后的数据.xlsx").build()) {
                     // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
                     WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
                     excelWriter.write(result1s, writeSheet1);
