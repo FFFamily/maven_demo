@@ -67,7 +67,6 @@ public class Step6 {
         List<OracleData> step5Result = step5.step5Test(newCompanyName)
                 .stream()
                 .filter(item -> item.get额外字段() == null)
-                .filter(item -> isBackProject(item.getActualProject()))
                 .peek(item -> {
                     String newProject = getNewProject(item);
                     item.setActualProject(newProject);
@@ -77,14 +76,25 @@ public class Step6 {
                         item.setMatchProject(newProject);
                     }
                 })
+                .filter(item -> isBackProject(item.getActualProject()))
                 .collect(Collectors.toList());
         List<OracleData> nccstep5Result =step5Result
                 .stream()
                 .filter(item -> item.get日记账说明().contains("NCC"))
                 .collect(Collectors.toList());
-        List<OracleData> oracleData = nccstep5Result.stream().filter(item -> filterCondition(newCompanyName,item)).collect(Collectors.toList());
-        List<OracleData> notWithNcc = step5Result.stream().filter(item -> !item.get日记账说明().contains("NCC")).collect(Collectors.toList());
-        notWithNcc.addAll(nccstep5Result.stream().filter(item -> !filterCondition(newCompanyName,item)).collect(Collectors.toList()));
+        List<OracleData> oracleData = new ArrayList<>();
+        List<OracleData> notWithNcc = step5Result.stream()
+                .filter(item -> !item.get日记账说明().contains("NCC"))
+                .peek(item -> item.setForm("23年7-12月新系统序时账"))
+                .collect(Collectors.toList());
+        for (OracleData data : nccstep5Result) {
+            if (filterCondition(newCompanyName,data)){
+                data.setForm("23年7-12月新系统序时账单独过滤");
+                notWithNcc.add(data);
+            }else {
+                oracleData.add(data);
+            }
+        }
         // 按月进行分组
         Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
             DateTime date = DateUtil.parseDate(item.getTime());
@@ -145,9 +155,9 @@ public class Step6 {
 
     private boolean filterCondition(String companyName,OracleData oracleData){
         if (companyName.equals("江苏中南物业服务有限公司天津分公司")){
-            return  !(oracleData.get日记账说明().equals("FYGD2023122610021_前期NCC凭证-冲销22年底计提审计费") || oracleData.get日记账说明().equals("FMS跑的计提与NCC重复，冲回-ZZTY2023092810121"));
+            return  oracleData.get日记账说明().equals("FYGD2023122610021_前期NCC凭证-冲销22年底计提审计费") || oracleData.get日记账说明().equals("FMS跑的计提与NCC重复，冲回-ZZTY2023092810121");
         }else if (companyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
-            return !oracleData.get日记账说明().equals("YGCB2023120510075总账通用计提：NCC11月导入未配置交易对象，补录交易对象");
+            return oracleData.get日记账说明().contains("YGCB2023120510075总账通用计提：NCC11月导入未配置交易对象，补录交易对象");
         }
         return false;
     }
