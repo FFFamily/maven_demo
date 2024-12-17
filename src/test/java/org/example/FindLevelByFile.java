@@ -61,13 +61,15 @@ public class FindLevelByFile {
 
                     }
                 }).excelType(ExcelTypeEnum.XLSX).sheet("江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助").headRowNumber(2).doRead();
-        Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
-                .stream()
+        Map<String, List<Assistant>> companyMap = null;
+        //
+//        Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
+//                .stream()
 //                .filter(item -> item.getCompanyCode().equals("WCRC0"))
 //                .filter(item -> item.getR().equals("WCRC0.0.1122010101.05.999999.0.0.0.30017821.0"))
 //                .filter(item -> item.getTransactionObjectId().equals("SS:72747717"))
                 // 根据公司分组
-                .collect(Collectors.groupingBy(Assistant::getCompanyCode));
+//                .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
             System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
             // 读取旧系统的序时账
