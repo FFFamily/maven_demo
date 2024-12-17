@@ -14,6 +14,7 @@ import org.example.enitty.zhong_nan.NewBalanceExcelResult;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.utils.CommonUtil;
+import org.example.utils.CoverNewDate;
 import org.example.新老系统.Step6;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +30,9 @@ import java.util.stream.Stream;
 public class ZMMerge20230712Test {
     @Resource
     private Step6 step6Test;
+
+    @Resource
+    private CoverNewDate coverNewDate;
     @Test
     void test(){
         Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
@@ -72,6 +76,7 @@ public class ZMMerge20230712Test {
                 }
                 List<OracleData> list3 = new ArrayList<>();
                 for (Step6OldDetailExcel data : oldDataList) {
+                    coverNewDate.cover("2023-7-12",data);
                     OracleData oracleData = new OracleData();
                     oracleData.setForm("23年7-12月序时账");
                     oracleData.set公司段描述(data.getCompanyName());

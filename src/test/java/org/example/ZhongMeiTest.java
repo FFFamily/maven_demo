@@ -11,6 +11,7 @@ import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.*;
 import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
+import org.example.utils.CoverNewDate;
 import org.example.寻找等级.FindNccZhongNanLevel;
 import org.example.新老系统.Step1;
 import org.junit.jupiter.api.Test;
@@ -27,9 +28,7 @@ import java.util.stream.Collectors;
 @SpringBootTest
 public class ZhongMeiTest {
     @Resource
-    private FindNccZhongNanLevel findNccZhongNanLevel;
-    @Resource
-    private JdbcTemplate jdbcTemplate;
+    private CoverNewDate coverNewDate;
 
     public List<String> pathList = Lists.newArrayList(
             "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
@@ -92,7 +91,7 @@ public class ZhongMeiTest {
     void test20230106() {
         for (String path : pathList) {
             System.out.println("当前path"+path);
-            List<Step6OldDetailExcel> excels = readPropertyExcel(path,"2023");
+            List<Step6OldDetailExcel> excels = readPropertyExcel(path,"2023-1-6");
             List<NewBalanceExcelResult> pathResult = new ArrayList<>();
             Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : collect.keySet()) {
@@ -155,182 +154,16 @@ public class ZhongMeiTest {
         EasyExcel.read(path, Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
-                                try {
-                                    if (data.getV() == null && data.getW() == null){
-                                        throw new RuntimeException("无法计算金额");
-                                    }
-                                    String projectName = data.getProjectName();
-                                    if (!isBackProject2022(projectName)){
-                                        continue;
-                                    }
-                                    String time = data.getTime();
-                                    DateTime date = DateUtil.parseDate(time);
-                                    if (startTime.equals("2022")){
-                                        if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
-                                            continue;
-                                        }
-                                    }else if (startTime.equals("2023")){
-                                        if (date.isBefore(DateUtil.parse("2023-01-01")) || date.isAfter(DateUtil.parse("2023-06-30"))) {
-                                            continue;
-                                        }
-                                    }else {
-                                        throw new RuntimeException();
-                                    }
-                                    // 年
-                                    int year = date.year();
-                                    // 月
-                                    int month = date.month() + 1;
-                                    StringBuilder builder = new StringBuilder();
-                                    StringBuilder nameBuilder = new StringBuilder();
-                                    // 1- 机构代码
-                                    String companyName = data.getCompanyName();
-                                    ZNCompanyMapping znCompanyMapping = findNccZhongNanLevel.znCompanyMapping.get(companyName);
-                                    String fmsCompanyCode = znCompanyMapping.getFMSCompanyCode();
-                                    builder.append(fmsCompanyCode).append(".");
-                                    nameBuilder.append(appendNameStr(znCompanyMapping.getFMSCompanyName())).append(".");
-                                    data.setCompanyCode(fmsCompanyCode);
-                                    data.setCompanyName(CompanyConstant.getNewCompanyByOldCompany(data.getCompanyName().split("-")[0]));
-                                    // 2- 部门
-//                                    String orgName = data.getOrgName();
-//                                    ZNOrgMapping znOrgMapping = findNccZhongNanLevel.znOrgMapping.get(orgName);
-//                                    String fmsOrgCode = znOrgMapping.getFMSOrgCode();
-//                                    builder.append(fmsOrgCode).append(".");
-                                    builder.append("0").append(".");
-                                    nameBuilder.append("-").append(".");
-                                    // 3-科目代码 4-子目代码
-                                    findProjectInfoByTime(data,year,month,builder,nameBuilder);
-                                    // 5-产品代码
-                                    String eventName = data.getEventName();
-                                    ZNEventMapping znEventMapping = findNccZhongNanLevel.znEventMapping.get(companyName + eventName);
-                                    String fmsProductCode = znEventMapping == null ?  null : znEventMapping.getFmsProductCode();
-                                    String fmsProductName = znEventMapping == null ?  null : znEventMapping.getFmsProductName();
-                                    builder.append(appendStr(fmsProductCode) ).append(".");
-                                    nameBuilder.append(appendNameStr(fmsProductName) ).append(".");
-                                    // 6-地区代码
-                                    String fmsAreaCode = "0";
-                                    builder.append(fmsAreaCode).append(".");
-                                    nameBuilder.append("-").append(".");
-                                    // 7-SBU
-                                    String fmsSBU = "0";
-                                    builder.append(fmsSBU).append(".");
-                                    nameBuilder.append("-").append(".");
-                                    // 8-ICP
-                                    String customerName = data.getCustomerName();
-                                    ZNIPCMapping znipcMapping = findNccZhongNanLevel.znipcMapping.get(customerName);
-                                    String icp = znipcMapping == null ? null : znipcMapping.getFmsICPCode();
-//                                    ZNCompanyMapping znCompanyMapping1 = findNccZhongNanLevel.znCustomerMapping.get(customerName);
-//                                    String icp = znCompanyMapping1.getFMSCompanyCode() == null ? "0" : znCompanyMapping1.getFMSCompanyCode();
-                                    builder.append(appendStr(icp)).append(".");
-                                    nameBuilder.append(appendNameStr(znipcMapping == null ? null : customerName)).append(".");
-                                    // 9-项目代码
-                                    String fmsEventCode = znEventMapping == null ? null : znEventMapping.getFmsEventCode();
-                                    String fmsEventName = znEventMapping == null ? null : znEventMapping.getFmsEventName();
-                                    builder.append(appendStr(fmsEventCode) ).append(".");
-                                    nameBuilder.append(appendNameStr(fmsEventName) ).append(".");
-                                    // 10-备用
-                                    String standby  = "0";
-                                    builder.append(standby);
-                                    nameBuilder.append("-");
-                                    String onlySign = builder.toString();
-                                    String onlySignName = nameBuilder.toString();
-                                    data.setOnlySign(onlySign);
-                                    data.setOnlySignName(onlySignName);
-                                    // 辅助核算
-                                    String auxiliaryAccounting = "";
-                                    String auxiliaryAccountingCode = "";
-                                    if (icp != null){
-                                        auxiliaryAccounting += "-";
-                                        auxiliaryAccountingCode += "0";
-                                    }else {
-                                        auxiliaryAccounting += data.getCustomerName() != null ? data.getCustomerName() : data.getPersonalName() == null ? "-" : data.getPersonalName();
-                                        auxiliaryAccountingCode += data.getCustomerName() != null ? data.getCustomerCode() : data.getPersonalName() == null ? "-" : data.getPersonalCode();
-                                    }
-                                    data.setAuxiliaryAccounting(auxiliaryAccounting);
-                                    data.setAuxiliaryAccountingCode(auxiliaryAccountingCode);
-                                    excels.add(data);
-                                }catch (Exception e){
-//                                    System.out.println("解析中南老系统明细数据出错: "+e.getMessage());
-                                    System.out.println(data);
-                                    e.printStackTrace();
-                                }
-
+                                coverNewDate.cover(startTime,data);
+                                excels.add(data);
                             }
                         }))
                 .sheet("综合查询表").doRead();
         return excels;
     }
 
-    private void findProjectInfoByTime(Step6OldDetailExcel data ,int year,int month,StringBuilder builder,StringBuilder nameBuilder){
-
-        String projectCode = data.getProjectCode();
-        ZNProjectMapping znProjectMapping = findNccZhongNanLevel.znProjectMapping.get(projectCode);
-        // 3-科目代码
-        String fmsProjectCode =  znProjectMapping.getFmsProjectCode();
-        String fmsProjectName = znProjectMapping.getFmsProjectName();
-        // 4-子目
-        String fmsChildProjectCode = znProjectMapping.getFmsChildProjectCode();
-        String fmsChildProjectName = znProjectMapping.getFmsChildProjectName();
-        if (year == 2022){
-            // 使用默认
-        }else if (year == 2023 && month >= 1 && month <= 6){
-            String customerName = data.getCustomerName();
-            ZNRelationMapping znRelationMapping = findNccZhongNanLevel.znRelationMapping.get(customerName);
-            if (znRelationMapping != null){
-                String project = getDataProject(fmsProjectCode);
-                if (project.equals("合同负债")){
-                    project = "预收账款";
-                }
-                ZNRelationProjectMapping znRelationProjectMapping = findNccZhongNanLevel.znRelationProjectMapping.get(project);
-                fmsProjectCode = znRelationProjectMapping.getFmsProjectCode();
-                fmsProjectName = znRelationProjectMapping.getFmsProjectName();
-                fmsChildProjectCode = znRelationProjectMapping.getFmsChildProjectCode();
-                fmsChildProjectName = znRelationProjectMapping.getFmsChildProjectName();
-            }
-        }
-        data.setProject(getDataProject(fmsProjectCode));
-        builder.append(appendStr(fmsProjectCode) ).append(".");
-        builder.append(appendStr(fmsChildProjectCode) ).append(".");
-        nameBuilder.append(appendNameStr(fmsProjectName)).append(".");
-        nameBuilder.append(appendNameStr(fmsChildProjectName)).append(".");
-    }
-
-    private String getDataProject(String fmsProjectCode){
-        String project = fmsProjectCode.substring(0,4);
-        switch (project) {
-            case "1122":
-                return "应收账款";
-            case "2202":
-                return "应付账款";
-            case "2203":
-                return "合同负债";
-            case "2205":
-                return "预收账款";
-            case "1123":
-                return "预付账款";
-            case "1221":
-                return "其他应收款";
-            case "2241":
-                return "其他应付款";
-        }
-        return "未知";
-    }
 
 
-    public String appendStr(String str){
-        return  str == null ? "0" : str;
-    }
-    public String appendNameStr(String str){
-        return  str == null ? "-" : str;
-    }
 
-    private Boolean isBackProject2022(String projectName) {
-        return projectName.startsWith("应付账款")
-                || projectName.startsWith("预付账款")
-                || projectName.startsWith("合同负债")
-                || projectName.startsWith("预收账款")
-                || projectName.startsWith("应收账款")
-                || projectName.startsWith("其他应付款")
-                || projectName.startsWith("其他应收款")
-                || projectName.startsWith("应收票据");
-    }
+
 }
