@@ -14,6 +14,7 @@ import org.example.enitty.zhong_nan.NewBalanceExcelResult;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.utils.CommonUtil;
+import org.example.新老系统.Step6;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
 @SpringBootTest
 public class ZMMerge20230712Test {
     @Resource
-    private Step6Test step6Test;
+    private Step6 step6Test;
     @Test
     void test(){
         File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
@@ -41,7 +42,7 @@ public class ZMMerge20230712Test {
             List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : companyMap.keySet()) {
-                Step6Test.Step6TestResult step6TestResult = step6Test.step6Test(companyName, companyMap);
+                Step6.Step6TestResult step6TestResult = step6Test.step6Test(companyName, companyMap);
                 if (step6TestResult == null){
                     continue;
                 }
