@@ -109,11 +109,11 @@ public class ZMMerge20230712Test {
                 }
 
                 // 新系统
-                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/组合余额表-2023-1-6-总账-"+newCompanyName+".xlsx",
+                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
                         Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
-//                                coverNewDate.cover("2023-1-6",data);
+                                coverNewDate.cover("2023-1-6",data);
                                 OracleData oracleData = new OracleData();
 //                                oracleData.setForm("23年1-6月序时账");
                                 oracleData.set公司段描述(data.getCompanyName());
@@ -139,7 +139,7 @@ public class ZMMerge20230712Test {
                                 list3.add(oracleData);
                             }
                         })
-                ).sheet("总账").doRead();
+                ).sheet("组合结果").doRead();
 
                 List<NewBalanceExcelResult> result = new ArrayList<>();
                 List<OracleData> list1 = new ArrayList<>();
