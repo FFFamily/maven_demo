@@ -47,9 +47,11 @@ public class Step6Test {
                 continue;
             }
             List<Step6OldDetailExcel> excels = step6.readPropertyExcel(fileName);
-            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> CompanyConstant.getNewCompanyByOldCompany( item.getCompanyName())));
+            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : companyMap.keySet()) {
-                Step6.Step6TestResult step6TestResult = step6.step6Test(companyName, companyMap);
+                String[] split = companyName.split("-");
+                String realCompanyName =  CompanyConstant.getNewCompanyByOldCompany(split[0]);
+                Step6.Step6TestResult step6TestResult = step6.step6Test(realCompanyName, companyMap);
                 if (step6TestResult == null) {
                     continue;
                 }
@@ -57,7 +59,7 @@ public class Step6Test {
                 List<OracleData> result2s = step6TestResult.getResult2s();
                 List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s();
                 // 这里 指定文件
-                try (ExcelWriter excelWriter = EasyExcel.write(name+"-"+companyName+"-第六步数据.xlsx").build()) {
+                try (ExcelWriter excelWriter = EasyExcel.write(name+"-"+realCompanyName+"-第六步数据.xlsx").build()) {
                     // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
                     WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
                     excelWriter.write(result1s, writeSheet1);

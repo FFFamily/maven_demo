@@ -43,8 +43,6 @@ public class ZMMerge20230712Test {
                 data.setForm("2022期末");
                 data.setV(null);
                 data.setW(null);
-//                data.setBalance(data.getPreBalance());
-//                data.setPreBalance(null);
                 orDefault.add(data);
                 listMap.put(data.getCompanyName(), orDefault);
             }
@@ -59,9 +57,11 @@ public class ZMMerge20230712Test {
             }
             // 旧系统
             List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
-            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> CompanyConstant.getNewCompanyByOldCompany(item.getCompanyName())));
+            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : companyMap.keySet()) {
-                Step6.Step6TestResult step6TestResult = step6Test.step6Test(companyName, companyMap);
+                String[] split = companyName.split("-");
+                String realCompanyName = CompanyConstant.getNewCompanyByOldCompany(split[0]);
+                Step6.Step6TestResult step6TestResult = step6Test.step6Test(realCompanyName, companyMap);
                 if (step6TestResult == null){
                     continue;
                 }

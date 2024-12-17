@@ -285,9 +285,9 @@ public class Step6 {
                                     if (data.getV() == null && data.getW() == null){
                                         throw new RuntimeException("无法计算金额");
                                     }
-                                    String companyName = data.getCompanyName();
-                                    String realCompanyName = companyName.split("-")[0];
-                                    data.setCompanyName(realCompanyName);
+//                                    String companyName = data.getCompanyName();
+//                                    String realCompanyName = companyName.split("-")[0];
+//                                    data.setCompanyName(realCompanyName);
 //                                    data.setCompanyName(CompanyConstant.getNewCompanyByOldCompany(realCompanyName));
                                     String time = data.getTime();
                                     DateTime date = DateUtil.parseDate(time);
