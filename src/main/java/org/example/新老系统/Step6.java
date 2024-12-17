@@ -123,7 +123,8 @@ public class Step6 {
                             projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
                             projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
                             oldSum,
-                            newSum);
+                            newSum,
+                            projectKey);
                     step6Result1.setRemark("余额不相等");
                     result1s.add(step6Result1);
                 }else {
@@ -133,7 +134,8 @@ public class Step6 {
                             projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
                             projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
                             oldSum,
-                            newSum);
+                            newSum,
+                            projectKey);
                     result1s.add(step6Result1);
                 }
             }
@@ -250,11 +252,12 @@ public class Step6 {
         return CommonUtil.getBigDecimalValue(newData.get输入借方()).subtract(CommonUtil.getBigDecimalValue(newData.get输入贷方()));
     }
 
-    private Step6Result1 create(String companyName,String timeKey,String oldProjectKey,String newProjectKey,BigDecimal oldSum,BigDecimal newSum){
+    private Step6Result1 create(String companyName,String timeKey,String oldProjectKey,String newProjectKey,BigDecimal oldSum,BigDecimal newSum,String matchKey){
         Step6Result1 step6Result1 = new Step6Result1();
         step6Result1.setCompanyName(companyName);
         step6Result1.setOldProject(oldProjectKey);
         step6Result1.setNewProject(newProjectKey);
+        step6Result1.setMatchProject(matchKey);
         step6Result1.setOldMoney(oldSum);
         step6Result1.setNewMoney(newSum);
         step6Result1.setTime(timeKey);

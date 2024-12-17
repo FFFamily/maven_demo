@@ -14,6 +14,8 @@ public class Step6Result1 {
     private String oldProject;
     @ExcelProperty("新系统科目")
     private String newProject;
+    @ExcelProperty("匹配科目")
+    private String matchProject;
     @ExcelProperty("旧系统借正贷负金额")
     private BigDecimal oldMoney;
     @ExcelProperty("新系统借正贷负金额")
