@@ -167,7 +167,7 @@ public class CoverNewDate {
         builder.append(appendStr(fmsChildProjectCode) ).append(".");
         nameBuilder.append(appendNameStr(fmsProjectName)).append(".");
         nameBuilder.append(appendNameStr(fmsChildProjectName)).append(".");
-        return appendNameStr(fmsProjectName);
+        return getDataProject(fmsProjectCode);
     }
 
     private String getDataProject(String fmsProjectCode){
