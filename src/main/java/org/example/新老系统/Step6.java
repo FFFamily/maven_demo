@@ -49,12 +49,14 @@ public class Step6 {
         List<Step6Result1> result1s = new ArrayList<>();
         List<OracleData> result2s = new ArrayList<>();
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
-        System.out.println("当前公司为： "+companyName);
+        String[] split = companyName.split("-");
+        String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(split[0]);
+        System.out.println("当前公司为： "+newCompanyName);
 //        if (!companyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
 //            return null;
 //        }
         List<Step6OldDetailExcel> list = companyMap.get(companyName);
-        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+companyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"日记账说明\" like '%NCC%' ";
+        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+newCompanyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"日记账说明\" like '%NCC%' ";
         List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
                 .stream()
                 .peek(item -> {
@@ -68,13 +70,13 @@ public class Step6 {
                 })
                 .filter(item -> isBackProject(item.getActualProject()))
                 .collect(Collectors.toList());
-        if (companyName.equals("江苏中南物业服务有限公司天津分公司")){
+        if (newCompanyName.equals("江苏中南物业服务有限公司天津分公司")){
             oracleData = oracleData.stream()
                     .filter(item -> !(item.get日记账说明().equals("FYGD2023122610021_前期NCC凭证-冲销22年底计提审计费")
                     || item.get日记账说明().equals(" FMS跑的计提与NCC重复")
                     || item.get日记账说明().equals("冲回-ZZTY2023092810121")))
                     .collect(Collectors.toList());
-        }else if (companyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
+        }else if (newCompanyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
             oracleData = oracleData
                     .stream()
                     .filter(item -> !item.get日记账说明().equals("YGCB2023120510075总账通用计提：NCC11月导入未配置交易对象，补录交易对象"))
@@ -108,7 +110,7 @@ public class Step6 {
                     findOld(projectOld,projectNew,result3s);
                     findNew(projectOld,projectNew,result2s);
                     Step6Result1 step6Result1 = create(
-                            companyName,
+                            newCompanyName,
                             timeKey,
                             projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
                             projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
@@ -118,7 +120,7 @@ public class Step6 {
                     result1s.add(step6Result1);
                 }else {
                     Step6Result1 step6Result1 = create(
-                            companyName,
+                            newCompanyName,
                             timeKey,
                             projectOld.stream().map(Step6OldDetailExcel::getActualProject).distinct().collect(Collectors.joining("、")),
                             projectNew.stream().map(OracleData::getActualProject).distinct().collect(Collectors.joining("、")),
