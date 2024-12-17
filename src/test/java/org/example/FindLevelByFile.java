@@ -33,13 +33,27 @@ public class FindLevelByFile {
     private SqlUtil sqlUtil;
     @Test
     void findLevel() {
-        List<SourceFileData> sourceFileDataList = new ArrayList<>();
+        List<Assistant> assistants = new ArrayList<>();
         EasyExcel.read("src/main/java/org/example/excel/江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助核算余额 _161224.xlsx",
                 new AnalysisEventListener<Map<Integer,String>>() {
                     @Override
                     public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
-                        SourceFileData sourceFileData = new SourceFileData();
-                        sourceFileDataList.add(sourceFileData);
+                        Assistant assistant3 = new Assistant();
+                        // 左前缀匹配
+                        assistant3.setZ(o.get(0));
+                        assistant3.setR(o.get(0));
+                        // 机构
+                        assistant3.setE(o.get(0));
+                        assistant3.setTransactionObjectId(o.get(0));
+                        assistant3.setTransactionObjectCode(o.get(0));
+                        assistant3.setTransactionObjectName(o.get(0));
+                        assistant3.setTransactionObjectCodeCopy(o.get(0));
+                        assistant3.setRDesc(o.get(0));
+                        assistant3.setCompanyCode(o.get(0));
+                        assistant3.setForm(o.get(0));
+                        // 唯一标识：账户组合+交易Id
+                        assistant3.setOnlySign(assistant3.getR()+assistant3.getTransactionObjectId());
+                        assistants.add(assistant3);
                     }
 
                     @Override
