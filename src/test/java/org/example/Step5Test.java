@@ -46,7 +46,7 @@ public class Step5Test {
                             String time = item.get("期间") +"-01";
                             try {
                                 DateTime dataTime = DateUtil.parse(time);
-                                return dataTime.isAfter(DateUtil.parse("2023-07-01")) && dataTime.isBefore(DateUtil.parse("2023-12-01"));
+                                return dataTime.isAfter(DateUtil.parse("2023-07-01")) && dataTime.isBefore(DateUtil.parse("2024-01-01"));
                             }catch (Exception e){
                                 System.out.println("时间处理出错: "+time);
                                 return false;
