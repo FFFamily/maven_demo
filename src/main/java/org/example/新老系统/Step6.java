@@ -28,6 +28,8 @@ import java.util.stream.Stream;
 @Service
 public class Step6 {
     @Resource
+    private Step5 step5;
+    @Resource
     private JdbcTemplate jdbcTemplate;
     @Resource
     private FindNccZhongNanLevel findNccZhongNanLevel;
@@ -56,8 +58,10 @@ public class Step6 {
             return null;
         }
         List<Step6OldDetailExcel> list = companyMap.get(companyName);
-        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+newCompanyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"日记账说明\" like '%NCC%' ";
-        List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
+//        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+newCompanyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"日记账说明\" like '%NCC%' ";
+
+//        List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
+        List<OracleData> oracleData = step5.step5Test(newCompanyName)
                 .stream()
                 .peek(item -> {
                     String newProject = getNewProject(item);
