@@ -33,9 +33,9 @@ public class Step5Test {
         for (String company : allCompany) {
             String type = CompanyTypeConstant.mapping.get(company);
             if (type.equals(CompanyTypeConstant.ZHONG_NAN)){
-//                if (!company.equals("江苏中南物业服务有限公司")){
-//                    continue;
-//                }
+                if (!company.equals("唐山中南国际旅游度假物业服务有限责任公司")){
+                    continue;
+                }
                 System.out.println("当前公司："+company);
                 List<OracleData> res = new ArrayList<>();
                 String findPiSQL = "SELECT  * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+company+"' ";
@@ -115,7 +115,7 @@ public class Step5Test {
                     }
 //                    res.addAll(data(mapList));
                 }
-                String fileName = "第五步数据-"+company + System.currentTimeMillis() + ".xlsx";
+                String fileName = "第五步数据-"+company + ".xlsx";
                 EasyExcel.write(fileName, OracleData.class).sheet("模板").doWrite(data(sqlList));
             }
         }

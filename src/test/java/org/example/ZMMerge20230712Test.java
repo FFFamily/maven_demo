@@ -52,7 +52,7 @@ public class ZMMerge20230712Test {
         for (String fileName : Objects.requireNonNull(file.list())) {
             String name = fileName.replace(".xlsx", "");
             System.out.println("当前文件："+name);
-            if (!name.equals("物业上海公司1")){
+            if (!name.equals("物业北京公司")){
                 continue;
             }
             // 旧系统
