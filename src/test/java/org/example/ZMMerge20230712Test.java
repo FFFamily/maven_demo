@@ -103,7 +103,12 @@ public class ZMMerge20230712Test {
                     oracleData.set部门名称(data.getOrgName());
                     list3.add(oracleData);
                 }
+                for (OracleData oracleData : step6TestResult.getOracleDataList()) {
+                    oracleData.setForm("23年7-12月新系统序时账");
+                    list3.add(oracleData);
+                }
 
+                // 新系统
                 EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/组合余额表-2023-1-6-总账-"+newCompanyName+".xlsx",
                         Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {

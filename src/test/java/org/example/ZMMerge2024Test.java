@@ -44,102 +44,26 @@
 //                listMap.put(data.getCompanyName(), orDefault);
 //            }
 //        })).sheet("余额表").doRead();
-//
-//
 //        // 旧系统
-//        List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
-//        Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
-//        for (String oldCompanyName : companyMap.keySet()) {
-//            String str = oldCompanyName.split("-")[0];
-//            String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(str);
-//            Step6.Step6TestResult step6TestResult = step6Test.step6Test(oldCompanyName, companyMap);
-//            if (step6TestResult == null) {
-//                continue;
-//            }
-//            // 旧系统处理后数据
-//            List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s()
-//                    .stream()
-//                    .filter(item -> item.getRemark() != null)
-//                    .collect(Collectors.toList());
-//            // 旧系统
-//            List<Step6OldDetailExcel> oldDataList = companyMap.get(oldCompanyName);
-//            for (Step6OldDetailExcel item : result3s) {
-//                oldDataList.remove(item);
-//            }
-//
+//        List<String> companyList = new ArrayList<>();
+//        for (String newCompanyName : companyList) {
+//            // todo 查询
 //            List<OracleData> list3 = new ArrayList<>();
 //            for (Step6OldDetailExcel data : oldDataList) {
-//                coverNewDate.cover("2023-7-12", data);
 //                OracleData oracleData = new OracleData();
 //                oracleData.setForm("23年7-12月序时账");
-//                oracleData.set公司段描述(data.getCompanyName());
-//                oracleData.set账户组合(data.getOnlySign());
-//                oracleData.set账户描述(data.getOnlySignName());
-//                oracleData.set交易对象(data.getAuxiliaryAccountingCode());
-//                oracleData.set交易对象名称(data.getAuxiliaryAccounting());
-//                oracleData.set输入借方(data.getV());
-//                oracleData.set输入贷方(data.getW());
-//                oracleData.set单据编号(data.getVoucherCode());
-//                oracleData.set有效日期(data.getTime());
-//                DateTime parse = DateUtil.parse(data.getTime());
-//                oracleData.set期间(parse.year() + "-" + (parse.month() + 1));
-//                oracleData.set科目代码(data.getProjectCode());
-//                oracleData.set科目段描述(data.getProjectName());
-//                oracleData.set对方科目(data.getOtherProjectCode());
-//                oracleData.set对方科目名称(data.getOtherProjectName());
-//                oracleData.set行说明(data.getMatch());
-//                oracleData.set项目(data.getEventCode());
-//                oracleData.set项目段描述(data.getEventName());
-//                oracleData.set部门代码(data.getOrgCode());
-//                oracleData.set部门名称(data.getOrgName());
 //                list3.add(oracleData);
 //            }
-//
-//            EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/组合余额表-2023-1-6-总账-" + newCompanyName + ".xlsx",
-//                    Step6OldDetailExcel.class,
-//                    new PageReadListener<Step6OldDetailExcel>(dataList -> {
-//                        for (Step6OldDetailExcel data : dataList) {
-//                            coverNewDate.cover("2023-1-6", data);
-//                            OracleData oracleData = new OracleData();
-//                            oracleData.setForm("23年1-6月序时账");
-//                            oracleData.set公司段描述(data.getCompanyName());
-//                            oracleData.set账户组合(data.getOnlySign());
-//                            oracleData.set账户描述(data.getOnlySignName());
-//                            oracleData.set交易对象(data.getAuxiliaryAccountingCode());
-//                            oracleData.set交易对象名称(data.getAuxiliaryAccounting());
-//                            oracleData.set输入借方(data.getV());
-//                            oracleData.set输入贷方(data.getW());
-//                            oracleData.set单据编号(data.getVoucherCode());
-//                            oracleData.set有效日期(data.getTime());
-//                            DateTime parse = DateUtil.parse(data.getTime());
-//                            oracleData.set期间(parse.year() + "-" + (parse.month() + 1));
-//                            oracleData.set科目代码(data.getProjectCode());
-//                            oracleData.set科目段描述(data.getProjectName());
-//                            oracleData.set对方科目(data.getOtherProjectCode());
-//                            oracleData.set对方科目名称(data.getOtherProjectName());
-//                            oracleData.set行说明(data.getMatch());
-//                            oracleData.set项目(data.getEventCode());
-//                            oracleData.set项目段描述(data.getEventName());
-//                            oracleData.set部门代码(data.getOrgCode());
-//                            oracleData.set部门名称(data.getOrgName());
-//                            list3.add(oracleData);
-//                        }
-//                    })
-//            ).sheet("总账").doRead();
-//
 //            List<NewBalanceExcelResult> result = new ArrayList<>();
 //            List<OracleData> list1 = new ArrayList<>();
 //            List<OracleData> list2 = new ArrayList<>();
-////                List<OracleData> list1 = map1.getOrDefault(company, new ArrayList<>());
-////                List<OracleData> list2 = map2.getOrDefault(company, new ArrayList<>());
 //            List<OracleData> xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
 //            Map<String, List<OracleData>> group = xsList.stream().collect(Collectors.groupingBy(item -> item.get账户组合() + getStr(item.get交易对象())));
 //            for (String key : group.keySet()) {
 //                List<OracleData> all = group.get(key);
 //                OracleData one = all.get(0);
 //                NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
-//                newBalanceExcelResult.setForm("2023年7-12月");
-//
+//                newBalanceExcelResult.setForm("2024年1-9月");
 //                newBalanceExcelResult.setCompanyName(newCompanyName);
 //                newBalanceExcelResult.setProjectCode(one.get账户组合());
 //                newBalanceExcelResult.setProjectName(one.get账户描述() + ".");
@@ -153,7 +77,7 @@
 ////            if (company.equals("青岛中南物业管理有限公司")){
 ////                EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
 ////            }
-//            File excelFile = new File(oldCompanyName + "-2023-7-12-组合序时账" + ".xlsx");
+//            File excelFile = new File(newCompanyName + "-2023-7-12-组合序时账" + ".xlsx");
 //            if (excelFile.exists()) {
 //                System.out.println("文件存在");
 //                List<OracleData> list = new ArrayList<>();
