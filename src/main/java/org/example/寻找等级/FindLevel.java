@@ -120,7 +120,7 @@ public class FindLevel {
             String companyName = parentItem.getCompanyName();
             String companyType = CompanyTypeConstant.mapping.get(companyName);
             if (companyType == null){
-                System.out.println("当前公司不属于任何系统： "+companyName);
+//                System.out.println("当前公司不属于任何系统： "+companyName);
             }else {
                 if (companyType.equals(CompanyTypeConstant.LANG_JI)){
                     // 朗基逻辑

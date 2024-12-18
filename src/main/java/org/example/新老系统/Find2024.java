@@ -8,6 +8,7 @@ import org.example.utils.CommonUtil;
 import org.example.utils.CoverNewDate;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -15,7 +16,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+@Service
 public class Find2024 {
     @Resource
     private JdbcTemplate jdbcTemplate;

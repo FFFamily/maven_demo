@@ -186,6 +186,9 @@ public class Step6 {
             return  oracleData.get日记账说明().equals("FYGD2023122610021_前期NCC凭证-冲销22年底计提审计费") || oracleData.get日记账说明().equals("FMS跑的计提与NCC重复，冲回-ZZTY2023092810121");
         }else if (companyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
             return oracleData.get日记账说明().contains("YGCB2023120510075总账通用计提：NCC11月导入未配置交易对象，补录交易对象");
+        }else if (companyName.equals("江苏中南物业服务有限公司")){
+            return oracleData.get日记账说明().contains("FYGD2023122610021_前期NCC凭证-冲销22年底计提审计费")
+                    || oracleData.get日记账说明().contains("FMS跑的计提与NCC重复，冲回-ZZTY2023092810121");
         }
         return false;
     }
