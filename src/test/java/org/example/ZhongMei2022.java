@@ -60,7 +60,7 @@ public class ZhongMei2022 {
                 System.out.println(companyName);
                 Result result = doTest(collect, companyName);
                 pathResult.addAll(result.getResults());
-                String fileName2 = "组合余额表-2022-总账-"+companyName + ".xlsx";
+                String fileName2 = "src/main/java/org/example/excel/zhong_nan/merge/company/组合余额表-2022-总账-"+companyName + ".xlsx";
                 File file = new File(fileName2);
                 if (file.exists()){
                     System.out.println("文件存在");
@@ -74,44 +74,11 @@ public class ZhongMei2022 {
                 }
             }
             String[] split = path.split("/");
-            String fileName ="余额表-"+split[split.length -1];
+            String fileName ="src/main/java/org/example/excel/zhong_nan/merge/余额表-"+split[split.length -1];
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(pathResult);
         }
     }
 
-    @Test
-    void test20230106() {
-        for (String path : pathList) {
-            System.out.println("当前path"+path);
-            List<Step6OldDetailExcel> excels = readPropertyExcel(path,"2023-1-6");
-            List<NewBalanceExcelResult> pathResult = new ArrayList<>();
-            Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
-            for (String companyName : collect.keySet()) {
-//                if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
-//                    continue;
-//                }
-                System.out.println(companyName);
-                Result result = doTest(collect, companyName);
-                pathResult.addAll(result.getResults());
-                String fileName2 = "组合余额表-2023-1-6-总账-"+companyName + ".xlsx";
-                File file = new File(fileName2);
-                if (file.exists()){
-                    System.out.println("文件存在");
-                    List<Step6OldDetailExcel> list = new ArrayList<>();
-                    EasyExcel.read(file, Step6OldDetailExcel.class,
-                            new PageReadListener<Step6OldDetailExcel>(list::addAll));
-                    list.addAll(result.getAllCompanyList());
-                    EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(list);
-                }else {
-                    EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
-                }
-            }
-            String[] split = path.split("/");
-            String fileName ="src/main/java/org/example/excel/zhong_nan/merge/company/余额表-"+split[split.length -1];
-            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(pathResult);
-        }
-
-    }
 
     public Result doTest(Map<String, List<Step6OldDetailExcel>> collect,String companyName){
         List<NewBalanceExcelResult> results = new ArrayList<>();
