@@ -110,8 +110,6 @@ public class Step6 {
         }
 
         oracleData.addAll(addCondition(newCompanyName,step5Result));
-
-
         // 按月进行分组
         Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
             DateTime date = DateUtil.parseDate(item.getTime());
@@ -162,7 +160,7 @@ public class Step6 {
                 }
             }
         }
-        result2s.stream().filter(item -> "和旧系统余额不相等".equals(item.get备注())).forEach(item ->{
+        result2s.stream().filter(item -> "和旧系统余额不相等".equals(item.get备注()) || "多余数据".equals(item.get备注())).forEach(item ->{
             item.setForm("新系统和旧系统余额不相等保留数据");
             notWithNcc.add(item);
         });
