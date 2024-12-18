@@ -37,7 +37,10 @@ public class Find2023 {
             System.out.println("2023-当前文件："+name);
             // 旧系统
             List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
-            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
+            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
+                String companyName = item.getCompanyName().split("-")[0];
+                return CompanyConstant.getNewCompanyByOldCompany(companyName);
+            }));
             for (String oldCompanyName : companyMap.keySet()) {
                 String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]);
                 if (!isFindAll && !CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]).equals(selectCompanyName)){
