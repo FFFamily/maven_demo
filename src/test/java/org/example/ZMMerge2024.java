@@ -62,8 +62,18 @@ public class ZMMerge2024 {
                 String findSql = "select * from ZDPROD_EXPDP_20241120 z where z.\"公司段描述\" = '" + newCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
                 List<OracleData> newDataList = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class));
                 for (OracleData data : newDataList) {
-                    data.setForm("24年1-9月序时账");
-                    list3.add(data);
+                    String form = data.get科目段描述();
+                    boolean isProject = form.startsWith("应付账款")
+                            || form.startsWith("预付账款")
+                            || form.startsWith("合同负债")
+                            || form.startsWith("预收账款")
+                            || form.startsWith("应收账款")
+                            || form.startsWith("其他应付款")
+                            || form.startsWith("其他应收款");
+                    if (isProject){
+                        data.setForm("24年1-9月序时账");
+                        list3.add(data);
+                    }
                 }
                 List<NewBalanceExcelResult> result = new ArrayList<>();
                 List<OracleData> list1 = new ArrayList<>();
