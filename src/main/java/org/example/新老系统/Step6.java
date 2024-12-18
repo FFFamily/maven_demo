@@ -158,7 +158,7 @@ public class Step6 {
                 }
             }
         }
-        try (ExcelWriter excelWriter = EasyExcel.write(companyName+"-第六步数据.xlsx").build()) {
+        try (ExcelWriter excelWriter = EasyExcel.write(newCompanyName+"-第六步数据.xlsx").build()) {
             // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
             WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
             excelWriter.write(result1s, writeSheet1);
@@ -183,6 +183,8 @@ public class Step6 {
         }else if (companyName.equals("江苏中南物业服务有限公司")){
             return oracleData.get日记账说明().contains("FYGD2023122610021_前期NCC凭证-冲销22年底计提审计费")
                     || oracleData.get日记账说明().contains("FMS跑的计提与NCC重复，冲回-ZZTY2023092810121");
+        }else if (companyName.equals("江苏中南物业服务有限公司嘉兴分公司")){
+            return oracleData.get日记账说明().contains("FYGD2024010110094_前期NCC凭证-冲销4-6月手工计提");
         }
         return false;
     }

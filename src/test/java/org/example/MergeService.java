@@ -26,8 +26,8 @@ public class MergeService {
     private FindAllBalance findAllBalance;
     @Test
     void mergeAll(){
-        String selectPath = "物业上海公司1";
-        String selectCompanyName = "江苏中南物业服务有限公司";
+        String selectPath = "物业上海公司2"; // 物业上海公司1
+        String selectCompanyName = "江苏中南物业服务有限公司嘉兴分公司"; // 江苏中南物业服务有限公司
         Boolean findAll = false;
         // 查询所有的
         List<String> allCompany = findAllCompany();

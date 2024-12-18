@@ -55,12 +55,12 @@ public class FindAllBalance {
                 return CompanyConstant.getNewCompanyByOldCompany(companyName);
             }));
             for (String oldCompanyName : companyMap.keySet()) {
-                String str = oldCompanyName.split("-")[0];
-                String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(str);
-                if (!isFindAll && !newCompanyName.equals(selectCompany)){
+//                String str = oldCompanyName.split("-")[0];
+//                String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(str);
+                if (!isFindAll && !oldCompanyName.equals(selectCompany)){
                     continue;
                 }
-                System.out.println("明细账-当前公司："+newCompanyName);
+                System.out.println("明细账-当前公司："+oldCompanyName);
                 Step6.Step6TestResult step6TestResult = step6Test.step6Test(oldCompanyName, companyMap);
                 if (step6TestResult == null){
                     continue;
@@ -108,7 +108,7 @@ public class FindAllBalance {
                     list3.add(oracleData);
                 }
 
-                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company/组合余额表-2022-总账-"+newCompanyName+".xlsx",
+                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company/组合余额表-2022-总账-"+oldCompanyName+".xlsx",
                         Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
@@ -140,7 +140,7 @@ public class FindAllBalance {
                         })
                 ).sheet("总账").doRead();
 
-                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
+                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+oldCompanyName+"-2023-1-6-组合序时账.xlsx",
                         OracleData.class,
                         new PageReadListener<OracleData>(dataList -> {
                             //coverNewDate.cover("2023-1-6",data);
@@ -148,7 +148,7 @@ public class FindAllBalance {
                         })
                 ).sheet("组合结果").doRead();
 
-                String findSql = "select * from ZDPROD_EXPDP_20241120 z where z.\"公司段描述\" = '" + newCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
+                String findSql = "select * from ZDPROD_EXPDP_20241120 z where z.\"公司段描述\" = '" + oldCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
                 List<OracleData> newDataList = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class));
                 for (OracleData data : newDataList) {
                     String form = data.get科目段描述();
@@ -174,7 +174,7 @@ public class FindAllBalance {
                     OracleData one = all.get(0);
                     NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
                     newBalanceExcelResult.setForm("2023年7-12月");
-                    newBalanceExcelResult.setCompanyName(newCompanyName);
+                    newBalanceExcelResult.setCompanyName(oldCompanyName);
                     newBalanceExcelResult.setProjectCode(one.get账户组合());
                     newBalanceExcelResult.setProjectName(one.get账户描述()+".");
                     newBalanceExcelResult.setProject(one.get科目段描述());
@@ -195,7 +195,7 @@ public class FindAllBalance {
                 }else {
                     EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
                 }
-                List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(newCompanyName,new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
+                List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(oldCompanyName,new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
                 Map<String, List<NewBalanceExcelResult>> cGroup = results.stream().collect(Collectors.groupingBy(item -> item.getProjectCode() + item.getAuxiliaryAccounting()));
                 for (String s : cGroup.keySet()) {
                     List<NewBalanceExcelResult> results1 = cGroup.get(s);

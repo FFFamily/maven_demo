@@ -41,13 +41,16 @@ public class Find2023 {
                 String companyName = item.getCompanyName().split("-")[0];
                 return CompanyConstant.getNewCompanyByOldCompany(companyName);
             }));
-            for (String oldCompanyName : companyMap.keySet()) {
-                String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]);
-                if (!isFindAll && !CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]).equals(selectCompanyName)){
+            for (String newCompanyName : companyMap.keySet()) {
+//                String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]);
+//                if (!isFindAll && !CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]).equals(selectCompanyName)){
+//                    continue;
+//                }
+                if (!isFindAll && !newCompanyName.equals(selectCompanyName)){
                     continue;
                 }
                 System.out.println("2023-当前公司为： "+newCompanyName);
-                Step6.Step6TestResult step6TestResult = step6Test.step6Test(oldCompanyName, companyMap);
+                Step6.Step6TestResult step6TestResult = step6Test.step6Test(newCompanyName, companyMap);
                 if (step6TestResult == null){
                     continue;
                 }
@@ -57,7 +60,7 @@ public class Find2023 {
                         .filter(item -> item.getRemark() != null)
                         .collect(Collectors.toList());
                 // 旧系统
-                List<Step6OldDetailExcel> oldDataList = companyMap.get(oldCompanyName);
+                List<Step6OldDetailExcel> oldDataList = companyMap.get(newCompanyName);
                 for (Step6OldDetailExcel item : result3s) {
                     oldDataList.remove(item);
                 }

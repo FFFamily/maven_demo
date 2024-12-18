@@ -46,7 +46,7 @@ public class Step6Test {
         for (String fileName : Objects.requireNonNull(file.list())) {
             String name = fileName.replace(".xlsx", "");
             System.out.println("当前文件："+name);
-            if (!name.equals("物业北京公司")){
+            if (!name.equals("物业上海公司1")){
                 continue;
             }
             List<Step6OldDetailExcel> excels = step6.readPropertyExcel(fileName);
@@ -55,7 +55,7 @@ public class Step6Test {
                 return CompanyConstant.getNewCompanyByOldCompany(companyName);
             }));
             for (String companyName : companyMap.keySet()) {
-                if (!companyName.equals("")){
+                if (!companyName.equals("江苏中南物业服务有限公司")){
                     continue;
                 }
                 Step6.Step6TestResult step6TestResult = step6.step6Test(companyName, companyMap);
