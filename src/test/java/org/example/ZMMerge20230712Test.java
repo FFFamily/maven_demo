@@ -112,7 +112,7 @@ public class ZMMerge20230712Test {
                     list3.add(oracleData);
                 }
 
-                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company/组合余额表-2022-总账"+newCompanyName+".xlsx",
+                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company/组合余额表-2022-总账-"+newCompanyName+".xlsx",
                         Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
@@ -142,7 +142,7 @@ public class ZMMerge20230712Test {
                                 list3.add(oracleData);
                             }
                         })
-                ).sheet("组合结果").doRead();
+                ).sheet("总账").doRead();
 
                 EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
                         OracleData.class,
@@ -152,11 +152,10 @@ public class ZMMerge20230712Test {
                         })
                 ).sheet("组合结果").doRead();
 
-                String findSql = "select * from z where z.\"公司段描述\" = '" + newCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
+                String findSql = "select * from ZDPROD_EXPDP_20241120 z where z.\"公司段描述\" = '" + newCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
                 List<OracleData> newDataList = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class));
                 for (OracleData data : newDataList) {
-                    OracleData oracleData = new OracleData();
-                    oracleData.setForm("24年1-9月序时账");
+                    data.setForm("24年1-9月序时账");
                     list3.add(data);
                 }
                 List<NewBalanceExcelResult> result = new ArrayList<>();

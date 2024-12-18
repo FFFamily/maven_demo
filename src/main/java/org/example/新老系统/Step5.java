@@ -25,7 +25,7 @@ public class Step5 {
         List<OracleData> sqlList = jdbcTemplate.query(findPiSQL, new BeanPropertyRowMapper<>(OracleData.class));
         List<OracleData> collect = sqlList.stream()
                 .peek(this::data)
-                .filter(item -> item.get交易对象名称().contains("中南物业虚拟"))
+                .filter(item -> item.get交易对象名称() != null && item.get交易对象名称().contains("中南物业虚拟"))
                 .filter(item -> {
                     String form = item.get科目段描述();
                     return form.startsWith("应付账款")
@@ -53,8 +53,9 @@ public class Step5 {
                         || form.startsWith("预收账款")
                         || form.startsWith("应收账款")
                         || form.startsWith("其他应付款")
-                        || form.startsWith("其他应收款");
-                if (isProject){
+                        || form.startsWith("其他应收款")
+                        || form.startsWith("坏帐准备");
+                if (!isProject){
                     flag = false;
                     break;
                 }
