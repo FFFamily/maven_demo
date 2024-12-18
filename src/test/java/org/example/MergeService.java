@@ -28,17 +28,18 @@ public class MergeService {
     void mergeAll(){
         String selectPath = "物业上海公司1";
         String selectCompanyName = "江苏中南物业服务有限公司";
+        Boolean findAll = false;
         // 查询所有的
         List<String> allCompany = findAllCompany();
         for (String newCompanyName : allCompany) {
-            System.out.println("当前公司为："+newCompanyName);
             if (!newCompanyName.equals(selectCompanyName)){
                 continue;
             }
-            find2022.find(false,newCompanyName);
-            find2023.find(false,selectPath,newCompanyName);
-            find2024.find(false,selectPath,newCompanyName);
-            findAllBalance.find(false,selectPath,newCompanyName);
+            System.out.println("当前公司为："+newCompanyName);
+            find2022.find(findAll,newCompanyName);
+            find2023.find(findAll,selectPath,newCompanyName);
+            find2024.find(findAll,selectPath,newCompanyName);
+            findAllBalance.find(findAll,selectPath,newCompanyName);
         }
     }
 
