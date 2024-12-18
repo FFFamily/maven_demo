@@ -76,7 +76,7 @@ public class Step6 {
                         int i1 = Integer.parseInt(month);
                         return i == 2023 && (i1 >= 7 && i1 <= 12);
                     }catch (Exception e){
-                        System.out.println("解析时间出错："+e.getMessage());
+//                        System.out.println("解析时间出错："+e.getMessage());
                         return false;
                     }
                 })
