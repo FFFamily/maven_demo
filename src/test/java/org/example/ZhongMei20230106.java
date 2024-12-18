@@ -63,7 +63,7 @@ public class ZhongMei20230106 {
                 System.out.println(companyName);
                 Result result = doTest(collect, companyName);
                 pathResult.addAll(result.getResults());
-                String fileName2 = "组合余额表-2023-1-6-总账-"+companyName + ".xlsx";
+                String fileName2 = "src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/组合余额表-2023-1-6-总账-"+companyName + ".xlsx";
                 File file = new File(fileName2);
                 if (file.exists()){
                     System.out.println("文件存在");
@@ -77,7 +77,7 @@ public class ZhongMei20230106 {
                 }
             }
             String[] split = path.split("/");
-            String fileName ="src/main/java/org/example/excel/zhong_nan/merge/company/余额表-"+split[split.length -1];
+            String fileName ="src/main/java/org/example/excel/zhong_nan/merge/余额表-"+split[split.length -1];
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(pathResult);
         }
 
