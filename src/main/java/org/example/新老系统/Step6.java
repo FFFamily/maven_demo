@@ -160,8 +160,12 @@ public class Step6 {
                 }
             }
         }
-        result2s.stream().filter(item -> "和旧系统余额不相等".equals(item.get备注()) || "多余数据".equals(item.get备注())).forEach(item ->{
+        result2s.stream().filter(item -> "和旧系统余额不相等".equals(item.get备注())).forEach(item ->{
             item.setForm("新系统和旧系统余额不相等保留数据");
+            notWithNcc.add(item);
+        });
+        result2s.stream().filter(item -> "多余数据".equals(item.get备注())).forEach(item ->{
+            item.setForm("新系统多余数据");
             notWithNcc.add(item);
         });
         try (ExcelWriter excelWriter = EasyExcel.write(newCompanyName+"-第六步数据.xlsx").build()) {
