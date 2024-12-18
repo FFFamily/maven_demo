@@ -3,17 +3,10 @@ package org.example;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.read.listener.PageReadListener;
-import com.alibaba.excel.write.metadata.WriteSheet;
-import lombok.Data;
-import org.apache.tomcat.Jar;
 import org.example.enitty.OracleData;
-import org.example.enitty.zhong_nan.Merge22Result;
 import org.example.enitty.zhong_nan.NewBalanceExcelResult;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
-import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
@@ -31,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SpringBootTest
-public class ZMMerge20230712Test {
+public class ZMMerge2023 {
     @Resource
     private Step6 step6Test;
     @Resource
@@ -41,10 +34,10 @@ public class ZMMerge20230712Test {
     @Test
     void test(){
         Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/最终组合结果-2023-1-6-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
             for (NewBalanceExcelResult data : dataList) {
                 List<NewBalanceExcelResult> orDefault = listMap.getOrDefault(data.getCompanyName(), new ArrayList<>());
-                data.setForm("2023期末");
+                data.setForm("2022年");
                 data.setV(null);
                 data.setW(null);
                 orDefault.add(data);
@@ -59,20 +52,65 @@ public class ZMMerge20230712Test {
             if (!name.equals("物业北京公司")){
                 continue;
             }
-            List<String> companyList = jdbcTemplate.queryForList(
-                    "select z.\"公司段描述\" from ZDPROD_EXPDP_20241120 z GROUP BY z.\"公司段描述\" ",
-                    String.class
-            );
-            for (String newCompanyName : companyList) {
-                List<OracleData> list3 = new ArrayList<>();
-                String findSql = "select * from ZDPROD_EXPDP_20241120 z where z.\"公司段描述\" = '" + newCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
-                List<OracleData> newDataList = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class));
-                for (OracleData data : newDataList) {
-                    data.setForm("24年1-9月序时账");
-                    list3.add(data);
+            // 旧系统
+            List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
+            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
+            for (String oldCompanyName : companyMap.keySet()) {
+                String str = oldCompanyName.split("-")[0];
+                String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(str);
+                Step6.Step6TestResult step6TestResult = step6Test.step6Test(oldCompanyName, companyMap);
+                if (step6TestResult == null){
+                    continue;
+                }
+                // 旧系统处理后数据
+                List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s()
+                        .stream()
+                        .filter(item -> item.getRemark() != null)
+                        .collect(Collectors.toList());
+                // 旧系统
+                List<Step6OldDetailExcel> oldDataList = companyMap.get(oldCompanyName);
+                for (Step6OldDetailExcel item : result3s) {
+                    oldDataList.remove(item);
                 }
 
-
+                List<OracleData> list3 = new ArrayList<>();
+                for (Step6OldDetailExcel data : oldDataList) {
+                    coverNewDate.cover("2023-7-12",data);
+                    OracleData oracleData = new OracleData();
+                    oracleData.setForm("23年7-12月序时账");
+                    oracleData.set公司段描述(data.getCompanyName());
+                    oracleData.set账户组合(data.getOnlySign());
+                    oracleData.set账户描述(data.getOnlySignName());
+                    oracleData.set交易对象(data.getAuxiliaryAccountingCode());
+                    oracleData.set交易对象名称(data.getAuxiliaryAccounting());
+                    oracleData.set输入借方(data.getV());
+                    oracleData.set输入贷方(data.getW());
+                    oracleData.set单据编号(data.getVoucherCode());
+                    oracleData.set有效日期(data.getTime());
+                    DateTime parse = DateUtil.parse(data.getTime());
+                    oracleData.set期间(parse.year()+"-"+(parse.month()+1));
+                    oracleData.set科目代码(data.getProjectCode());
+                    oracleData.set科目段描述(data.getProjectName());
+                    oracleData.set对方科目(data.getOtherProjectCode());
+                    oracleData.set对方科目名称(data.getOtherProjectName());
+                    oracleData.set行说明(data.getMatch());
+                    oracleData.set项目(data.getEventCode());
+                    oracleData.set项目段描述(data.getEventName());
+                    oracleData.set部门代码(data.getOrgCode());
+                    oracleData.set部门名称(data.getOrgName());
+                    list3.add(oracleData);
+                }
+                for (OracleData oracleData : step6TestResult.getOracleDataList()) {
+//                    oracleData.setForm("23年7-12月新系统序时账");
+                    list3.add(oracleData);
+                }
+                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
+                        OracleData.class,
+                        new PageReadListener<OracleData>(dataList -> {
+                            //coverNewDate.cover("2023-1-6",data);
+                            list3.addAll(dataList);
+                        })
+                ).sheet("组合结果").doRead();
                 List<NewBalanceExcelResult> result = new ArrayList<>();
                 List<OracleData> list1 = new ArrayList<>();
                 List<OracleData> list2 = new ArrayList<>();
@@ -82,8 +120,7 @@ public class ZMMerge20230712Test {
                     List<OracleData> all = group.get(key);
                     OracleData one = all.get(0);
                     NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
-                    newBalanceExcelResult.setForm("2023年7-12月");
-
+                    newBalanceExcelResult.setForm("2023年");
                     newBalanceExcelResult.setCompanyName(newCompanyName);
                     newBalanceExcelResult.setProjectCode(one.get账户组合());
                     newBalanceExcelResult.setProjectName(one.get账户描述()+".");
@@ -94,10 +131,7 @@ public class ZMMerge20230712Test {
 //                    newBalanceExcelResult.setBalance(newBalanceExcelResult.getV().subtract(newBalanceExcelResult.getW()));
                     result.add(newBalanceExcelResult);
                 }
-//            if (company.equals("青岛中南物业管理有限公司")){
-//                EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
-//            }
-                File excelFile = new File(newCompanyName + "-2024-1-9-组合序时账" + ".xlsx");
+                File excelFile = new File(newCompanyName + "-2023-7-12-组合序时账" + ".xlsx");
                 if (excelFile.exists()){
                     System.out.println("文件存在");
                     List<OracleData> list = new ArrayList<>();
@@ -116,19 +150,18 @@ public class ZMMerge20230712Test {
                     re.setForm(results1.stream().map(NewBalanceExcelResult::getForm).distinct().collect(Collectors.joining("、")));
                     re.setCompanyName(results1.stream().map(NewBalanceExcelResult::getCompanyName).distinct().collect(Collectors.joining("、")));
                     re.setProjectCode(results1.stream().map(NewBalanceExcelResult::getProjectCode).distinct().collect(Collectors.joining("、")));
-                    // todo 后续有个. 要处理
                     re.setProjectName(results1.stream().map(NewBalanceExcelResult::getProjectName).distinct().collect(Collectors.joining("、")));
                     re.setAuxiliaryAccounting(results1.stream().map(NewBalanceExcelResult::getAuxiliaryAccounting).distinct().collect(Collectors.joining("、")));
                     re.setV(results1.stream().map(NewBalanceExcelResult::getV).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                     re.setW(results1.stream().map(NewBalanceExcelResult::getW).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
 //                    re.setBalance(results1.stream().map(NewBalanceExcelResult::getBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
-                    re.setPreBalance(results1.stream().filter(item -> item.getForm().equals("2023期末")).map(NewBalanceExcelResult::getPreBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
+                    re.setPreBalance(results1.stream().filter(item -> item.getForm().equals("2022年")).map(NewBalanceExcelResult::getPreBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                     re.setBalance(re.getPreBalance().add(re.getV()).subtract(re.getW()));
                     finalExcel.add(re);
                 }
             }
         }
-        EasyExcel.write( "最终组合结果-2024-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 
     private static String getStr(String str){
