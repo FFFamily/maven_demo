@@ -54,6 +54,10 @@ public class ZMMerge2024 {
                     String.class
             );
             for (String newCompanyName : companyList) {
+                System.out.println("当前公司："+newCompanyName);
+                if (!newCompanyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
+                    continue;
+                }
                 List<OracleData> list3 = new ArrayList<>();
                 String findSql = "select * from ZDPROD_EXPDP_20241120 z where z.\"公司段描述\" = '" + newCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
                 List<OracleData> newDataList = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class));
@@ -84,17 +88,17 @@ public class ZMMerge2024 {
 //            if (company.equals("青岛中南物业管理有限公司")){
 //                EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
 //            }
-                File excelFile = new File(newCompanyName + "-2024-组合序时账" + ".xlsx");
-                if (excelFile.exists()){
-                    System.out.println("文件存在");
-                    List<OracleData> list = new ArrayList<>();
-                    EasyExcel.read(excelFile, Step6OldDetailExcel.class,
-                            new PageReadListener<OracleData>(list::addAll));
-                    list.addAll(xsList);
-                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(list);
-                }else {
-                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
-                }
+//                File excelFile = new File(newCompanyName + "-2024-组合序时账" + ".xlsx");
+//                if (excelFile.exists()){
+//                    System.out.println("文件存在");
+//                    List<OracleData> list = new ArrayList<>();
+//                    EasyExcel.read(excelFile, Step6OldDetailExcel.class,
+//                            new PageReadListener<OracleData>(list::addAll));
+//                    list.addAll(xsList);
+//                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(list);
+//                }else {
+//                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
+//                }
                 List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(newCompanyName,new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
                 Map<String, List<NewBalanceExcelResult>> cGroup = results.stream().collect(Collectors.groupingBy(item -> item.getProjectCode() + item.getAuxiliaryAccounting()));
                 for (String s : cGroup.keySet()) {
@@ -109,13 +113,13 @@ public class ZMMerge2024 {
                     re.setV(results1.stream().map(NewBalanceExcelResult::getV).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                     re.setW(results1.stream().map(NewBalanceExcelResult::getW).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
 //                    re.setBalance(results1.stream().map(NewBalanceExcelResult::getBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
-                    re.setPreBalance(results1.stream().filter(item -> item.getForm().equals("2023期末")).map(NewBalanceExcelResult::getPreBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
+                    re.setPreBalance(results1.stream().filter(item -> item.getForm().equals("2023期末")).map(NewBalanceExcelResult::getBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                     re.setBalance(re.getPreBalance().add(re.getV()).subtract(re.getW()));
                     finalExcel.add(re);
                 }
             }
         }
-        EasyExcel.write( "最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/最终组合结果-2024-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 
     private static String getStr(String str){

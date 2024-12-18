@@ -7,6 +7,7 @@ import lombok.Data;
 import org.assertj.core.util.Lists;
 import org.example.enitty.zhong_nan.*;
 import org.example.utils.CommonUtil;
+import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,10 +58,11 @@ public class ZhongMei2022 {
 //                if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
 //                    continue;
 //                }
-                System.out.println(companyName);
+                String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(companyName);
+                System.out.println("原公司："+companyName +" 现公司："+newCompanyName);
                 Result result = doTest(collect, companyName);
                 pathResult.addAll(result.getResults());
-                String fileName2 = "src/main/java/org/example/excel/zhong_nan/merge/company/组合余额表-2022-总账-"+companyName + ".xlsx";
+                String fileName2 = "src/main/java/org/example/excel/zhong_nan/merge/company/组合余额表-2022-总账-"+newCompanyName + ".xlsx";
                 File file = new File(fileName2);
                 if (file.exists()){
                     System.out.println("文件存在");
@@ -73,9 +75,9 @@ public class ZhongMei2022 {
                     EasyExcel.write(fileName2, Step6OldDetailExcel.class).sheet("总账").doWrite(result.getAllCompanyList());
                 }
             }
-            String[] split = path.split("/");
-            String fileName ="src/main/java/org/example/excel/zhong_nan/merge/余额表-"+split[split.length -1];
-            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(pathResult);
+//            String[] split = path.split("/");
+//            String fileName ="src/main/java/org/example/excel/zhong_nan/merge/余额表-"+split[split.length -1];
+//            EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(pathResult);
         }
     }
 

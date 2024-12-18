@@ -69,13 +69,19 @@ public class Step6 {
                 .filter(item -> item.get额外字段() == null)
                 .filter(item -> {
                     try {
-                        String time = item.get期间();
-                        String[] split1 = time.split("-");
-                        String year = split1[0];
-                        int i = Integer.parseInt(year);
-                        String month = split1[1];
-                        int i1 = Integer.parseInt(month);
-                        return i == 2023 && (i1 >= 7 && i1 <= 12);
+                        try {
+                            String time = item.get期间();
+                            String[] split1 = time.split("-");
+                            String year = split1[0];
+                            int i = Integer.parseInt(year);
+                            String month = split1[1];
+                            int i1 = Integer.parseInt(month);
+                            return i == 2023 && (i1 >= 7 && i1 <= 12);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            return false;
+                        }
+
                     }catch (Exception e){
                         e.printStackTrace();
                         return false;
