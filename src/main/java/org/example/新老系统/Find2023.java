@@ -25,7 +25,8 @@ public class Find2023 {
     @Resource
     private CoverNewDate coverNewDate;
     public void find(Boolean isFindAll,String path,String selectCompanyName){
-        Map<String, List<NewBalanceExcelResult>> listMap = initBalance();
+        String str =  isFindAll ? "" : selectCompanyName;
+        Map<String, List<NewBalanceExcelResult>> listMap = initBalance(str);
         File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
         for (String fileName : Objects.requireNonNull(file.list())) {
@@ -38,8 +39,7 @@ public class Find2023 {
             List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String oldCompanyName : companyMap.keySet()) {
-                String str = oldCompanyName.split("-")[0];
-                String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(str);
+                String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]);
                 if (!isFindAll && !CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]).equals(selectCompanyName)){
                     continue;
                 }
@@ -147,13 +147,13 @@ public class Find2023 {
                 }
             }
         }
-        String str =  isFindAll ? "" : selectCompanyName;
+
         EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 
-    public Map<String, List<NewBalanceExcelResult>>  initBalance(){
+    public Map<String, List<NewBalanceExcelResult>>  initBalance(String str){
         Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
             for (NewBalanceExcelResult data : dataList) {
                 List<NewBalanceExcelResult> orDefault = listMap.getOrDefault(data.getCompanyName(), new ArrayList<>());
                 data.setForm("2022年");

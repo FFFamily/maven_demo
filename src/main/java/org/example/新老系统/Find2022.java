@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 @Service
 public class Find2022 {
     public void find(Boolean findAll,String companyName){
+        String str =  findAll ? "" : companyName;
         Map<String, List<OracleData>> map1 =  init1();
         Map<String,List<OracleData>> map2 = init2();
         Map<String, List<NewBalanceExcelResult>> listMap = initListMap();
@@ -97,7 +98,7 @@ public class Find2022 {
                 finalExcel.add(re);
             }
         }
-        String str =  findAll ? "" : companyName;
+
         EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 

@@ -20,8 +20,9 @@ public class Find2024 {
     @Resource
     private JdbcTemplate jdbcTemplate;
     public void find(Boolean isFindAll,String selectPath,String selectCompanyName){
+        String str =  isFindAll ? "" : selectCompanyName;
         Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
             for (NewBalanceExcelResult data : dataList) {
                 List<NewBalanceExcelResult> orDefault = listMap.getOrDefault(data.getCompanyName(), new ArrayList<>());
                 data.setForm("2023期末");
@@ -119,7 +120,7 @@ public class Find2024 {
                 }
             }
         }
-        String str =  isFindAll ? "" : selectCompanyName;
+
         EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2024-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 
