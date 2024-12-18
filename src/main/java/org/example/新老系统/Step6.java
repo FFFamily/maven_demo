@@ -56,14 +56,11 @@ public class Step6 {
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
         String[] split = companyName.split("-");
         String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(split[0]);
-        System.out.println("当前公司为： "+newCompanyName);
-        if (!newCompanyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
-            return null;
-        }
+//        System.out.println("当前公司为： "+newCompanyName);
+//        if (!newCompanyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
+//            return null;
+//        }
         List<Step6OldDetailExcel> list = companyMap.get(companyName);
-//        String findSql = "SELECT * FROM ZDPROD_EXPDP_20241120 z WHERE z.\"公司段描述\" = '"+newCompanyName+"' AND z.\"期间\" >= '2023-07' AND z.\"期间\" <= '2023-12' AND z.\"日记账说明\" like '%NCC%' ";
-
-//        List<OracleData> oracleData = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class))
         List<OracleData> step5Result = step5.step5Test(newCompanyName)
                 .stream()
                 .filter(item -> item.get额外字段() == null)

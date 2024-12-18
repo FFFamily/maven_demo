@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SpringBootTest
-public class ZhongMei2022 {
+public class ZhongMei2022Create {
     @Resource
     private CoverNewDate coverNewDate;
 
