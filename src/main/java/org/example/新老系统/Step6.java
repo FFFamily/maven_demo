@@ -77,7 +77,7 @@ public class Step6 {
                         return i == 2023 && (i1 >= 7 && i1 <= 12);
                     }catch (Exception e){
 //                        System.out.println("解析时间出错："+e.getMessage());
-                        return false;
+                        return true;
                     }
                 })
                 .peek(item -> {
@@ -108,6 +108,7 @@ public class Step6 {
                 oracleData.add(data);
             }
         }
+
         // 按月进行分组
         Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
             DateTime date = DateUtil.parseDate(item.getTime());
@@ -158,6 +159,10 @@ public class Step6 {
                 }
             }
         }
+        result2s.stream().filter(item -> "和旧系统余额不相等".equals(item.get备注())).forEach(item ->{
+            item.setForm("新系统和旧系统余额不相等保留数据");
+            notWithNcc.add(item);
+        });
         try (ExcelWriter excelWriter = EasyExcel.write(newCompanyName+"-第六步数据.xlsx").build()) {
             // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
             WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
