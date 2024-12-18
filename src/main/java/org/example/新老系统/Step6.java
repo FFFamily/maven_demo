@@ -15,7 +15,6 @@ import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
 import org.example.寻找等级.FindNccZhongNanLevel;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -135,8 +134,12 @@ public class Step6 {
                 BigDecimal newSum = projectNew.stream().reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr.get输入借方()).subtract(CommonUtil.getBigDecimalValue(curr.get输入贷方()))), (l, r) -> l);
                 if (oldSum.compareTo(newSum) != 0) {
                     // 两个余额不相等
-                    findOld(projectOld,projectNew,result3s);
-                    findNew(projectOld,projectNew,result2s);
+                    findOld(projectOld,projectNew,result2s,result3s);
+                    result2s.addAll(projectNew);
+                    result3s.addAll(projectOld);
+//                    findNew(projectOld,projectNew,result2s);
+
+
                     Step6Result1 step6Result1 = create(
                             newCompanyName,
                             timeKey,
@@ -160,14 +163,15 @@ public class Step6 {
                 }
             }
         }
-        result2s.stream().filter(item -> "和旧系统余额不相等".equals(item.get备注())).forEach(item ->{
-            item.setForm("新系统和旧系统余额不相等保留数据");
-            notWithNcc.add(item);
-        });
-        result2s.stream().filter(item -> "多余数据".equals(item.get备注())).forEach(item ->{
-            item.setForm("新系统多余数据");
-            notWithNcc.add(item);
-        });
+//        result2s.stream().filter(item -> "和旧系统余额不相等".equals(item.get备注())).forEach(item ->{
+//            item.setForm("新系统和旧系统余额不相等保留数据");
+//            notWithNcc.add(item);
+//        });
+//        result2s.stream().filter(item -> "多余数据".equals(item.get备注())).forEach(item ->{
+//            item.setForm("新系统多余数据");
+//            notWithNcc.add(item);
+//        });
+        result2s.stream().filter(item -> !item.getRemark().equals("匹配成功")).forEach(notWithNcc::add);
         try (ExcelWriter excelWriter = EasyExcel.write(newCompanyName+"-第六步数据.xlsx").build()) {
             // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
             WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
@@ -239,36 +243,40 @@ public class Step6 {
         return false;
     }
 
-    private void findOld(List<Step6OldDetailExcel>  projectOld,List<OracleData> projectNew,List<Step6OldDetailExcel> result3s){
+    private void findOld(List<Step6OldDetailExcel>  projectOld, List<OracleData> projectNew, List<OracleData> result2s, List<Step6OldDetailExcel> result3s){
         // 找到造成差额的明细账
         int oldSize = projectOld.size();
         int newSize = projectNew.size();
         // 先从旧系统出发
-        if (oldSize > newSize) {
-            matchOld(projectOld,projectNew,result3s,newSize);
-            for (int i = newSize; i < oldSize; i++) {
-                Step6OldDetailExcel data = projectOld.get(i);
-                data.setRemark("多余数据");
-                result3s.add(data);
-            }
-        }else {
-            matchOld(projectOld,projectNew,result3s,oldSize);
-        }
+//        if (oldSize > newSize) {
+        matchOld(projectOld,projectNew,result2s,result3s,oldSize);
+//            for (int i = newSize; i < oldSize; i++) {
+//                Step6OldDetailExcel data = projectOld.get(i);
+//                data.setRemark("多余数据");
+//                result3s.add(data);
+//            }
+//        }else {
+//            matchOld(projectOld,projectNew,result3s,oldSize);
+//        }
     }
 
-    private void matchOld(List<Step6OldDetailExcel>  projectOld,List<OracleData> projectNew,List<Step6OldDetailExcel> result3s,int size){
+    private void matchOld(List<Step6OldDetailExcel>  projectOld, List<OracleData> projectNew, List<OracleData> result2s, List<Step6OldDetailExcel> result3s, int size){
         Map<String, List<OracleData>> collect = projectNew.stream().collect(Collectors.groupingBy(OracleData::get行说明));
         for (int i = 0; i < size; i++) {
             Step6OldDetailExcel oldData = projectOld.get(i);
             BigDecimal oldBalance = getOldBalance(oldData);
-            List<OracleData> newDataList = collect.getOrDefault(oldData.getMatch(),new ArrayList<>());
-            if (newDataList.size() == 1){
+            List<OracleData> newDataList = collect.getOrDefault(oldData.getMatch(),null);
+            if (newDataList == null){
+                oldData.setRemark("未能匹配数据");
+            }else if (newDataList.size() == 1){
                 OracleData newData = newDataList.get(0);
                 BigDecimal newBalance = getNewBalance(newData);
                 if (oldBalance.compareTo(newBalance) != 0) {
                     // 余额不相等
-//                    result3s.add(oldData);
                     oldData.setRemark("和新系统余额不相等");
+                }else {
+                    oldData.setRemark("匹配成功");
+                    newData.setRemark("匹配成功");
                 }
             }else {
                 boolean flag = true;
@@ -277,6 +285,8 @@ public class Step6 {
                     if (!newData.getUsed() && newBalance.compareTo(oldBalance) == 0){
                         flag = false;
                         newData.setUsed(true);
+                        oldData.setRemark("匹配成功");
+                        newData.setRemark("匹配成功");
                         break;
                     }
                 }
@@ -285,7 +295,7 @@ public class Step6 {
 //                    result3s.add(oldData);
                 }
             }
-            result3s.add(oldData);
+//            result3s.add(oldData);
         }
     }
 
@@ -295,25 +305,30 @@ public class Step6 {
         int oldSize = projectOld.size();
         int newSize = projectNew.size();
         // 先从旧系统出发
-        if (oldSize >= newSize) {
-            matchNew(projectOld,projectNew,result2s,newSize);
-        }else {
-            matchNew(projectOld,projectNew,result2s,oldSize);
-            for (int i = oldSize; i < newSize; i++) {
-                OracleData data = projectNew.get(i);
-                data.set备注("多余数据");
-                result2s.add(data);
-            }
-        }
+//        if (oldSize >= newSize) {
+        matchNew(projectOld,projectNew,result2s,newSize);
+//        }else {
+//            matchNew(projectOld,projectNew,result2s,oldSize);
+//            for (int i = oldSize; i < newSize; i++) {
+//                OracleData data = projectNew.get(i);
+//                data.set备注("多余数据");
+//                result2s.add(data);
+//            }
+//        }
     }
 
     private void matchNew(List<Step6OldDetailExcel>  projectOld,List<OracleData> projectNew,List<OracleData> result2s,int size){
         Map<String, List<Step6OldDetailExcel>> collect = projectOld.stream().collect(Collectors.groupingBy(item -> item.getMatch()));
         for (int i = 0; i < size; i++) {
             OracleData newData = projectNew.get(i);
+            if (newData.getRemark().equals("匹配成功")){
+                continue;
+            }
             BigDecimal newBalance = getNewBalance(newData);
-            List<Step6OldDetailExcel> oldDataList = collect.getOrDefault(newData.get行说明(), new ArrayList<>());
-            if (oldDataList.size() == 1){
+            List<Step6OldDetailExcel> oldDataList = collect.getOrDefault(newData.get行说明(), null);
+            if (oldDataList == null){
+                newData.set备注("未能匹配数据");
+            }else if (oldDataList.size() == 1){
                 Step6OldDetailExcel oldData = oldDataList.get(0);
                 BigDecimal oldBalance = getOldBalance(oldData);
                 if (oldBalance.compareTo(newBalance) != 0) {
