@@ -122,7 +122,7 @@ public class Find2024 {
             }
         }
 
-        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2024-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"-最终组合结果-2024-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 
     private static String getStr(String str){

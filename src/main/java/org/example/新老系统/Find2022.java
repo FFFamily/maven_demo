@@ -99,7 +99,7 @@ public class Find2022 {
             }
         }
 
-        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"-最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 
     public Map<String, List<OracleData>> init1() {

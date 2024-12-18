@@ -123,17 +123,17 @@ public class Find2023 {
 //                    newBalanceExcelResult.setBalance(newBalanceExcelResult.getV().subtract(newBalanceExcelResult.getW()));
                     result.add(newBalanceExcelResult);
                 }
-                File excelFile = new File(newCompanyName + "-2023-7-12-组合序时账" + ".xlsx");
-                if (excelFile.exists()){
-                    System.out.println("文件存在");
-                    List<OracleData> list = new ArrayList<>();
-                    EasyExcel.read(excelFile, Step6OldDetailExcel.class,
-                            new PageReadListener<OracleData>(list::addAll));
-                    list.addAll(xsList);
-                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(list);
-                }else {
-                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
-                }
+//                File excelFile = new File(newCompanyName + "-2023-7-12-组合序时账" + ".xlsx");
+//                if (excelFile.exists()){
+//                    System.out.println("文件存在");
+//                    List<OracleData> list = new ArrayList<>();
+//                    EasyExcel.read(excelFile, Step6OldDetailExcel.class,
+//                            new PageReadListener<OracleData>(list::addAll));
+//                    list.addAll(xsList);
+//                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(list);
+//                }else {
+//                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
+//                }
                 List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(newCompanyName,new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
                 Map<String, List<NewBalanceExcelResult>> cGroup = results.stream().collect(Collectors.groupingBy(item -> item.getProjectCode() + item.getAuxiliaryAccounting()));
                 for (String s : cGroup.keySet()) {
@@ -159,7 +159,7 @@ public class Find2023 {
 
     public Map<String, List<NewBalanceExcelResult>>  initBalance(String str){
         Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/"+str+"-最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
             for (NewBalanceExcelResult data : dataList) {
                 List<NewBalanceExcelResult> orDefault = listMap.getOrDefault(data.getCompanyName(), new ArrayList<>());
                 data.setForm("2022年");

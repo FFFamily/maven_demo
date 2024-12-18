@@ -215,7 +215,7 @@ public class FindAllBalance {
             }
         }
         String str =  isFindAll ? "" : selectCompany;
-        EasyExcel.write( str+"最终组合结果-总余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+//        EasyExcel.write( str+"-最终组合结果-总余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 
     private static String getStr(String str){

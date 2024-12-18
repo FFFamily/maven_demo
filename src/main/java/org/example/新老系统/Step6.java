@@ -109,6 +109,9 @@ public class Step6 {
             }
         }
 
+        oracleData.addAll(addCondition(newCompanyName,step5Result));
+
+
         // 按月进行分组
         Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
             DateTime date = DateUtil.parseDate(item.getTime());
@@ -180,9 +183,20 @@ public class Step6 {
         );
     }
 
+    private Collection<? extends OracleData> addCondition(String newCompanyName, List<OracleData> step5Result) {
+        if (newCompanyName.equals("江苏中南物业服务有限公司梅州分公司")){
+            return step5Result.stream()
+                    .filter(item ->item.get日记账说明().contains("ZZTY2023110110151本地业财发起待确认事项：梅州雅居乐10.30-10.31周报、应收冲抵单")
+                    || item.get日记账说明().contains("ZZTY2023103010321本地业财发起待确认事项：梅州雅居乐10.1-10.29周报、应收冲抵单adi"))
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
     private boolean filterCondition(String companyName,OracleData oracleData){
         if (companyName.equals("江苏中南物业服务有限公司天津分公司")){
-            return  oracleData.get日记账说明().equals("FYGD2023122610021_前期NCC凭证-冲销22年底计提审计费") || oracleData.get日记账说明().equals("FMS跑的计提与NCC重复，冲回-ZZTY2023092810121");
+            return  oracleData.get日记账说明().equals("FYGD2023122610021_前期NCC凭证-冲销22年底计提审计费")
+                    || oracleData.get日记账说明().equals("FMS跑的计提与NCC重复，冲回-ZZTY2023092810121");
         }else if (companyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
             return oracleData.get日记账说明().contains("YGCB2023120510075总账通用计提：NCC11月导入未配置交易对象，补录交易对象");
         }else if (companyName.equals("江苏中南物业服务有限公司")){
@@ -190,6 +204,35 @@ public class Step6 {
                     || oracleData.get日记账说明().contains("FMS跑的计提与NCC重复，冲回-ZZTY2023092810121");
         }else if (companyName.equals("江苏中南物业服务有限公司嘉兴分公司")){
             return oracleData.get日记账说明().contains("FYGD2024010110094_前期NCC凭证-冲销4-6月手工计提");
+        }else if (companyName.equals("江苏中南物业服务有限公司台州分公司")){
+            return oracleData.get日记账说明().contains("YGCB2024010210505 总账通用计提：台州分公司202312应收科目调整（冲销前期NCC调整）")
+                    || oracleData.get日记账说明().contains("YGCB2023110110585 总账通用计提：台州分公司前期中南单据已于NCC归档待支付（进项已抵扣），由于现从报账系统重新发起支付，导致成本进项重复");
+        }else if (companyName.equals("江苏中南物业服务有限公司昆明分公司")){
+            return oracleData.get日记账说明().contains("ZZTY2023120210748本地业财发起待确认事项：11月垃圾清运NCC推单调整")
+                    || oracleData.get日记账说明().contains("YGCB2024010410337总账通用计提：NCC推送错误：应收客商及应收科目调整");
+        }else if (companyName.equals("江苏中南物业服务有限公司泰兴分公司")){
+            return oracleData.get日记账说明().contains("ZZTY2023092910010关于对【NCC中计提过的已报销成本费用】的账务冲销处理")
+                    || oracleData.get日记账说明().contains("YGCB2023120210370_ncc凭证号2022-12-594#；2022-12-595#冲销往年计提")
+                    || oracleData.get日记账说明().contains("FYGD2023112910101_NCC凭证11-23#、12-498#按总部要求调整成本科目");
+        }else if (companyName.equals("江苏中南物业服务有限公司东台分公司")){
+            return oracleData.get日记账说明().contains("FYGD2023120610006_NCC2022-6-150#、2022-7-76#冲销2022年6.7月份计提成本")
+                    || oracleData.get日记账说明().contains("FYGD2023082910023调整：冲销NCC成本计提");
+        }else if (companyName.equals("青岛中南物业管理有限公司烟台分公司")){
+            return oracleData.get日记账说明().contains("FYGD2023100110051费用账务处理工单：冲销原NCC计提明细表中调整审批单页签");
+        }else if (companyName.equals("江苏中南物业服务有限公司淮安分公司")){
+            return oracleData.get日记账说明().contains("FYGD2023090110025费用账务处理工单_冲销1-6NCC计提成本")
+                    || oracleData.get日记账说明().contains("FYGD2023113010155_冲销原NCC账面暂估计提的3月成本")
+                    || oracleData.get日记账说明().contains("JCFS0|YGCB2024010111115总账通用计提:调整NCC映射科目与FMS科目不一致，统一将地产应收归口至应收物业服务款-被收购公司原关联方款项");
+        }else if (companyName.equals("江苏中南物业服务有限公司成都分公司")){
+            return oracleData.get日记账说明().contains("KQLU0|YGCB2023120310516：总账通用计提：中南成都分公司案场收入NCC与应收管理平台冲平")
+                    || oracleData.get日记账说明().contains("YGCB2023110210684:中南一二类问题整改（中南物业垫付，找中南地产结算）NCC导入到其他应付款-应付在建工程及设备款科目，现改到其他应收款")
+                    || oracleData.get日记账说明().contains("NCC导入数据调整");
+        }else if (companyName.equals("江苏中南物业服务有限公司太仓分公司")){
+            return oracleData.get日记账说明().contains("YGCB2024010210752总账通用计提:NCC能耗销项税税率6%调整至13%");
+        }else if (companyName.equals("江苏中南物业服务有限公司梅州分公司")){
+            return oracleData.get日记账说明().equals("GXZZ2023082910086:2023年8月7日收到梅州市强风艳装饰有限公司退回2021年第4季度垃圾清运重复付款（ncc凭证号：2022.04#53）")
+                    || oracleData.get日记账说明().contains("调整科目：梅州23.6.09代扣5月电费（ncc凭证号23.6#15），于23.7月补走流程GCSJ2023071910060")
+                    || oracleData.get日记账说明().contains("调整科目：ncc科目映射有误");
         }
         return false;
     }

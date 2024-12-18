@@ -26,8 +26,11 @@ public class MergeService {
     private FindAllBalance findAllBalance;
     @Test
     void mergeAll(){
-        String selectPath = "物业上海公司2"; // 物业上海公司1
-        String selectCompanyName = "江苏中南物业服务有限公司嘉兴分公司"; // 江苏中南物业服务有限公司
+        // 15
+        //  物业上海公司2
+        String selectPath = "物业厦门公司";
+        // 江苏中南物业服务有限公司
+        String selectCompanyName = "江苏中南物业服务有限公司晋江分公司"; //  江苏中南物业服务有限公司嘉兴分公司
         Boolean findAll = false;
         // 查询所有的
         List<String> allCompany = findAllCompany();
@@ -35,7 +38,7 @@ public class MergeService {
             if (!newCompanyName.equals(selectCompanyName)){
                 continue;
             }
-            System.out.println("当前公司为："+newCompanyName);
+            System.out.println("开始- 当前公司为："+newCompanyName);
             find2022.find(findAll,newCompanyName);
             find2023.find(findAll,selectPath,newCompanyName);
             find2024.find(findAll,selectPath,newCompanyName);

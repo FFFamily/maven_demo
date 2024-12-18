@@ -41,7 +41,7 @@ public class Step5 {
         Map<String, List<OracleData>> sqlMap = sqlList.stream().collect(Collectors.groupingBy(OracleData::get批名));
         // 拿到所有的行说明
         for (String pi : map.keySet()) {
-            System.out.println(pi);
+//            System.out.println(pi);
             boolean flag = true;
             List<OracleData> mapList = sqlMap.get(pi);
             BigDecimal sum = BigDecimal.ZERO;
