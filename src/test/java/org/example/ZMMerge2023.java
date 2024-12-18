@@ -161,7 +161,7 @@ public class ZMMerge2023 {
                 }
             }
         }
-        EasyExcel.write( "最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 
     private static String getStr(String str){

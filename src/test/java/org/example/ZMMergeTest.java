@@ -144,7 +144,7 @@ public class ZMMergeTest {
                 finalExcel.add(re);
             }
         }
-        EasyExcel.write( "最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
     @Data
     public static class OldBalance{
