@@ -198,7 +198,7 @@ public class Step6 {
             matchOld(projectOld,projectNew,result3s,newSize);
             for (int i = newSize; i < oldSize; i++) {
                 Step6OldDetailExcel data = projectOld.get(i);
-//                data.setRemark("多余数据");
+                data.setRemark("多余数据");
                 result3s.add(data);
             }
         }else {
@@ -251,7 +251,7 @@ public class Step6 {
             matchNew(projectOld,projectNew,result2s,oldSize);
             for (int i = oldSize; i < newSize; i++) {
                 OracleData data = projectNew.get(i);
-//                data.set备注("多余数据");
+                data.set备注("多余数据");
                 result2s.add(data);
             }
         }
