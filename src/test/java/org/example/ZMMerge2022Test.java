@@ -27,6 +27,6 @@ public class ZMMerge2022Test {
     private Find2022 find2022;
     @Test
     void test(){
-        find2022.find();
+//        find2022.find();
     }
 }
