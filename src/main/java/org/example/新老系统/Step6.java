@@ -67,6 +67,15 @@ public class Step6 {
         List<OracleData> step5Result = step5.step5Test(newCompanyName)
                 .stream()
                 .filter(item -> item.get额外字段() == null)
+                .filter(item -> {
+                    String time = item.get期间();
+                    String[] split1 = time.split("-");
+                    String year = split1[0];
+                    int i = Integer.parseInt(year);
+                    String month = split1[1];
+                    int i1 = Integer.parseInt(month);
+                    return i == 2023 && (i1 >= 7 && i1 <= 12);
+                })
                 .peek(item -> {
                     String newProject = getNewProject(item);
                     item.setActualProject(newProject);
@@ -78,7 +87,7 @@ public class Step6 {
                 })
                 .filter(item -> isBackProject(item.getActualProject()))
                 .collect(Collectors.toList());
-        List<OracleData> nccstep5Result =step5Result
+        List<OracleData> nccstep5Result = step5Result
                 .stream()
                 .filter(item -> item.get日记账说明().contains("NCC"))
                 .collect(Collectors.toList());
