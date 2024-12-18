@@ -1,32 +1,24 @@
 package org.example;
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import lombok.Builder;
 import lombok.Data;
 import org.assertj.core.util.Lists;
-import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.*;
 import org.example.utils.CommonUtil;
-import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
-import org.example.寻找等级.FindNccZhongNanLevel;
-import org.example.新老系统.Step1;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Resource;
-import java.awt.image.Kernel;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @SpringBootTest
-public class ZhongMeiTest {
+public class ZhongMei2022 {
     @Resource
     private CoverNewDate coverNewDate;
 
