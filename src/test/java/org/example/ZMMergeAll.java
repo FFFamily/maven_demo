@@ -58,6 +58,9 @@ public class ZMMergeAll {
             for (String oldCompanyName : companyMap.keySet()) {
                 String str = oldCompanyName.split("-")[0];
                 String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(str);
+                if (!newCompanyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
+                    continue;
+                }
                 Step6.Step6TestResult step6TestResult = step6Test.step6Test(oldCompanyName, companyMap);
                 if (step6TestResult == null){
                     continue;
@@ -109,7 +112,7 @@ public class ZMMergeAll {
                         Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
-                                coverNewDate.cover("2023-1-6",data);
+//                                coverNewDate.cover("2023-1-6",data);
                                 OracleData oracleData = new OracleData();
                                 oracleData.setForm("22年序时账");
                                 oracleData.set公司段描述(data.getCompanyName());
@@ -161,7 +164,6 @@ public class ZMMergeAll {
                     OracleData one = all.get(0);
                     NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
                     newBalanceExcelResult.setForm("2023年7-12月");
-
                     newBalanceExcelResult.setCompanyName(newCompanyName);
                     newBalanceExcelResult.setProjectCode(one.get账户组合());
                     newBalanceExcelResult.setProjectName(one.get账户描述()+".");
@@ -172,10 +174,7 @@ public class ZMMergeAll {
 //                    newBalanceExcelResult.setBalance(newBalanceExcelResult.getV().subtract(newBalanceExcelResult.getW()));
                     result.add(newBalanceExcelResult);
                 }
-//            if (company.equals("青岛中南物业管理有限公司")){
-//                EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
-//            }
-                File excelFile = new File(oldCompanyName + "-2023-7-12-组合序时账" + ".xlsx");
+                File excelFile = new File(oldCompanyName + "-总序时账" + ".xlsx");
                 if (excelFile.exists()){
                     System.out.println("文件存在");
                     List<OracleData> list = new ArrayList<>();
@@ -205,7 +204,7 @@ public class ZMMergeAll {
                 }
             }
         }
-        EasyExcel.write( "最终组合结果-2023-7-12-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "最终组合结果-总余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
     }
 
     private static String getStr(String str){
