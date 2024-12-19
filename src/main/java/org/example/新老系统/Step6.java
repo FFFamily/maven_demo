@@ -98,22 +98,34 @@ public class Step6 {
                 .stream()
                 .filter(item -> item.get日记账说明().contains("NCC"))
                 .collect(Collectors.toList());
-        List<OracleData> oracleData = new ArrayList<>();
         // 新系统不含 NCC 导入的数量
-        List<OracleData> notWithNcc = step5Result.stream()
+        List<OracleData> notWithNccOracleList = step5Result.stream()
                 .filter(item -> !item.get日记账说明().contains("NCC"))
                 .peek(item -> item.setForm("23年7-12月新系统序时账"))
                 .collect(Collectors.toList());
+        List<OracleData> oracleData = new ArrayList<>();
         for (OracleData data : nccstep5Result) {
             if (filterCondition(newCompanyName,data)){
                 data.setForm("23年7-12月新系统序时账单独过滤");
-                notWithNcc.add(data);
+                notWithNccOracleList.add(data);
             }else {
                 oracleData.add(data);
             }
         }
+        List<OracleData> notWithNcc = new ArrayList<>();
+        // 在不包含ncc的数据中找到本来就是ncc导入的
+        for (OracleData data : notWithNccOracleList) {
+            if (filterAddCondition(newCompanyName,data)){
+                data.setForm("23年7-12月新系统序时账单独添加");
+                oracleData.add(data);
+            }else {
+                notWithNcc.add(data);
+            }
+        }
 
-        oracleData.addAll(addCondition(newCompanyName,step5Result));
+//        oracleData.addAll(addCondition(newCompanyName,step5Result));
+
+
         // 按月进行分组
         Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
             DateTime date = DateUtil.parseDate(item.getTime());
@@ -186,32 +198,21 @@ public class Step6 {
         );
     }
 
-    private Collection<? extends OracleData> addCondition(String newCompanyName, List<OracleData> step5Result) {
+    private boolean filterAddCondition(String newCompanyName, OracleData item) {
         if (newCompanyName.equals("江苏中南物业服务有限公司梅州分公司")){
-            return step5Result.stream()
-                    .filter(item ->item.get日记账说明().contains("ZZTY2023110110151本地业财发起待确认事项：梅州雅居乐10.30-10.31周报、应收冲抵单")
-                    || item.get日记账说明().contains("ZZTY2023103010321本地业财发起待确认事项：梅州雅居乐10.1-10.29周报、应收冲抵单adi"))
-                    .collect(Collectors.toList());
+            return item.get日记账说明().contains("ZZTY2023110110151本地业财发起待确认事项：梅州雅居乐10.30-10.31周报、应收冲抵单")
+                    || item.get日记账说明().contains("ZZTY2023103010321本地业财发起待确认事项：梅州雅居乐10.1-10.29周报、应收冲抵单adi");
         }else if (newCompanyName.equals("余姚中锦物业服务有限公司")){
-            return step5Result.stream()
-                    .filter(item ->item.get日记账说明().contains("BKDT0|YGCB2024010210474 总账通用计提:余姚中锦-2023年12月预估收缴率收入"))
-                    .collect(Collectors.toList());
+            return item.get日记账说明().contains("BKDT0|YGCB2024010210474 总账通用计提:余姚中锦-2023年12月预估收缴率收入");
         }else if (newCompanyName.equals("江苏中南物业服务有限公司仁寿分公司")){
-            return step5Result.stream()
-                    .filter(item ->item.get日记账说明().contains("HNCX0|YGCB2024010111235：总账通用计提：中南仁寿分公司收缴率还原"))
-                    .collect(Collectors.toList());
+            return item.get日记账说明().contains("HNCX0|YGCB2024010111235：总账通用计提：中南仁寿分公司收缴率还原");
         }else if (newCompanyName.equals("江苏中南物业服务有限公司抚顺分公司")){
-            return step5Result.stream()
-                    .filter(item ->item.get日记账说明().contains("ERXX0|YGCB2023123010142总账通用计提:收抚顺中南熙悦2022年12月住宅物业费(基础包干制)")
-                    || item.get日记账说明().contains("ERXX0|YGCB2024010110009总账通用计提:收入（抚顺中南熙悦12.31）外系统生成凭证"))
-                    .collect(Collectors.toList());
+            return item.get日记账说明().contains("ERXX0|YGCB2023123010142总账通用计提:收抚顺中南熙悦2022年12月住宅物业费(基础包干制)")
+                    || item.get日记账说明().contains("ERXX0|YGCB2024010110009总账通用计提:收入（抚顺中南熙悦12.31）外系统生成凭证");
         }else if (newCompanyName.equals("江苏中南物业服务有限公司长丰分公司")){
-            return step5Result.stream()
-                    .filter(item ->item.get日记账说明().contains("LXHT0|GXZZ2023122110061 基础物业服务收入工单：中南长丰宸悦收入ADI导入12.1-12.17"))
-                    .collect(Collectors.toList());
+            return item.get日记账说明().contains("LXHT0|GXZZ2023122110061 基础物业服务收入工单：中南长丰宸悦收入ADI导入12.1-12.17");
         }
-
-        return new ArrayList<>();
+        return false;
     }
 
     private boolean filterCondition(String companyName,OracleData oracleData){
