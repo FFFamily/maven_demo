@@ -84,13 +84,14 @@ public class FindFileUtil {
                         assistant3.setRDesc(o.get(1));
                         // 机构
                         assistant3.setE(company);
-                        assistant3.setTransactionObjectId("");
-                        assistant3.setTransactionObjectCode("");
-                        assistant3.setTransactionObjectName("");
+
                         // 辅助核算段
                         String s = o.get(2);
                         String[] split = s.split("\\.");
                         assistant3.setA(s);
+                        assistant3.setTransactionObjectId(split[1].equals("-") ? "" : split[1]);
+                        assistant3.setTransactionObjectCode("");
+                        assistant3.setTransactionObjectName("");
                         assistant3.setTransactionObjectCodeCopy(split[1].equals("-") ? "" : split[1]);
                         // 科目段描述
                         String codeName = o.get(1);
