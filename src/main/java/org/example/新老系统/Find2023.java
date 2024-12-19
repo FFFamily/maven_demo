@@ -76,7 +76,7 @@ public class Find2023 {
                 for (Step6OldDetailExcel data : oldDataList) {
                     coverNewDate.cover("2023-7-12",data);
                     OracleData oracleData = new OracleData();
-                    oracleData.setForm("23年7-12月序时账");
+                    oracleData.setForm("23年7-12月旧系统序时账");
                     oracleData.set公司段描述(data.getCompanyName());
                     oracleData.set账户组合(data.getOnlySign());
                     oracleData.set账户描述(data.getOnlySignName());
@@ -101,6 +101,7 @@ public class Find2023 {
                 }
                 for (OracleData oracleData : step6TestResult.getOracleDataList()) {
 //                    oracleData.setForm("23年7-12月新系统序时账");
+                    oracleData.setForm(oracleData.getForm() == null ? "2023未被处理" : oracleData.getForm());
                     list3.add(oracleData);
                 }
                 EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
