@@ -58,9 +58,15 @@ public class FindABCDByFile {
                 LevelUtil.organizeDataItem(item);
                 item.setSystemForm("新系统");
             });
+//            if (realAssistantList.size() != dataList.size()){
+//                throw new RuntimeException("为什么不对");
+//            }
             List<AssistantResult> excelExcelData = new ArrayList<>();
             for (int i = 0; i < dataList.size(); i++) {
                 Assistant assistant = realAssistantList.get(i);
+//                if (!assistant.getR().equals("WRMB0-0-2241030101-01-0-0-0-0-30013420-0")){
+//                    continue;
+//                }
                 String onlySign = assistant.getOnlySign();
                 AssistantResult assistantResult = dataList.get(i);
                 assistantResult.setIndex(String.valueOf(i+1));
@@ -97,12 +103,8 @@ public class FindABCDByFile {
             String[] splitRDesc = rDesc.split("\\.");
             String[] splitR = assistant.getR().split("-");
             data.setSEGMENT1_NAME(assistant.getE());
-
-
             data.setMatch(assistant.getR());
             data.setMatchName(rDesc);
-
-
             data.setTransactionObjectId(assistant.getTransactionObjectId());
             data.setTransactionObjectName(assistant.getTransactionObjectName());
             data.setTransactionObjectCode(assistant.getTransactionObjectCode());

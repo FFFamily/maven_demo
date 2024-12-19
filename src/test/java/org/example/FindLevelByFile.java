@@ -36,49 +36,10 @@ public class FindLevelByFile {
     private SqlUtil sqlUtil;
     @Test
     void findLevel() {
-        List<Assistant> assistants = new ArrayList<>();
         String company = "江苏中南物业服务有限公司常德分公司";
-        EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-辅助核算余额.xlsx",
-                new AnalysisEventListener<Map<Integer,String>>() {
-                    @Override
-                    public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
-                        Assistant assistant3 = new Assistant();
-                        // 左前缀匹配
-                        BigDecimal v = new BigDecimal(o.get(7).replaceAll(",",""));
-                        BigDecimal w = new BigDecimal(o.get(8).replaceAll(",",""));
-                        assistant3.setZ(CommonUtil.getZ(CommonUtil.getBigDecimalValue(v).subtract(CommonUtil.getBigDecimalValue(w))));
-                        String code = o.get(0);
-                        assistant3.setR(code);
-//                        assistant3.setR(code.replace("-","."));
-                        // 机构
-                        assistant3.setE(company);
-                        assistant3.setTransactionObjectId("");
-                        assistant3.setTransactionObjectCode("");
-                        assistant3.setTransactionObjectName("");
-                        // 辅助核算段
-                        String s = o.get(2);
-                        String[] split = s.split("\\.");
-
-                        assistant3.setTransactionObjectCodeCopy(split[1].equals("-") ? "" : split[1]);
-                        // 科目段描述
-                        String codeName = o.get(1);
-                        assistant3.setRDesc(codeName);
-//                        assistant3.setCompanyCode(o.get(0));
-//                        assistant3.setForm(o.get(0));
-                        // 唯一标识：账户组合+交易Id
-                        assistant3.setOnlySign(assistant3.getR()+assistant3.getTransactionObjectCodeCopy());
-                        assistants.add(assistant3);
-                    }
-                    @Override
-                    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
-
-                    }
-                }).excelType(ExcelTypeEnum.XLSX).sheet(0).headRowNumber(2).doRead();
+        List<Assistant> assistants = FindFileUtil.redaBalance(company);
         Map<String, List<Assistant>> companyMap = assistants
                 .stream()
-//                .filter(item -> item.getCompanyCode().equals("WCRC0"))
-//                .filter(item -> item.getR().equals("WCRC0.0.1122010101.05.999999.0.0.0.30017821.0"))
-//                .filter(item -> item.getTransactionObjectId().equals("SS:72747717"))
                 .collect(Collectors.groupingBy(Assistant::getE));
         for (String companyCode : companyMap.keySet()) {
             System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
@@ -88,53 +49,7 @@ public class FindLevelByFile {
             List<Assistant> realAssistantList = companyMap.get(companyCode);
             List<OtherInfo3> result1 = new ArrayList<>();
             System.out.println("共"+realAssistantList.size()+"条");
-            List<OtherInfo3> cachedDataList = new ArrayList<>();
-            EasyExcel.read("src/main/java/org/example/excel/ewai/总帐凭证行查 _"+company+".xlsx", LevelFileExcel.class,
-                            new PageReadListener<LevelFileExcel>(dataList -> {
-                                for (LevelFileExcel levelFileExcel : dataList) {
-//                                    String s = levelFileExcel.getS();
-                                    String project = levelFileExcel.getProject();
-                                    if (!(project.startsWith("应付账款")
-                                            || project.startsWith("预付账款")
-                                            || project.startsWith("合同负债")
-                                            || project.startsWith("预收账款")
-                                            || project.startsWith("应收账款")
-                                            || project.startsWith("其他应付款")
-                                            || project.startsWith("其他应收款"))){
-                                        continue;
-                                    }
-                                    OtherInfo3 info = new OtherInfo3();
-                                    //
-                                    // 有效日期
-                                    DateTime date = DateUtil.date(levelFileExcel.getN());
-                                    int year = date.year();
-                                    int month = date.month()+1;
-                                    int code = levelFileExcel.getQ();
-                                    info.setQ(code);
-                                    info.setR(year+"-"+month+"-"+code);
-                                    info.setV(levelFileExcel.getV());
-                                    info.setW(levelFileExcel.getW());
-                                    // 有效日期
-                                    info.setN(date);
-                                    info.setS(levelFileExcel.getS());
-                                    // 有借就是 借方向
-                                    info.setX(info.getV() != null ? "借" : "贷");
-                                    info.setZ(levelFileExcel.getZ());
-                                    info.setZCopy(levelFileExcel.getZ().replace(".","-"));
-                                    info.setZDesc(levelFileExcel.getZDesc());
-                                    info.setTransactionId(getStr(levelFileExcel.getTransactionId()));
-                                    info.setTransactionName(getStr( levelFileExcel.getTransactionName()));
-                                    info.setTransactionCodeCopy(getStr(levelFileExcel.getTransactionCodeCopy()));
-                                    info.setOnlySign(info.getZCopy()+info.getTransactionCodeCopy());
-//                                    info.setOriginZCopy(info.getZCopy()+info.getTransactionCodeCopy());
-                                    // 公司名称
-                                    info.setCompanyName(company);
-                                    // 用于追溯老系统
-                                    info.setJournalExplanation(levelFileExcel.getJournalExplanation());
-                                    cachedDataList.add(info);
-                                }
-                            })
-            ).sheet(0).doRead();
+            List<OtherInfo3> cachedDataList = FindFileUtil.readDetailExcel(company);
             cachedDataList.forEach(item -> {
                 LevelUtil.organizeDataItem(item);
                 item.setSystemForm("新系统");
@@ -154,10 +69,10 @@ public class FindLevelByFile {
 //                            item.setTransactionCode(assistant.getTransactionObjectCode());
 //                        })
                         .collect(Collectors.toList());
-                if (startCollect.isEmpty()){
-                    System.out.println("找不到对应的值："+onlySign);
-                    continue;
-                }
+//                if (startCollect.isEmpty()){
+//                    System.out.println("找不到对应的值："+onlySign);
+//                    continue;
+//                }
                 List<OtherInfo3> result = findLevel.doMain(
                         true,
                         false,
