@@ -108,7 +108,10 @@ public class Find2023 {
                         OracleData.class,
                         new PageReadListener<OracleData>(dataList -> {
                             //coverNewDate.cover("2023-1-6",data);
-                            list3.addAll(dataList);
+                            for (OracleData oracleData : dataList) {
+                                oracleData.setForm(oracleData.getForm() == null ? "2023-1-6月未被处理" : oracleData.getForm());
+                                list3.add(oracleData);
+                            }
                         })
                 ).sheet("组合结果").doRead();
                 List<NewBalanceExcelResult> result = new ArrayList<>();
