@@ -51,7 +51,7 @@ public class FindABCDByFile {
             String companyName = Firstassistant.getE();
             List<Assistant> realAssistantList = companyMap.get(companyCode);
             List<SourceFileData> sourceFileDataList = readExcel(realAssistantList);
-            List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, null);
+//            List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, null);
             System.out.println("共"+realAssistantList.size()+"条");
             List<OtherInfo3> cachedDataList = FindFileUtil.readDetailExcel(company);
             cachedDataList.forEach(item -> {
@@ -62,13 +62,40 @@ public class FindABCDByFile {
 //                throw new RuntimeException("为什么不对");
 //            }
             List<AssistantResult> excelExcelData = new ArrayList<>();
-            for (int i = 0; i < dataList.size(); i++) {
+            for (int i = 0; i < realAssistantList.size(); i++) {
                 Assistant assistant = realAssistantList.get(i);
 //                if (!assistant.getR().equals("WRMB0-0-2241030101-01-0-0-0-0-30013420-0")){
 //                    continue;
 //                }
                 String onlySign = assistant.getOnlySign();
-                AssistantResult assistantResult = dataList.get(i);
+//                AssistantResult assistantResult = dataList.get(i);
+                AssistantResult assistantResult = new AssistantResult();
+                assistantResult.setCompanyName(companyName);
+                String rDesc = assistant.getRDesc();
+                String[] splitRDesc = rDesc.split("\\.");
+                String[] splitR = assistant.getR().split("-");
+                assistantResult.setTransactionObjectId(assistant.getTransactionObjectId());
+                assistantResult.setTransactionObjectName(assistant.getTransactionObjectName());
+                assistantResult.setTransactionObjectCode(assistant.getTransactionObjectCode());
+                assistantResult.setTransactionObjectCodeCopy(assistant.getTransactionObjectCodeCopy());
+                assistantResult.setFieldCode( assistant.getR());
+                assistantResult.setField(rDesc);
+                assistantResult.setSubjectName(splitRDesc[2]);
+
+                assistantResult.setSEGMENT1(splitR[0]);
+                assistantResult.setSEGMENT1_NAME(splitRDesc[0]);
+                assistantResult.setSEGMENT2_NAME(splitRDesc[1]);
+                assistantResult.setSEGMENT3_NAME(splitRDesc[2]);
+                assistantResult.setSEGMENT4_NAME(splitRDesc[3]);
+                assistantResult.setSEGMENT5_NAME(splitRDesc[4]);
+                assistantResult.setSEGMENT6_NAME(splitRDesc[5]);
+                assistantResult.setSEGMENT7_NAME(splitRDesc[6]);
+                assistantResult.setSEGMENT8_NAME(splitRDesc[7]);
+                assistantResult.setSEGMENT9_NAME(splitRDesc[8]);
+                assistantResult.setSEGMENT10_NAME(splitRDesc.length == 10 ? splitRDesc[9] : "");
+
+                assistantResult.setMoney(getZValue(assistant.getZ()));
+
                 assistantResult.setIndex(String.valueOf(i+1));
                 String z = assistant.getZ();
                 if (z == null) {
