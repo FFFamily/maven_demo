@@ -174,7 +174,10 @@ public class Step6 {
 //            item.setForm("新系统多余数据");
 //            notWithNcc.add(item);
 //        });
-        result2s.stream().filter(item -> item.getRemark() ==null || !item.getRemark().equals("匹配成功")).forEach(notWithNcc::add);
+        result2s.stream().filter(item -> item.getRemark() ==null || !item.getRemark().equals("匹配成功")).forEach(item -> {
+            item.setRemark("");
+            notWithNcc.add(item);
+        });
         return new Step6TestResult(
                 result1s,
                 result2s,
