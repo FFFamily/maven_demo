@@ -47,21 +47,25 @@ public class FindLevelByFile {
                         BigDecimal v = new BigDecimal(o.get(7).replaceAll(",",""));
                         BigDecimal w = new BigDecimal(o.get(8).replaceAll(",",""));
                         assistant3.setZ(CommonUtil.getZ(CommonUtil.getBigDecimalValue(v).subtract(CommonUtil.getBigDecimalValue(w))));
-                        String code = (String) o.get(0);
+                        String code = o.get(0);
                         assistant3.setR(code);
                         // 机构
                         assistant3.setE(company);
                         assistant3.setTransactionObjectId("");
                         assistant3.setTransactionObjectCode("");
                         assistant3.setTransactionObjectName("");
-                        assistant3.setTransactionObjectCodeCopy((String) o.get(2));
+                        // 辅助核算段
+                        String s = o.get(2);
+                        String[] split = s.split("//.");
+
+                        assistant3.setTransactionObjectCodeCopy(split[1]);
                         // 科目段描述
-                        String codeName = (String) o.get(1);
+                        String codeName = o.get(1);
                         assistant3.setRDesc(codeName);
 //                        assistant3.setCompanyCode(o.get(0));
 //                        assistant3.setForm(o.get(0));
                         // 唯一标识：账户组合+交易Id
-                        assistant3.setOnlySign(assistant3.getR()+assistant3.getTransactionObjectId());
+                        assistant3.setOnlySign(assistant3.getR()+assistant3.getTransactionObjectCodeCopy());
                         assistants.add(assistant3);
                     }
                     @Override
@@ -104,11 +108,13 @@ public class FindLevelByFile {
                                     // 有借就是 借方向
                                     info.setX(info.getV() != null ? "借" : "贷");
                                     info.setZ(levelFileExcel.getZ());
+                                    info.setZCopy(levelFileExcel.getZ().replace(".","-"));
                                     info.setZDesc(levelFileExcel.getZDesc());
                                     info.setTransactionId(levelFileExcel.getTransactionId());
                                     info.setTransactionName(levelFileExcel.getTransactionName());
                                     info.setTransactionCodeCopy(levelFileExcel.getTransactionCodeCopy());
                                     info.setOnlySign(info.getZ()+info.getTransactionCodeCopy());
+                                    info.setOriginZCopy(info.getZCopy()+info.getTransactionCodeCopy());
                                     // 公司名称
                                     info.setCompanyName(company);
                                     // 用于追溯老系统

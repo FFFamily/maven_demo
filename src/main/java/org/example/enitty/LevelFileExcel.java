@@ -11,7 +11,7 @@ public class LevelFileExcel {
     @ExcelProperty("单据编号")
     private Integer q;
     @ColumnWidth(20)
-    @ExcelProperty("来源")
+    @ExcelProperty("会计科目")
     private String s;
     @ExcelProperty("有效日期")
     private Date n;
