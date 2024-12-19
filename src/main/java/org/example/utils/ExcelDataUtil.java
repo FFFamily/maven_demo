@@ -133,7 +133,6 @@ public class ExcelDataUtil {
                     AssistantResult assistantResult = new AssistantResult();
                     SourceFileData sourceFileData = curr.get(0);
                     assistantResult.setCompanyName(sourceFileData.getSEGMENT1_NAME());
-                    assistantResult.setFieldCode(sourceFileData.getMatch());
                     assistantResult.setSubjectName(sourceFileData.getSEGMENT3_NAME());
 //                    assistantResult.setForm(sourceFileData.getSEGMENT3_NAME());
                     String transactionObjectId = sourceFileData.getTransactionObjectId();
@@ -145,6 +144,7 @@ public class ExcelDataUtil {
                     assistantResult.setTransactionObjectName(transactionObjectName);
                     assistantResult.setTransactionObjectCodeCopy(transactionObjectCodeCopy);
                     assistantResult.setField(sourceFileData.getMatchName());
+                    assistantResult.setFieldCode(sourceFileData.getMatch());
                     BigDecimal money = ExcelDataUtil.getBalance(curr);
                     assistantResult.setSEGMENT1(sourceFileData.getSEGMENT1());
                     assistantResult.setSEGMENT1_NAME(sourceFileData.getSEGMENT1_NAME());
