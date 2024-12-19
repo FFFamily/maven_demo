@@ -1,19 +1,24 @@
 package org.example;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.read.listener.PageReadListener;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.tomcat.Jar;
-import org.example.新老系统.Find2022;
-import org.example.新老系统.Find2023;
-import org.example.新老系统.Find2024;
-import org.example.新老系统.FindAllBalance;
+import org.example.enitty.OracleData;
+import org.example.enitty.zhong_nan.Step6OldDetailExcel;
+import org.example.utils.CompanyConstant;
+import org.example.新老系统.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 public class MergeService {
@@ -25,6 +30,8 @@ public class MergeService {
     private Find2023 find2023;
     @Resource
     private Find2024 find2024;
+    @Resource
+    private FindUtil findUtil;
     @Resource
     private FindAllBalance findAllBalance;
     @Data
@@ -63,26 +70,42 @@ public class MergeService {
 //
 //        list.add(new Item("物业成都公司","江苏中南物业服务有限公司西安分公司"));
 //        list.add(new Item("物业深圳公司","江苏中南物业服务有限公司惠州分公司"));
+//        File file = new File();
+        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
 
-        for (Item item : list) {
-            //  物业上海公司2
-            String selectPath = item.selectPath;
-            // 江苏中南物业服务有限公司
-            String selectCompanyName = item.selectCompanyName; //  江苏中南物业服务有限公司嘉兴分公司
-            Boolean findAll = false;
-            // 查询所有的
-            List<String> allCompany = findAllCompany();
-            for (String newCompanyName : allCompany) {
-                if (!newCompanyName.equals(selectCompanyName)){
-                    continue;
-                }
+        for (String fileName : file.list()) {
+            String name = fileName.replace(".xlsx", "");
+            System.out.println("2023-当前文件："+name);
+            // 老系统数据
+            List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
+            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
+                String companyName = item.getCompanyName().split("-")[0];
+                return CompanyConstant.getNewCompanyByOldCompany(companyName);
+            }));
+            for (String newCompanyName : companyMap.keySet()) {
                 System.out.println("开始- 当前公司为："+newCompanyName);
-                find2022.find(findAll,newCompanyName);
-                find2023.find(findAll,selectPath,newCompanyName);
-                find2024.find(findAll,selectPath,newCompanyName);
-                findAllBalance.find(findAll,selectPath,newCompanyName);
+                List<OracleData> list1 = find2022.find(newCompanyName);
+                List<OracleData> list2 = find2023.find(companyMap, newCompanyName);
+                List<OracleData> list3 = find2024.find(newCompanyName);
+                List<OracleData> xsList = new ArrayList<>();
+                xsList.addAll(list1);
+                xsList.addAll(list2);
+                xsList.addAll(list3);
+//                findAllBalance.find(selectPath,newCompanyName);
+                File excelFile = new File(newCompanyName + "-总序时账" + ".xlsx");
+                if (excelFile.exists()){
+                    System.out.println("文件存在");
+                    List<OracleData> oldList = new ArrayList<>();
+                    EasyExcel.read(excelFile, Step6OldDetailExcel.class,
+                            new PageReadListener<OracleData>(oldList::addAll));
+                    oldList.addAll(xsList);
+                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(oldList);
+                }else {
+                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
+                }
             }
         }
+
 
     }
 

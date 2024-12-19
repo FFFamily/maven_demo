@@ -32,6 +32,8 @@ public class Step6 {
     @Resource
     private Step5 step5;
     @Resource
+    private FindUtil findUtil;
+    @Resource
     private JdbcTemplate jdbcTemplate;
     @Resource
     private CoverNewDate coverNewDate;
@@ -89,7 +91,7 @@ public class Step6 {
                         item.setMatchProject(newProject);
                     }
                 })
-                .filter(item -> isBackProject(item.getActualProject()))
+                .filter(item -> findUtil.isBackProject(item.getActualProject()))
                 .collect(Collectors.toList());
         // 将新系统过滤出NCC导入的数据
         List<OracleData> nccstep5Result = step5Result
@@ -187,7 +189,25 @@ public class Step6 {
                     .filter(item ->item.get日记账说明().contains("ZZTY2023110110151本地业财发起待确认事项：梅州雅居乐10.30-10.31周报、应收冲抵单")
                     || item.get日记账说明().contains("ZZTY2023103010321本地业财发起待确认事项：梅州雅居乐10.1-10.29周报、应收冲抵单adi"))
                     .collect(Collectors.toList());
+        }else if (newCompanyName.equals("余姚中锦物业服务有限公司")){
+            return step5Result.stream()
+                    .filter(item ->item.get日记账说明().contains("BKDT0|YGCB2024010210474 总账通用计提:余姚中锦-2023年12月预估收缴率收入"))
+                    .collect(Collectors.toList());
+        }else if (newCompanyName.equals("江苏中南物业服务有限公司仁寿分公司")){
+            return step5Result.stream()
+                    .filter(item ->item.get日记账说明().contains("HNCX0|YGCB2024010111235：总账通用计提：中南仁寿分公司收缴率还原"))
+                    .collect(Collectors.toList());
+        }else if (newCompanyName.equals("江苏中南物业服务有限公司抚顺分公司")){
+            return step5Result.stream()
+                    .filter(item ->item.get日记账说明().contains("ERXX0|YGCB2023123010142总账通用计提:收抚顺中南熙悦2022年12月住宅物业费(基础包干制)")
+                    || item.get日记账说明().contains("ERXX0|YGCB2024010110009总账通用计提:收入（抚顺中南熙悦12.31）外系统生成凭证"))
+                    .collect(Collectors.toList());
+        }else if (newCompanyName.equals("江苏中南物业服务有限公司长丰分公司")){
+            return step5Result.stream()
+                    .filter(item ->item.get日记账说明().contains("LXHT0|GXZZ2023122110061 基础物业服务收入工单：中南长丰宸悦收入ADI导入12.1-12.17"))
+                    .collect(Collectors.toList());
         }
+
         return new ArrayList<>();
     }
 
@@ -235,6 +255,138 @@ public class Step6 {
             return oracleData.get日记账说明().equals("ZZTY2023080310151冲销NCC原计提成本费用，已入账FMS");
         }else if (companyName.equals("江苏中南物业服务有限公司惠州分公司")){
             return oracleData.get日记账说明().equals("8月ncc提税有误");
+        }else if (companyName.equals("余姚中锦物业服务有限公司")){
+            return oracleData.get日记账说明().equals("ZZTY2023092810346本地业财发起待确认事项：NCC科目调整");
+        }else if (companyName.equals("江苏中南物业服务有限公司余姚分公司")){
+            return oracleData.get日记账说明().equals("FYGD2023082910075冲销原NCC630计提")
+                    || oracleData.get日记账说明().equals("MJNZ0|YGCB2023121110136:总账通用计提_冲销NCC成本计提")
+                    || oracleData.get日记账说明().equals("MJNZ0|YGCB2023121310203:总账通用计提_调整在途科目调整以及NCC以前年度计提冲销")
+                    || oracleData.get日记账说明().equals("YGCB2023120310421:总账通用计提_调整NCC银行")
+                    || oracleData.get日记账说明().equals("ZZTY2023092610246本地业财发起待确认事项:冲销NCC能耗计提+项目段调整+客商调整+新旧科目调整")
+                    || oracleData.get日记账说明().equals("ZZTY2023100111033本地业财发起待确认事项:NCC成本已入账，冲销成本及应付科目_:64/DGFY2023091810531");
+        }else if (companyName.equals("江苏中南物业服务有限公司宁波分公司")){
+            return oracleData.get日记账说明().equals("IFZH0|YGCB2023112710128:总账通用计提_冲销630NCC计提已付款成本")
+                    || oracleData.get日记账说明().equals("冲销原NCC计提凭证ZZTY2023082910278");
+        }else if (companyName.equals("江苏中南物业服务有限公司诸暨分公司")){
+            return oracleData.get日记账说明().equals("YGCB2023120810083:总账通用计提_冲销NCC成本计提");
+        }else if (companyName.equals("江苏中南物业服务有限公司宁波杭州湾新区分公司")){
+            return oracleData.get日记账说明().equals("NCC已入成本未付款本月FMS重复成本冲销FYGD2023073110263")
+                    || oracleData.get日记账说明().equals("ZZTY2023083110296冲销原NCC计提成本")
+                    || oracleData.get日记账说明().equals("冲销原NCC计提凭证ZZTY2023082910129");
+        }else if (companyName.equals("江苏中南物业服务有限公司桐庐分公司")){
+            return oracleData.get日记账说明().equals("ZZTY2023080410118调整GYSF2023072410012费用类型|托收款补录NCC5月6月已入账");
+        }else if (companyName.equals("江苏中南物业服务有限公司温州分公司")){
+            return oracleData.get日记账说明().equals("ZWTZ2023121410013悦+财务一体化账务调整:申请冲销前期NCC导入暂估计提收入");
+        }else if (companyName.equals("江苏中南物业服务有限公司湖州分公司")) {
+            return oracleData.get日记账说明().equals("FYGD2023120110192_NCC22年9-11月凭证-冲销往年计提")
+                    || oracleData.get日记账说明().equals("YGCB2023120310575总账通用计提：湖州分调整NCC入账")
+                    || oracleData.get日记账说明().equals("YGCB2023120211393总账通用计提:NCC入账错误调整（退装修保证金）")
+                    || oracleData.get日记账说明().equals("YGCB2023120310350总账通用计提：湖州分调整NCC入账");
+        }else if (companyName.equals("江苏中南物业服务有限公司金华分公司")){
+            return oracleData.get日记账说明().equals("GXZZ2024010110622 共享会计自主做账：冲销金华共享服务费计提：YKBK0-202306账期-NCC系统导入数据补入");
+        }else if (companyName.equals("江苏中南物业服务有限公司宁波奉化分公司")) {
+            return oracleData.get日记账说明().equals("FYGD2023080110192费用账务处理工单_账务调整：冲原NCC2022年12月12#凭证税金借方费用贷方|DSFY2023071910192侯宝利21416733办公行政费")
+                    || oracleData.get日记账说明().equals("ZZTY2023090110303冲销原NCC归档待支付凭证")
+                    || oracleData.get日记账说明().equals("冲销原NCC计提凭证ZZTY2023082910150")
+                    || oracleData.get日记账说明().equals("冲销：24/DGFY2023071810166NCC6-47#成本重复FYGD2023073110218");
+        }else if (companyName.equals("江苏中南物业服务有限公司许昌分公司")){
+            return oracleData.get日记账说明().equals("ZZTY2023092910145 本地业财发起待确认事项 许昌分9月调整及NCC计提冲销");
+        }else if (companyName.equals("江苏中南物业服务有限公司海门分公司")){
+            return oracleData.get日记账说明().contains("NCC账务调整")
+                    || oracleData.get日记账说明().contains("YGCB2023112810032总账通用计提：NCC6月凭证科目有误：海门春江电信付款科目调整");
+        }else if (companyName.equals("江苏中南物业服务有限公司昆山分公司")){
+            return oracleData.get日记账说明().equals("NCC账务处理调整");
+        }else if (companyName.equals("江苏中南物业服务有限公司苏州分公司")){
+            return oracleData.get日记账说明().equals("YGCB2023120210727总账通用计提：规范ncc导入凭证银行科目");
+        }else if (companyName.equals("江苏中南物业服务有限公司常熟分公司")){
+            return oracleData.get日记账说明().contains("YGCB2024010210750总账通用计提:NCC能耗销项税税率6%调整至13%")
+                    || oracleData.get日记账说明().contains("2.NNGV0|ZZTY2023093010578：调整成本（熟林樾成本NCC与ERP重复成本）");
+        }else if (companyName.equals("江苏中南物业服务有限公司南通分公司")){
+            return oracleData.get日记账说明().contains("FYGD2023083010095费用账务处理工单：冲销NCC系统2023.1-6月的合同计提金额（冲销的是报账系统2023.8月流程通过的费用）")
+                    || oracleData.get日记账说明().contains("ZZTY2023090110779本地业财发起待确认事项：因ERP合同期初录入，需冲销NCC合同计提")
+                    || oracleData.get日记账说明().contains("FYGD2023103010062_冲减前期NCC计提凭证");
+        }else if (companyName.equals("江苏中南物业服务有限公司无锡分公司")){
+            return oracleData.get日记账说明().equals("CGIT0|ZWTZ2023120110270悦+财务一体化账务调整中南无锡NCC导入调整");
+        }else if (companyName.equals("江苏中南物业服务有限公司乍浦分公司")){
+            return oracleData.get日记账说明().contains("FYGD2023113010124_NCC凭证冲销前期手工计提合同成本")
+                    || oracleData.get日记账说明().contains("FYGD2023122210029_前期NCC凭证-冲销前期手工计提合同成本")
+                    || oracleData.get日记账说明().contains("FYGD2023122610036_前期NCC凭证-冲销前期手工计提合同成本");
+        }else if (companyName.equals("青岛中南物业管理有限公司")) {
+            return oracleData.get日记账说明().equals("FYGD2023110110096冲销上线共享前原NCC计提")
+                    || oracleData.get日记账说明().equals("GXZZ2023100210342 基础物业服务收入工单调整金石NCC9月重复生成应收")
+                    || oracleData.get日记账说明().equals("FYGD2023123010054冲销原NCC计提费用及进项转出调整")
+                    || oracleData.get日记账说明().equals("FYGD2023120110136调整原NCC计提冲销");
+        }else if (companyName.equals("青岛中南物业管理有限公司东营分公司")) {
+            return oracleData.get日记账说明().equals("SRWR0|YGCB2024010211229 总账通用计提：NCC科目调整")
+                    || oracleData.get日记账说明().equals("FYGD2023113010049冲销前期NCC计提凭证")
+                    || oracleData.get日记账说明().equals("YGCB2024010310084 总账通用计提：青岛东营银行科目梳理调整-调整天问NCC导入错误")
+                    || oracleData.get日记账说明().equals("YGCB2024010410696 总账通用计提：天问导入NCC有误更正");
+        }else if (companyName.equals("江苏中南物业服务有限公司平度分公司")){
+            return oracleData.get日记账说明().equals("VBCV0|FYGD2023100110081：冲销NCC计提凭证");
+        }else if (companyName.equals("江苏中南物业服务有限公司潍坊分公司")){
+            return oracleData.get日记账说明().contains("GXZZ2024010310865 潍坊熙悦NCC推错收入调减")
+                    || oracleData.get日记账说明().contains("YGCB2023120210016 总账通用计提：NCC导入调整");
+        }else if (companyName.equals("江苏中南物业服务有限公司济宁分公司")){
+            return oracleData.get日记账说明().contains("FYGD2023080110161：与NCC账面重复，发票已认证，故冲销此笔费用，原NCC凭证2023-01-50#")
+                    || oracleData.get日记账说明().contains("FYGD2024010110120冲销NCC成本计提")
+                    || oracleData.get日记账说明().contains("FYGD2023122610032 费用账务处理工单_冲销手工计提账务：冲销ncc账面计提");
+        }else if (companyName.equals("江苏中南物业服务有限公司淄博分公司")){
+            return oracleData.get日记账说明().equals("GXZZ2024010211057基础物业服务收入工单：12月余额负数-建筑垃圾（已通过NCC推送）");
+        }else if (companyName.equals("江苏中南物业服务有限公司龙口分公司")){
+            return oracleData.get日记账说明().contains("FYGD2023122210025冲销原NCC计提成本调整")
+                    || oracleData.get日记账说明().contains("FYGD2023100110042 费用账务处理工单_冲销手工计提账务：调整冲销NCC原计提凭证—9月ERP已推送计提到FMS");
+        }else if (companyName.equals("江苏中南物业服务有限公司邹城分公司")){
+            return oracleData.get日记账说明().contains("FYGD2024010110116冲销NCC成本计提")
+                    || oracleData.get日记账说明().contains("RDJU0|YGCB2023120211475 总账通用计提:辅助调整及NCC拆税")
+                    || oracleData.get日记账说明().contains("RDJU0|FYGD2023122610038 费用账务处理工单_冲销手工计提账务:NCC能源费计提冲销");
+        }else if (companyName.equals("江苏中南物业服务有限公司威海分公司")) {
+            return oracleData.get日记账说明().equals("ZZTY2023100210358 本地业财发起待确认事项：调整银行在途以及冲销ncc管销费科目")
+                    || oracleData.get日记账说明().equals("ZZTY2023092010360 本地业财发起待确认事项：拆分中南ncc客商")
+                    || oracleData.get日记账说明().equals("UBIF0|YGCB2024010311201 总账通用计提：ncc导入的资金归集错误数据，做负数冲平")
+                    || oracleData.get日记账说明().equals("YGCB2024010211412 总账通用计提：冲减NCC中sbu和项目段不匹配业务");
+        }else if (companyName.equals("江苏中南物业服务有限公司日照分公司")) {
+            return oracleData.get日记账说明().equals("FYGD2023122210013冲销原NCC计提成本调整")
+                    || oracleData.get日记账说明().equals("FYGD2023100110038 费用账务处理工单:冲销往期NCC计提成本")
+                    || oracleData.get日记账说明().equals("FYGD2023122910074冲销原NCC计提成本")
+                    || oracleData.get日记账说明().equals("CRXL0|CRXL0-202401账期-NCC系统导入数据");
+        }else if (companyName.equals("江苏中南物业服务有限公司即墨分公司")){
+            return oracleData.get日记账说明().equals("YGCB2023110210162 总账通用计提：江苏即墨ncc导入银行科目调整（退押金部分）");
+        }else if (companyName.equals("江苏中南物业服务有限公司丹阳分公司")){
+            return oracleData.get日记账说明().contains("ZZTY2023110310373 本地业财发起待确认事项:NCC导入凭证sbu补挂")
+                    || oracleData.get日记账说明().contains("ZZTY2023110210742 本地业财发起待确认事项:NCC导入凭证sbu补挂");
+        }else if (companyName.equals("江苏中南物业服务有限公司宿迁分公司")){
+            return oracleData.get日记账说明().equals("FYGD2023090110125费用账务处理工单_冲销NCC往期暂估计提凭证");
+        }else if (companyName.equals("江苏中南物业服务有限公司泉州分公司")){
+            return oracleData.get日记账说明().equals("ZZTY2023101610093本地业财发起待确认事项：冲销NCC计提单据：6月报销2023年3月份物资采购费用（退汇、8月重新发起付款）");
+        }else if (companyName.equals("江苏中南物业服务有限公司江津分公司")){
+            return oracleData.get日记账说明().equals("YGCB2024010310368总账通用计提：调整银行-天问推送NCC押金转预存凭证导致借方虚增错误");
+        }else if (companyName.equals("青岛中南物业管理有限公司沈阳分公司")){
+            return oracleData.get日记账说明().equals("ZZTY2023110310055本地业财发起待确认事项：调整沈阳ncc推送银行科目");
+        }else if (companyName.equals("江苏中南物业服务有限公司邯郸分公司")){
+            return oracleData.get日记账说明().equals("FYGD2023112310014_冲减2023年6月NCC计提，无需计提（赵路伟435.2元、修玘昆194.43元）");
+        }else if (companyName.equals("江苏中南物业服务有限公司慈溪分公司")) {
+            return oracleData.get日记账说明().equals("PCJE0|YGCB2023121310077:总账通用计提_冲销原NCC计提凭证")
+                    || oracleData.get日记账说明().equals("FYGD2023090110166冲销NCC的计提凭证")
+                    || oracleData.get日记账说明().equals("PCJE0|YGCB2023112810473:总账通用计提_冲销NCC成本计提")
+                    || oracleData.get日记账说明().equals("ZZTY2023092710317本地业财发起待确认事项：FMS跑的计提与NCC重复，需冲回")
+                    || oracleData.get日记账说明().equals("YGCB2023110210040:总账通用计提_调整NCC中账做在了预收账款，导出ADI后变成了其他应付款，因此需调整科目")
+                    || oracleData.get日记账说明().equals("冲销NCC计提凭证FYGD2023082910046");
+        }else if (companyName.equals("江苏中南物业服务有限公司张家港分公司")){
+            return oracleData.get日记账说明().contains("FYGD2023083010074调整：冲销NCC计提成本")
+                    || oracleData.get日记账说明().contains("YGCB2024010410030总账通用计提：调整NCC导入凭证入错科目")
+                    || oracleData.get日记账说明().contains("YGCB2024010210758总账通用计提:NCC能耗销项税税率6%调整至13%");
+        }else if (companyName.equals("江苏中南物业服务有限公司德清分公司")){
+            return oracleData.get日记账说明().contains("YGCB2023110310405总账通用计提：NCC入账错误调整")
+                    || oracleData.get日记账说明().contains("YGCB2023120211401总账通用计提:NCC入账错误调整（退装修保证金）");
+        }else if (companyName.equals("江苏中南物业服务有限公司马鞍山分公司")){
+            return oracleData.get日记账说明().contains("NIUF0|NIUF0-202310账期-NCC系统导入数据 电子表格 A 48651827 71652849")
+                    || oracleData.get日记账说明().contains("GXZZ2023110310383：共享会计自主做账-调账：中南NCC导入凭证，未带摘要，现冲销原凭证");
+        }else if (companyName.equals("江苏中南物业服务有限公司佛山高明分公司")){
+            return oracleData.get日记账说明().equals("从 \"2023-11\" 反冲 \"ESNY0|ESNY0-202311账期-NCC系统导入数据 电子表格 A 48646649 71627024\" 批的 \"ESNY0|ESNY0-202311账期-NCC系统导入数据 CRC表内凭证 CNY Use\" 日记账。");
+        }else if (companyName.equals("江苏中南物业服务有限公司揭阳分公司")){
+            return oracleData.get日记账说明().equals("1.调整科目：ncc系统在途款映射成银行存款");
+        }else if (companyName.equals("江苏中南物业服务有限公司万宁分公司")){
+            return oracleData.get日记账说明().equals("YGCB2024010410023总账通用计提：NCC4-63#已退款，5-38#录入天问在途退款导致账面重复挂账负数");
         }
         return false;
     }
@@ -382,81 +534,13 @@ public class Step6 {
         return step6Result1;
     }
 
-    private String getOldProject(Step6OldDetailExcel excel){
-        return excel.getProjectName().split("－")[0];
-    }
+
 
     private String getNewProject(OracleData oracleData){
         return oracleData.get科目段描述().split("-")[0];
     }
 
-    private Boolean isBackProject(String projectName){
-        return projectName.startsWith("应付账款")
-                || projectName.startsWith("预付账款")
-                || projectName.startsWith("合同负债")
-                || projectName.startsWith("预收账款")
-                || projectName.startsWith("应收账款")
-                || projectName.startsWith("其他应付款")
-                || projectName.startsWith("其他应收款");
-    }
 
-    /**
-     * 读取物业excel
-     * @return
-     */
-    public List<Step6OldDetailExcel> readPropertyExcel(String fileName){
-        List<Step6OldDetailExcel> excels = new ArrayList<>();
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/detail/"+fileName, Step6OldDetailExcel.class,
-                        new PageReadListener<Step6OldDetailExcel>(dataList -> {
-                            for (Step6OldDetailExcel data : dataList) {
-                                try {
-                                    if (data.getV() == null && data.getW() == null){
-                                        throw new RuntimeException("无法计算金额");
-                                    }
-                                    String time = data.getTime();
-                                    DateTime date = DateUtil.parseDate(time);
-                                    if (date.isBefore(DateUtil.parse("2023-07-01")) || date.isAfter(DateUtil.parse("2023-12-31"))) {
-                                        // 只需要 07-12 月的
-                                        continue;
-                                    }
-                                    // 科目
-                                    String projectName = data.getProjectName();
-                                    if (!(isBackProject(projectName) || projectName.startsWith("其他货币资金"))){
-                                        // 只需要7大往来
-                                        continue;
-                                    }
-                                    // 其他货币基金只取 9-12月
-                                    if (projectName.startsWith("其他货币资金") && (date.isBefore(DateUtil.parse("2023-09-01")) || date.isAfter(DateUtil.parse("2023-12-31")))){
-                                        continue;
-                                    }
-                                    // 摘要
-                                    String match = data.getMatch();
-                                    if (match.contains("资金归集")){
-                                        continue;
-                                    }
 
-//                                    String oldProject = getOldProject(data);
-                                    data.setOldProject(getOldProject(data));
-                                    String oldProject = coverNewDate.getProjectName(data).split("-")[0];
-                                    data.setActualProject(oldProject);
-                                    if (oldProject.startsWith("其他应收款") || oldProject.startsWith("其他货币资金")){
-                                        data.setMatchProject("其他应收款");
-                                    }else if (oldProject.startsWith("合同负债") || oldProject.startsWith("预收账款")){
-                                        data.setMatchProject("合同负债/预收账款");
-                                    } else {
-                                        data.setMatchProject(oldProject);
-                                    }
-                                    ZNProjectMapping znProjectMapping = findNccZhongNanLevel.znProjectMapping.get(data.getProjectCode());
-                                    data.setProjectName(znProjectMapping.getFmsProjectName());
-                                    excels.add(data);
-                                }catch (Exception e){
-                                    System.out.println("解析中南老系统明细数据出错: "+e.getMessage());
-                                    System.out.println(data);
-                                }
 
-                            }
-                        }))
-                .sheet("综合查询表").doRead();
-        return excels;
-    }
 }

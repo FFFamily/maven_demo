@@ -5,7 +5,6 @@ import com.alibaba.excel.read.listener.PageReadListener;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.NewBalanceExcelResult;
 import org.example.utils.CommonUtil;
-import org.example.utils.CoverNewDate;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -20,10 +19,9 @@ import java.util.stream.Stream;
 public class Find2024 {
     @Resource
     private JdbcTemplate jdbcTemplate;
-    public void find(Boolean isFindAll,String selectPath,String selectCompanyName){
-        String str =  isFindAll ? "" : selectCompanyName;
+    public List<OracleData> find( String selectCompanyName){
         Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/"+ selectCompanyName +"最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
             for (NewBalanceExcelResult data : dataList) {
                 List<NewBalanceExcelResult> orDefault = listMap.getOrDefault(data.getCompanyName(), new ArrayList<>());
                 data.setForm("2023期末");
@@ -33,20 +31,21 @@ public class Find2024 {
                 listMap.put(data.getCompanyName(), orDefault);
             }
         })).sheet("余额表").doRead();
-        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
+//        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
-        for (String fileName : Objects.requireNonNull(file.list())) {
-            String name = fileName.replace(".xlsx", "");
-            if (!isFindAll && !name.equals(selectPath)){
-                continue;
-            }
-            System.out.println("2024-当前文件："+name);
+        List<OracleData> xsList = null;
+//        for (String fileName : Objects.requireNonNull(file.list())) {
+//            String name = fileName.replace(".xlsx", "");
+//            if (!name.equals(selectPath)){
+//                continue;
+//            }
+            System.out.println("2024-当前文件："+selectCompanyName);
             List<String> companyList = jdbcTemplate.queryForList(
                     "select z.\"公司段描述\" from ZDPROD_EXPDP_20241120 z GROUP BY z.\"公司段描述\" ",
                     String.class
             );
             for (String newCompanyName : companyList) {
-                if (!isFindAll && !newCompanyName.equals(selectCompanyName)){
+                if ( !newCompanyName.equals(selectCompanyName)){
                     continue;
                 }
                 System.out.println("2024-当前公司："+newCompanyName);
@@ -70,7 +69,7 @@ public class Find2024 {
                 List<NewBalanceExcelResult> result = new ArrayList<>();
                 List<OracleData> list1 = new ArrayList<>();
                 List<OracleData> list2 = new ArrayList<>();
-                List<OracleData> xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
+                xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
                 Map<String, List<OracleData>> group = xsList.stream().collect(Collectors.groupingBy(item -> item.get账户组合() + getStr(item.get交易对象())));
                 for (String key : group.keySet()) {
                     List<OracleData> all = group.get(key);
@@ -120,9 +119,10 @@ public class Find2024 {
                     finalExcel.add(re);
                 }
             }
-        }
+//        }
 
-        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"-最终组合结果-2024-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+ selectCompanyName +"-最终组合结果-2024-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        return xsList;
     }
 
     private static String getStr(String str){

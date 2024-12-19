@@ -110,6 +110,7 @@ public class FindFileUtil {
         return assistants;
     }
 
+
     private static String getStr(String str){
         return str == null ?"":str;
     }

@@ -12,6 +12,8 @@ import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.utils.CommonUtil;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
@@ -20,17 +22,28 @@ import java.util.stream.Stream;
 
 @Service
 public class Find2022 {
-    public void find(Boolean findAll,String companyName){
-        String str =  findAll ? "" : companyName;
-        Map<String, List<OracleData>> map1 =  init1();
-        Map<String,List<OracleData>> map2 = init2();
-        Map<String, List<NewBalanceExcelResult>> listMap = initListMap();
+    @Resource
+    private FindUtil findUtil;
+    Map<String, List<OracleData>> map1 = new HashMap<>();
+    Map<String, List<OracleData>> map2 = new HashMap<>();
+    Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
+    @PostConstruct
+    public void init(){
+        map1 = init1();
+        map2 = init2();
+        listMap = initListMap();
+    }
+    public List<OracleData> find(String companyName){
+//        Map<String, List<OracleData>> map1 =  init1();
+//        Map<String,List<OracleData>> map2 = init2();
+//        Map<String, List<NewBalanceExcelResult>> listMap = initListMap();
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
         String filePath = "src/main/java/org/example/excel/zhong_nan/merge/company";
         File file = new File(filePath);
         if (!file.isDirectory()){
             throw new RuntimeException("不是目录");
         }
+        List<OracleData> xsList = null;
         for (String fileName : file.list()) {
             if (fileName.equals(".DS_Store")){
                 continue;
@@ -38,7 +51,7 @@ public class Find2022 {
             List<OracleData> list3 = new ArrayList<>();
             String[] split = fileName.split("-");
             String company = split[split.length - 1].replace(".xlsx", "");
-            if (!findAll && !company.equals(companyName)){
+            if (!company.equals(companyName)){
                 continue;
             }
             System.out.println("步骤2022-当前公司："+company);
@@ -72,11 +85,11 @@ public class Find2022 {
             List<NewBalanceExcelResult> result = new ArrayList<>();
             List<OracleData> list1 = map1.getOrDefault(company, new ArrayList<>());
             List<OracleData> list2 = map2.getOrDefault(company, new ArrayList<>());
-            List<OracleData> xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
+            xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
             Map<String, List<OracleData>> group = xsList.stream().collect(Collectors.groupingBy(item -> item.get账户组合() + getStr(item.get交易对象())));
             for (String key : group.keySet()) {
                 List<OracleData> all = group.get(key);
-                NewBalanceExcelResult newBalanceExcelResult = FindUtil.caculate(company, all);
+                NewBalanceExcelResult newBalanceExcelResult = findUtil.caculate(company, all);
                 result.add(newBalanceExcelResult);
             }
 //            EasyExcel.write(company + "-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
@@ -99,7 +112,8 @@ public class Find2022 {
             }
         }
 
-        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"-最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+ companyName +"-最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        return xsList;
     }
 
     public Map<String, List<OracleData>> init1() {
@@ -113,6 +127,7 @@ public class Find2022 {
                 map1.put(data.get公司段描述(),list);
             }
         })).sheet("模板").doRead();
+        System.out.println("22年调整.xlsx 读取完成");
         return map1;
     }
     public Map<String, List<OracleData>> init2() {
@@ -126,6 +141,7 @@ public class Find2022 {
                 map2.put(data.get公司段描述(),list);
             }
         })).sheet("模板").doRead();
+        System.out.println("22年应收账款预估收缴率调整.xlsx 读取完成");
         return map2;
     }
 
@@ -145,6 +161,7 @@ public class Find2022 {
                 listMap.put(data.getCompanyName(), orDefault);
             }
         })).sheet("期初").doRead();
+        System.out.println("中南22期初.xlsx 读取完成");
         return listMap;
     }
 

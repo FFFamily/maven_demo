@@ -26,38 +26,36 @@ public class Find2023 {
     @Resource
     private Step6 step6Test;
     @Resource
+    private FindUtil findUtil;
+    @Resource
     private CoverNewDate coverNewDate;
-    public void find(Boolean isFindAll,String path,String selectCompanyName){
-        String str =  isFindAll ? "" : selectCompanyName;
-        Map<String, List<NewBalanceExcelResult>> listMap = initBalance(str);
-        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
+
+    public List<OracleData> find(Map<String, List<Step6OldDetailExcel>> companyMap, String newCompanyName){
+        Map<String, List<NewBalanceExcelResult>> listMap = initBalance(newCompanyName);
+//        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
-        for (String fileName : Objects.requireNonNull(file.list())) {
-            String name = fileName.replace(".xlsx", "");
-            if (!isFindAll && !name.equals(path)){
-                continue;
-            }
-            System.out.println("2023-当前文件："+name);
+        List<OracleData> xsList = null;
+//        for (String fileName : Objects.requireNonNull(file.list())) {
+//            String name = fileName.replace(".xlsx", "");
+//            if (!name.equals(path)){
+//                continue;
+//            }
+//            System.out.println("2023-当前文件："+name);
             // 旧系统
-            List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
-            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
-                String companyName = item.getCompanyName().split("-")[0];
-                return CompanyConstant.getNewCompanyByOldCompany(companyName);
-            }));
-            for (String newCompanyName : companyMap.keySet()) {
-//                String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]);
-//                if (!isFindAll && !CompanyConstant.getNewCompanyByOldCompany(oldCompanyName.split("-")[0]).equals(selectCompanyName)){
+//            List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
+//            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
+//                String companyName = item.getCompanyName().split("-")[0];
+//                return CompanyConstant.getNewCompanyByOldCompany(companyName);
+//            }));
+//            for (String newCompanyName : companyMap.keySet()) {
+//                if (!newCompanyName.equals(selectCompanyName)){
 //                    continue;
 //                }
-                if (!isFindAll && !newCompanyName.equals(selectCompanyName)){
-                    continue;
-                }
                 System.out.println("2023-当前公司为： "+newCompanyName);
                 Step6.Step6TestResult step6TestResult = step6Test.step6Test(newCompanyName, companyMap);
                 if (step6TestResult == null){
-                    continue;
+                    return new ArrayList<>();
                 }
-
                 try (ExcelWriter excelWriter = EasyExcel.write(newCompanyName+"-第六步数据.xlsx").build()) {
                     // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
                     WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
@@ -72,16 +70,8 @@ public class Find2023 {
                 List<Step6OldDetailExcel> oldDataList = step6TestResult.getResult3s()
                         .stream()
                         .filter(item ->  "匹配成功".equals(item.getRemark()))
-//                        .stream()
-//                        .filter(item -> item.getRemark() != null)
-//                        .filter(item -> !item.getRemark().equals("匹配成功"))
                         .collect(Collectors.toList());
                 // 旧系统
-//                List<Step6OldDetailExcel> oldDataList = companyMap.get(newCompanyName);
-//                for (Step6OldDetailExcel item : result3s) {
-//                    oldDataList.remove(item);
-//                }
-
                 List<OracleData> list3 = new ArrayList<>();
                 for (Step6OldDetailExcel data : oldDataList) {
                     coverNewDate.cover("2023-7-12",data);
@@ -123,7 +113,7 @@ public class Find2023 {
                 List<NewBalanceExcelResult> result = new ArrayList<>();
                 List<OracleData> list1 = new ArrayList<>();
                 List<OracleData> list2 = new ArrayList<>();
-                List<OracleData> xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
+                xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
                 Map<String, List<OracleData>> group = xsList.stream().collect(Collectors.groupingBy(item -> item.get账户组合() + getStr(item.get交易对象())));
                 for (String key : group.keySet()) {
                     List<OracleData> all = group.get(key);
@@ -137,20 +127,8 @@ public class Find2023 {
                     newBalanceExcelResult.setAuxiliaryAccounting(one.get交易对象名称());
                     newBalanceExcelResult.setV(all.stream().map(OracleData::get输入借方).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                     newBalanceExcelResult.setW(all.stream().map(OracleData::get输入贷方).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
-//                    newBalanceExcelResult.setBalance(newBalanceExcelResult.getV().subtract(newBalanceExcelResult.getW()));
                     result.add(newBalanceExcelResult);
                 }
-//                File excelFile = new File(newCompanyName + "-2023-7-12-组合序时账" + ".xlsx");
-//                if (excelFile.exists()){
-//                    System.out.println("文件存在");
-//                    List<OracleData> list = new ArrayList<>();
-//                    EasyExcel.read(excelFile, Step6OldDetailExcel.class,
-//                            new PageReadListener<OracleData>(list::addAll));
-//                    list.addAll(xsList);
-//                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(list);
-//                }else {
-//                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
-//                }
                 List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(newCompanyName,new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
                 Map<String, List<NewBalanceExcelResult>> cGroup = results.stream().collect(Collectors.groupingBy(item -> item.getProjectCode() + item.getAuxiliaryAccounting()));
                 for (String s : cGroup.keySet()) {
@@ -168,10 +146,11 @@ public class Find2023 {
                     re.setBalance(re.getPreBalance().add(re.getV()).subtract(re.getW()));
                     finalExcel.add(re);
                 }
-            }
-        }
+//            }
+//        }
 
-        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+str+"最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+ newCompanyName +"最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        return xsList;
     }
 
     public Map<String, List<NewBalanceExcelResult>>  initBalance(String str){
