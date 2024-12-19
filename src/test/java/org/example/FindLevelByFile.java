@@ -34,42 +34,44 @@ public class FindLevelByFile {
     @Test
     void findLevel() {
         List<Assistant> assistants = new ArrayList<>();
-        EasyExcel.read("src/main/java/org/example/excel/江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助核算余额 _161224.xlsx",
+        String company = "江苏中南物业服务有限公司常德分公司";
+        EasyExcel.read("src/main/java/org/example/excel/"+company+"-辅助核算余额 _161224.xlsx",
                 new AnalysisEventListener<Map<Integer,String>>() {
                     @Override
                     public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
                         Assistant assistant3 = new Assistant();
                         // 左前缀匹配
-                        assistant3.setZ(o.get(0));
-                        assistant3.setR(o.get(0));
+                        BigDecimal v = new BigDecimal(o.get(8));
+                        BigDecimal w = new BigDecimal(o.get(9));
+                        assistant3.setZ(CommonUtil.getZ(CommonUtil.getBigDecimalValue(v).subtract(CommonUtil.getBigDecimalValue(w))));
+                        String code = o.get(0);
+                        assistant3.setR(code);
                         // 机构
-                        assistant3.setE(o.get(0));
-                        assistant3.setTransactionObjectId(o.get(0));
-                        assistant3.setTransactionObjectCode(o.get(0));
-                        assistant3.setTransactionObjectName(o.get(0));
-                        assistant3.setTransactionObjectCodeCopy(o.get(0));
-                        assistant3.setRDesc(o.get(0));
-                        assistant3.setCompanyCode(o.get(0));
+                        assistant3.setE(company);
+                        assistant3.setTransactionObjectId("");
+                        assistant3.setTransactionObjectCode("");
+                        assistant3.setTransactionObjectName("");
+                        assistant3.setTransactionObjectCodeCopy("");
+                        // 科目段描述
+                        String codeName = o.get(2);
+                        assistant3.setRDesc(codeName);
+//                        assistant3.setCompanyCode(o.get(0));
                         assistant3.setForm(o.get(0));
                         // 唯一标识：账户组合+交易Id
                         assistant3.setOnlySign(assistant3.getR()+assistant3.getTransactionObjectId());
                         assistants.add(assistant3);
                     }
-
                     @Override
                     public void doAfterAllAnalysed(AnalysisContext analysisContext) {
 
                     }
                 }).excelType(ExcelTypeEnum.XLSX).sheet("江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助").headRowNumber(2).doRead();
-        Map<String, List<Assistant>> companyMap = null;
-        //
-//        Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
-//                .stream()
+        Map<String, List<Assistant>> companyMap = assistants
+                .stream()
 //                .filter(item -> item.getCompanyCode().equals("WCRC0"))
 //                .filter(item -> item.getR().equals("WCRC0.0.1122010101.05.999999.0.0.0.30017821.0"))
 //                .filter(item -> item.getTransactionObjectId().equals("SS:72747717"))
-                // 根据公司分组
-//                .collect(Collectors.groupingBy(Assistant::getCompanyCode));
+                .collect(Collectors.groupingBy(Assistant::getE));
         for (String companyCode : companyMap.keySet()) {
             System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
             // 读取旧系统的序时账
@@ -93,7 +95,6 @@ public class FindLevelByFile {
                             OtherInfo3 otherInfo3 = new OtherInfo3();
                             cachedDataList.add(otherInfo3);
                         }
-
                         @Override
                         public void doAfterAllAnalysed(AnalysisContext analysisContext) {
 
