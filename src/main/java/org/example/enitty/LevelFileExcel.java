@@ -10,8 +10,10 @@ import java.util.Date;
 public class LevelFileExcel {
     @ExcelProperty("单据编号")
     private Integer q;
-    @ExcelProperty("会计科目")
+    @ExcelProperty("来源")
     private String s;
+    @ExcelProperty("会计科目")
+    private String project;
     @ExcelProperty("有效日期")
     private Date n;
     @ExcelProperty("输入借方")
@@ -27,7 +29,7 @@ public class LevelFileExcel {
     private String transactionId;
     @ExcelProperty("交易对象名称")
     private String transactionName;
-    @ExcelProperty("交易对象编码处理")
+    @ExcelProperty("交易对象编码处理后")
     private String transactionCodeCopy;
     @ExcelProperty("日记账说明")
     private String journalExplanation;

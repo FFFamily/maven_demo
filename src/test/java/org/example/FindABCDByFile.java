@@ -43,7 +43,7 @@ public class FindABCDByFile {
     @Resource
     private SqlUtil sqlUtil;
     @Test
-    void findLevel() {
+    void findABCD() {
         Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
         String company = "江苏中南物业服务有限公司常德分公司";
         List<Assistant> assistants = redaBalance(company);
@@ -159,10 +159,28 @@ public class FindABCDByFile {
             data.setSEGMENT7_NAME(splitRDesc[6]);
             data.setSEGMENT8_NAME(splitRDesc[7]);
             data.setSEGMENT9_NAME(splitRDesc[8]);
-            data.setSEGMENT10_NAME(splitRDesc[9]);
+            data.setSEGMENT10_NAME(splitRDesc.length == 10 ? splitRDesc[9] : "");
+            data.setYEAR_BEGIN_CR(getZValue(assistant.getZ()));
+            data.setYEAR_BEGIN_DR(BigDecimal.ZERO);
+            data.setYTD_CR(BigDecimal.ZERO);
+            data.setYTD_DR(BigDecimal.ZERO);
             sourceFileDataList.add(data);
         }
         return sourceFileDataList;
+    }
+
+    public  BigDecimal getZValue(String z) {
+        BigDecimal balance;
+        try {
+            balance = new BigDecimal(z.replace(",", "").replace("(", "").replace(")", ""));
+        } catch (Exception e) {
+            balance = BigDecimal.ZERO;
+        }
+        if (z.contains("(") || z.contains(")")) {
+            // 负值
+            return BigDecimal.ZERO.subtract(balance);
+        }
+        return balance;
     }
 
     public List<OtherInfo3> readDetailExcel(String company){

@@ -49,6 +49,7 @@ public class FindLevelByFile {
                         assistant3.setZ(CommonUtil.getZ(CommonUtil.getBigDecimalValue(v).subtract(CommonUtil.getBigDecimalValue(w))));
                         String code = o.get(0);
                         assistant3.setR(code);
+//                        assistant3.setR(code.replace("-","."));
                         // 机构
                         assistant3.setE(company);
                         assistant3.setTransactionObjectId("");
@@ -72,7 +73,7 @@ public class FindLevelByFile {
                     public void doAfterAllAnalysed(AnalysisContext analysisContext) {
 
                     }
-                }).sheet(0).headRowNumber(2).doRead();
+                }).excelType(ExcelTypeEnum.XLSX).sheet(0).headRowNumber(2).doRead();
         Map<String, List<Assistant>> companyMap = assistants
                 .stream()
 //                .filter(item -> item.getCompanyCode().equals("WCRC0"))
@@ -88,9 +89,20 @@ public class FindLevelByFile {
             List<OtherInfo3> result1 = new ArrayList<>();
             System.out.println("共"+realAssistantList.size()+"条");
             List<OtherInfo3> cachedDataList = new ArrayList<>();
-            EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-总账.xlsx", LevelFileExcel.class,
+            EasyExcel.read("src/main/java/org/example/excel/ewai/总帐凭证行查 _"+company+".xlsx", LevelFileExcel.class,
                             new PageReadListener<LevelFileExcel>(dataList -> {
                                 for (LevelFileExcel levelFileExcel : dataList) {
+//                                    String s = levelFileExcel.getS();
+                                    String project = levelFileExcel.getProject();
+                                    if (!(project.startsWith("应付账款")
+                                            || project.startsWith("预付账款")
+                                            || project.startsWith("合同负债")
+                                            || project.startsWith("预收账款")
+                                            || project.startsWith("应收账款")
+                                            || project.startsWith("其他应付款")
+                                            || project.startsWith("其他应收款"))){
+                                        continue;
+                                    }
                                     OtherInfo3 info = new OtherInfo3();
                                     //
                                     // 有效日期
@@ -113,8 +125,8 @@ public class FindLevelByFile {
                                     info.setTransactionId(getStr(levelFileExcel.getTransactionId()));
                                     info.setTransactionName(getStr( levelFileExcel.getTransactionName()));
                                     info.setTransactionCodeCopy(getStr(levelFileExcel.getTransactionCodeCopy()));
-                                    info.setOnlySign(info.getZ()+info.getTransactionCodeCopy());
-                                    info.setOriginZCopy(info.getZCopy()+info.getTransactionCodeCopy());
+                                    info.setOnlySign(info.getZCopy()+info.getTransactionCodeCopy());
+//                                    info.setOriginZCopy(info.getZCopy()+info.getTransactionCodeCopy());
                                     // 公司名称
                                     info.setCompanyName(company);
                                     // 用于追溯老系统
@@ -142,6 +154,10 @@ public class FindLevelByFile {
 //                            item.setTransactionCode(assistant.getTransactionObjectCode());
 //                        })
                         .collect(Collectors.toList());
+                if (startCollect.isEmpty()){
+                    System.out.println("找不到对应的值："+onlySign);
+                    continue;
+                }
                 List<OtherInfo3> result = findLevel.doMain(
                         true,
                         false,
@@ -208,7 +224,7 @@ public class FindLevelByFile {
                 }
             }
 
-            String resultFileName = "模版-" + companyName + "-" + System.currentTimeMillis() + ".xlsx";
+            String resultFileName = "分级-" + companyName + ".xlsx";
             try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
                 WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
                 excelWriter.write(result1, writeSheet1);
