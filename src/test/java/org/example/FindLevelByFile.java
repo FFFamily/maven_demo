@@ -56,9 +56,9 @@ public class FindLevelByFile {
                         assistant3.setTransactionObjectName("");
                         // 辅助核算段
                         String s = o.get(2);
-                        String[] split = s.split("//.");
+                        String[] split = s.split("\\.");
 
-                        assistant3.setTransactionObjectCodeCopy(split[1]);
+                        assistant3.setTransactionObjectCodeCopy(split[1].equals("-") ? "" : split[1]);
                         // 科目段描述
                         String codeName = o.get(1);
                         assistant3.setRDesc(codeName);
@@ -110,9 +110,9 @@ public class FindLevelByFile {
                                     info.setZ(levelFileExcel.getZ());
                                     info.setZCopy(levelFileExcel.getZ().replace(".","-"));
                                     info.setZDesc(levelFileExcel.getZDesc());
-                                    info.setTransactionId(levelFileExcel.getTransactionId());
-                                    info.setTransactionName(levelFileExcel.getTransactionName());
-                                    info.setTransactionCodeCopy(levelFileExcel.getTransactionCodeCopy());
+                                    info.setTransactionId(getStr(levelFileExcel.getTransactionId()));
+                                    info.setTransactionName(getStr( levelFileExcel.getTransactionName()));
+                                    info.setTransactionCodeCopy(getStr(levelFileExcel.getTransactionCodeCopy()));
                                     info.setOnlySign(info.getZ()+info.getTransactionCodeCopy());
                                     info.setOriginZCopy(info.getZCopy()+info.getTransactionCodeCopy());
                                     // 公司名称
@@ -122,7 +122,7 @@ public class FindLevelByFile {
                                     cachedDataList.add(info);
                                 }
                             })
-            );
+            ).sheet(0).doRead();
             cachedDataList.forEach(item -> {
                 LevelUtil.organizeDataItem(item);
                 item.setSystemForm("新系统");
@@ -158,7 +158,7 @@ public class FindLevelByFile {
                     otherInfo3.setNo("1");
                     otherInfo3.setLevel(1);
                     otherInfo3.setS(assistant.getForm());
-                    otherInfo3.setBalanceSum(new BigDecimal(assistant.getZ()));
+//                    otherInfo3.setBalanceSum(new BigDecimal(assistant.getZ()));
                     otherInfo3.setZ(projectName);
                     otherInfo3.setZDesc(assistant.getRDesc());
                     otherInfo3.setTransactionId(assistant.getTransactionObjectId());
@@ -216,6 +216,10 @@ public class FindLevelByFile {
             }
         }
         System.out.println("结束");
+    }
+
+    private static String getStr(String str){
+        return str == null ?"":str;
     }
 
 }
