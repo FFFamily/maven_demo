@@ -1,5 +1,6 @@
 package org.example;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
@@ -9,7 +10,9 @@ import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.enitty.Assistant;
+import org.example.enitty.LevelFileExcel;
 import org.example.enitty.SourceFileData;
+import org.example.enitty.zhong_nan.OldZNAuxiliaryBalanceSheet;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.utils.*;
 import org.example.寻找等级.FindLevel;
@@ -35,7 +38,7 @@ public class FindLevelByFile {
     void findLevel() {
         List<Assistant> assistants = new ArrayList<>();
         String company = "江苏中南物业服务有限公司常德分公司";
-        EasyExcel.read("src/main/java/org/example/excel/"+company+"-辅助核算余额 _161224.xlsx",
+        EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-总账.xlsx",
                 new AnalysisEventListener<Map<Integer,String>>() {
                     @Override
                     public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
@@ -65,7 +68,7 @@ public class FindLevelByFile {
                     public void doAfterAllAnalysed(AnalysisContext analysisContext) {
 
                     }
-                }).excelType(ExcelTypeEnum.XLSX).sheet("江苏中南物业服务有限公司常德分公司-CRC_B00_GL_辅助").headRowNumber(2).doRead();
+                });
         Map<String, List<Assistant>> companyMap = assistants
                 .stream()
 //                .filter(item -> item.getCompanyCode().equals("WCRC0"))
@@ -88,18 +91,39 @@ public class FindLevelByFile {
             List<OtherInfo3> result1 = new ArrayList<>();
             System.out.println("共"+realAssistantList.size()+"条");
             List<OtherInfo3> cachedDataList = new ArrayList<>();
-            EasyExcel.read("src/main/java/org/example/excel/CRC_B00_GL_总帐凭证行查 _江苏中南物业服务有限公司常德分公司2021.1-2024.9.xlsx",
-                    new AnalysisEventListener<Map<Integer,String>>() {
-                        @Override
-                        public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
-                            OtherInfo3 otherInfo3 = new OtherInfo3();
-                            cachedDataList.add(otherInfo3);
-                        }
-                        @Override
-                        public void doAfterAllAnalysed(AnalysisContext analysisContext) {
 
-                        }
-                    }
+            EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-辅助核算余额.xlsx", LevelFileExcel.class,
+                            new PageReadListener<LevelFileExcel>(dataList -> {
+                                for (LevelFileExcel levelFileExcel : dataList) {
+                                    OtherInfo3 info = new OtherInfo3();
+                                    //
+                                    // 有效日期
+                                    DateTime date = DateUtil.date(levelFileExcel.getN());
+                                    int year = date.year();
+                                    int month = date.month()+1;
+                                    int code = levelFileExcel.getQ();
+                                    info.setQ(code);
+                                    info.setR(year+"-"+month+"-"+code);
+                                    info.setV(levelFileExcel.getV());
+                                    info.setW(levelFileExcel.getW());
+                                    // 有效日期
+                                    info.setN(date);
+                                    info.setS(levelFileExcel.getS());
+                                    // 有借就是 借方向
+                                    info.setX(info.getV() != null ? "借" : "贷");
+                                    info.setZ(levelFileExcel.getZ());
+                                    info.setZDesc(levelFileExcel.getZDesc());
+                                    info.setTransactionId(levelFileExcel.getTransactionId());
+                                    info.setTransactionName(levelFileExcel.getTransactionName());
+                                    info.setTransactionCodeCopy(levelFileExcel.getTransactionCodeCopy());
+                                    info.setOnlySign(info.getZ()+info.getTransactionCodeCopy());
+                                    // 公司名称
+                                    info.setCompanyName(company);
+                                    // 用于追溯老系统
+                                    info.setJournalExplanation(levelFileExcel.getJournalExplanation());
+                                    cachedDataList.add(info);
+                                }
+                            })
             );
             cachedDataList.forEach(item -> {
                 LevelUtil.organizeDataItem(item);
