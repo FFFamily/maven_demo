@@ -24,25 +24,25 @@ import java.util.stream.Collectors;
 public class ZhongMei20230106 {
     @Resource
     private CoverNewDate coverNewDate;
-
+//
+//    public List<String> pathList = Lists.newArrayList(
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业北京公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司1.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司2.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业厦门公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业合肥公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业成都公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业沈阳公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业济南公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业深圳公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业重庆公司.xlsx"
+//    );
     public List<String> pathList = Lists.newArrayList(
-            "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业北京公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司1.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司2.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业厦门公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业合肥公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业成都公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业沈阳公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业济南公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业深圳公司.xlsx",
             "src/main/java/org/example/excel/zhong_nan/detail/物业重庆公司.xlsx"
     );
-//    public List<String> pathList = Lists.newArrayList(
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx"
-//    );
     @Data
     @Builder
     private static class Result{
@@ -57,9 +57,9 @@ public class ZhongMei20230106 {
             List<NewBalanceExcelResult> pathResult = new ArrayList<>();
             Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : collect.keySet()) {
-//                if (!companyName.equals("江苏中南物业服务有限公司温州分公司")){
-//                    continue;
-//                }
+                if (!companyName.equals("江苏中南物业服务有限公司昆明分公司")){
+                    continue;
+                }
                 System.out.println(companyName);
                 Result result = doTest(collect, companyName);
                 pathResult.addAll(result.getResults());

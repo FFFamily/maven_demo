@@ -3,10 +3,13 @@ package org.example.新老系统;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.read.listener.PageReadListener;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.NewBalanceExcelResult;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
+import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
@@ -54,10 +57,21 @@ public class Find2023 {
                 if (step6TestResult == null){
                     continue;
                 }
+
+                try (ExcelWriter excelWriter = EasyExcel.write(newCompanyName+"-第六步数据.xlsx").build()) {
+                    // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
+                    WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
+                    excelWriter.write(step6TestResult.getResult1s(), writeSheet1);
+                    WriteSheet writeSheet2 = EasyExcel.writerSheet(1, "新系统").head(OracleData.class).build();
+                    excelWriter.write(step6TestResult.getResult2s(), writeSheet2);
+                    WriteSheet writeSheet3 = EasyExcel.writerSheet(2, "旧系统").head(Step6OldDetailExcel.class).build();
+                    excelWriter.write(step6TestResult.getResult3s(), writeSheet3);
+                }
+
                 // 旧系统处理后数据
                 List<Step6OldDetailExcel> oldDataList = step6TestResult.getResult3s()
                         .stream()
-                        .filter(item -> item.getRemark().equals("匹配成功"))
+                        .filter(item ->  "匹配成功".equals(item.getRemark()))
 //                        .stream()
 //                        .filter(item -> item.getRemark() != null)
 //                        .filter(item -> !item.getRemark().equals("匹配成功"))

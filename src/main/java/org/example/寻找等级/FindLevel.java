@@ -123,7 +123,7 @@ public class FindLevel {
 //                System.out.println("当前公司不属于任何系统： "+companyName);
             }else {
                 if (companyType.equals(CompanyTypeConstant.LANG_JI)){
-                    if (companyName.equals("")){
+                    if (companyName.equals("成都朗基汇物业服务有限责任公司")){
                         if (Objects.equals(parentItem.getSystemForm(),"老系统") || (parentItem.getJournalExplanation() != null && (
                                 parentItem.getJournalExplanation().contains("并购初数据导入")
                                         || parentItem.getJournalExplanation().contains("发生额数据导入")

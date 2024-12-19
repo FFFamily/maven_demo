@@ -38,28 +38,28 @@ public class FindLevelByFile {
     void findLevel() {
         List<Assistant> assistants = new ArrayList<>();
         String company = "江苏中南物业服务有限公司常德分公司";
-        EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-总账.xlsx",
-                new AnalysisEventListener<Map<Integer,String>>() {
+        EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-辅助核算余额.xlsx",
+                new AnalysisEventListener<Map<Integer,Object>>() {
                     @Override
-                    public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
+                    public void invoke(Map<Integer,Object> o, AnalysisContext analysisContext) {
                         Assistant assistant3 = new Assistant();
                         // 左前缀匹配
-                        BigDecimal v = new BigDecimal(o.get(8));
-                        BigDecimal w = new BigDecimal(o.get(9));
+                        BigDecimal v = (BigDecimal)o.get(7);
+                        BigDecimal w = (BigDecimal)o.get(8);
                         assistant3.setZ(CommonUtil.getZ(CommonUtil.getBigDecimalValue(v).subtract(CommonUtil.getBigDecimalValue(w))));
-                        String code = o.get(0);
+                        String code = (String) o.get(0);
                         assistant3.setR(code);
                         // 机构
                         assistant3.setE(company);
                         assistant3.setTransactionObjectId("");
                         assistant3.setTransactionObjectCode("");
                         assistant3.setTransactionObjectName("");
-                        assistant3.setTransactionObjectCodeCopy("");
+                        assistant3.setTransactionObjectCodeCopy((String) o.get(2));
                         // 科目段描述
-                        String codeName = o.get(2);
+                        String codeName = (String) o.get(1);
                         assistant3.setRDesc(codeName);
 //                        assistant3.setCompanyCode(o.get(0));
-                        assistant3.setForm(o.get(0));
+//                        assistant3.setForm(o.get(0));
                         // 唯一标识：账户组合+交易Id
                         assistant3.setOnlySign(assistant3.getR()+assistant3.getTransactionObjectId());
                         assistants.add(assistant3);
@@ -68,7 +68,7 @@ public class FindLevelByFile {
                     public void doAfterAllAnalysed(AnalysisContext analysisContext) {
 
                     }
-                });
+                }).sheet(0).headRowNumber(2).doRead();
         Map<String, List<Assistant>> companyMap = assistants
                 .stream()
 //                .filter(item -> item.getCompanyCode().equals("WCRC0"))
@@ -80,19 +80,11 @@ public class FindLevelByFile {
             // 读取旧系统的序时账
             Assistant Firstassistant = companyMap.get(companyCode).get(0);
             String companyName = Firstassistant.getE();
-//            String companyType = CompanyTypeConstant.mapping.get(companyName);
-//            if (!companyType.equals(CompanyTypeConstant.LANG_JI)){
-//                System.out.println("不是朗基的公司，跳过");
-//                continue;
-//            }
-//            List<OtherInfo3> oldCachedDataList = findNccLangJiLevel.getOldCachedDataListByCompanyName(companyName);
-//            oldCachedDataList.forEach(LevelUtil::organizeDataItem);
             List<Assistant> realAssistantList = companyMap.get(companyCode);
             List<OtherInfo3> result1 = new ArrayList<>();
             System.out.println("共"+realAssistantList.size()+"条");
             List<OtherInfo3> cachedDataList = new ArrayList<>();
-
-            EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-辅助核算余额.xlsx", LevelFileExcel.class,
+            EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-总账.xlsx", LevelFileExcel.class,
                             new PageReadListener<LevelFileExcel>(dataList -> {
                                 for (LevelFileExcel levelFileExcel : dataList) {
                                     OtherInfo3 info = new OtherInfo3();

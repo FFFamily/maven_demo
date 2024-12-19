@@ -68,7 +68,6 @@ public class OracleData {
     private BigDecimal 借正贷负;
     private String 备注;
     private String remark;
-    @ExcelIgnore
     private Boolean used;
     public Boolean getUsed(){
         return this.used != null && this.used;

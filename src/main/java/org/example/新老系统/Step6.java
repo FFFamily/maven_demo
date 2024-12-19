@@ -62,6 +62,7 @@ public class Step6 {
 //            return null;
 //        }
         List<Step6OldDetailExcel> list = companyMap.get(companyName);
+        // 新系统全部数据
         List<OracleData> step5Result = step5.step5Test(newCompanyName)
                 .stream()
                 .filter(item -> item.get额外字段() == null)
@@ -90,11 +91,13 @@ public class Step6 {
                 })
                 .filter(item -> isBackProject(item.getActualProject()))
                 .collect(Collectors.toList());
+        // 将新系统过滤出NCC导入的数据
         List<OracleData> nccstep5Result = step5Result
                 .stream()
                 .filter(item -> item.get日记账说明().contains("NCC"))
                 .collect(Collectors.toList());
         List<OracleData> oracleData = new ArrayList<>();
+        // 新系统不含 NCC 导入的数量
         List<OracleData> notWithNcc = step5Result.stream()
                 .filter(item -> !item.get日记账说明().contains("NCC"))
                 .peek(item -> item.setForm("23年7-12月新系统序时账"))
@@ -135,11 +138,7 @@ public class Step6 {
                 if (oldSum.compareTo(newSum) != 0) {
                     // 两个余额不相等
                     findOld(projectOld,projectNew,result2s,result3s);
-                    result2s.addAll(projectNew);
-                    result3s.addAll(projectOld);
 //                    findNew(projectOld,projectNew,result2s);
-
-
                     Step6Result1 step6Result1 = create(
                             newCompanyName,
                             timeKey,
@@ -161,6 +160,8 @@ public class Step6 {
                             projectKey);
                     result1s.add(step6Result1);
                 }
+                result2s.addAll(projectNew);
+                result3s.addAll(projectOld);
             }
         }
 //        result2s.stream().filter(item -> "和旧系统余额不相等".equals(item.get备注())).forEach(item ->{
@@ -171,16 +172,7 @@ public class Step6 {
 //            item.setForm("新系统多余数据");
 //            notWithNcc.add(item);
 //        });
-        result2s.stream().filter(item -> !item.getRemark().equals("匹配成功")).forEach(notWithNcc::add);
-        try (ExcelWriter excelWriter = EasyExcel.write(newCompanyName+"-第六步数据.xlsx").build()) {
-            // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
-            WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "模板").head(Step6Result1.class).build();
-            excelWriter.write(result1s, writeSheet1);
-            WriteSheet writeSheet2 = EasyExcel.writerSheet(1, "新系统").head(OracleData.class).build();
-            excelWriter.write(result2s, writeSheet2);
-            WriteSheet writeSheet3 = EasyExcel.writerSheet(2, "旧系统").head(Step6OldDetailExcel.class).build();
-            excelWriter.write(result3s, writeSheet3);
-        }
+        result2s.stream().filter(item -> item.getRemark() ==null || !item.getRemark().equals("匹配成功")).forEach(notWithNcc::add);
         return new Step6TestResult(
                 result1s,
                 result2s,
@@ -239,6 +231,10 @@ public class Step6 {
             return oracleData.get日记账说明().equals("GXZZ2023082910086:2023年8月7日收到梅州市强风艳装饰有限公司退回2021年第4季度垃圾清运重复付款（ncc凭证号：2022.04#53）")
                     || oracleData.get日记账说明().contains("调整科目：梅州23.6.09代扣5月电费（ncc凭证号23.6#15），于23.7月补走流程GCSJ2023071910060")
                     || oracleData.get日记账说明().contains("调整科目：ncc科目映射有误");
+        }else if (companyName.equals("江苏中南物业服务有限公司西安分公司")){
+            return oracleData.get日记账说明().equals("ZZTY2023080310151冲销NCC原计提成本费用，已入账FMS");
+        }else if (companyName.equals("江苏中南物业服务有限公司惠州分公司")){
+            return oracleData.get日记账说明().equals("8月ncc提税有误");
         }
         return false;
     }
@@ -271,12 +267,17 @@ public class Step6 {
             }else if (newDataList.size() == 1){
                 OracleData newData = newDataList.get(0);
                 BigDecimal newBalance = getNewBalance(newData);
-                if (oldBalance.compareTo(newBalance) != 0) {
-                    // 余额不相等
-                    oldData.setRemark("和新系统余额不相等");
+                if (!newData.getUsed()){
+                    if (oldBalance.compareTo(newBalance) != 0) {
+                        // 余额不相等
+                        oldData.setRemark("和新系统余额不相等");
+                    }else {
+                        newData.setUsed(true);
+                        oldData.setRemark("匹配成功");
+                        newData.setRemark("匹配成功");
+                    }
                 }else {
-                    oldData.setRemark("匹配成功");
-                    newData.setRemark("匹配成功");
+                    oldData.setRemark("唯一新系统对应的值已被使用");
                 }
             }else {
                 boolean flag = true;
@@ -335,6 +336,9 @@ public class Step6 {
                     // 余额不相等
 //                    result2s.add(newData);
                     newData.set备注("和旧系统余额不相等");
+                }else {
+                    oldData.setRemark("匹配成功");
+                    newData.setRemark("匹配成功");
                 }
             }else {
                 boolean flag = true;
@@ -342,6 +346,8 @@ public class Step6 {
                     BigDecimal oldBalance = getOldBalance(oldData);
                     if (!oldData.getUsed() && newBalance.compareTo(oldBalance) == 0){
                         oldData.setUsed(true);
+                        oldData.setRemark("匹配成功");
+                        newData.setRemark("匹配成功");
                         flag = false;
                         break;
                     }

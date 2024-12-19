@@ -65,16 +65,23 @@ public class FindAllBalance {
                 if (step6TestResult == null){
                     continue;
                 }
-                // 旧系统处理后数据
-                List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s()
+//                // 旧系统处理后数据
+//                List<Step6OldDetailExcel> result3s = step6TestResult.getResult3s()
+//                        .stream()
+//                        .filter(item -> item.getRemark() != null)
+//                        .collect(Collectors.toList());
+//                // 旧系统
+//                List<Step6OldDetailExcel> oldDataList = companyMap.get(oldCompanyName);
+//                for (Step6OldDetailExcel item : result3s) {
+//                    oldDataList.remove(item);
+//                }
+                List<Step6OldDetailExcel> oldDataList = step6TestResult.getResult3s()
                         .stream()
-                        .filter(item -> item.getRemark() != null)
+                        .filter(item ->  "匹配成功".equals(item.getRemark()))
+//                        .stream()
+//                        .filter(item -> item.getRemark() != null)
+//                        .filter(item -> !item.getRemark().equals("匹配成功"))
                         .collect(Collectors.toList());
-                // 旧系统
-                List<Step6OldDetailExcel> oldDataList = companyMap.get(oldCompanyName);
-                for (Step6OldDetailExcel item : result3s) {
-                    oldDataList.remove(item);
-                }
 
                 List<OracleData> list3 = new ArrayList<>();
                 for (Step6OldDetailExcel data : oldDataList) {
