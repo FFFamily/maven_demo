@@ -39,13 +39,13 @@ public class FindLevelByFile {
         List<Assistant> assistants = new ArrayList<>();
         String company = "江苏中南物业服务有限公司常德分公司";
         EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-辅助核算余额.xlsx",
-                new AnalysisEventListener<Map<Integer,Object>>() {
+                new AnalysisEventListener<Map<Integer,String>>() {
                     @Override
-                    public void invoke(Map<Integer,Object> o, AnalysisContext analysisContext) {
+                    public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
                         Assistant assistant3 = new Assistant();
                         // 左前缀匹配
-                        BigDecimal v = (BigDecimal)o.get(7);
-                        BigDecimal w = (BigDecimal)o.get(8);
+                        BigDecimal v = new BigDecimal(o.get(7).replaceAll(",",""));
+                        BigDecimal w = new BigDecimal(o.get(8).replaceAll(",",""));
                         assistant3.setZ(CommonUtil.getZ(CommonUtil.getBigDecimalValue(v).subtract(CommonUtil.getBigDecimalValue(w))));
                         String code = (String) o.get(0);
                         assistant3.setR(code);
