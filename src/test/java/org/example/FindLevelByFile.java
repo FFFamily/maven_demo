@@ -36,114 +36,122 @@ public class FindLevelByFile {
     private SqlUtil sqlUtil;
     @Test
     void findLevel() {
-        String company = "江苏中南物业服务有限公司常德分公司";
-        List<Assistant> assistants = FindFileUtil.redaBalance(company);
-        Map<String, List<Assistant>> companyMap = assistants
-                .stream()
-                .collect(Collectors.groupingBy(Assistant::getE));
-        for (String companyCode : companyMap.keySet()) {
-            System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
-            // 读取旧系统的序时账
-            Assistant Firstassistant = companyMap.get(companyCode).get(0);
-            String companyName = Firstassistant.getE();
-            List<Assistant> realAssistantList = companyMap.get(companyCode);
-            List<OtherInfo3> result1 = new ArrayList<>();
-            System.out.println("共"+realAssistantList.size()+"条");
-            List<OtherInfo3> cachedDataList = FindFileUtil.readDetailExcel(company);
-            cachedDataList.forEach(item -> {
-                LevelUtil.organizeDataItem(item);
-                item.setSystemForm("新系统");
-            });
-            for (int i = 0; i < realAssistantList.size(); i++) {
-                Assistant assistant = realAssistantList.get(i);
-                String z = assistant.getZ();
-                if (z == null) {
-                    continue;
-                }
-                // 账户组合描述
-                String projectName = assistant.getR();
-                String onlySign = assistant.getOnlySign();
-                List<OtherInfo3> startCollect = cachedDataList.stream()
-                        .filter(item -> item.getOnlySign().equals(onlySign))
+//        String company = "江苏中南物业服务有限公司常德分公司";
+        List<String> list = new ArrayList<>();
+        list.add("江苏中南物业服务有限公司武汉分公司");
+        list.add("江苏中南物业服务有限公司常德分公司");
+        list.add("江苏中南物业服务有限公司潜江分公司");
+        list.add("江苏中南物业服务有限公司长沙分公司");
+        list.add("禹洲物业服务有限公司武汉分公司");
+        for (String company : list) {
+            List<Assistant> assistants = FindFileUtil.redaBalance(company);
+            Map<String, List<Assistant>> companyMap = assistants
+                    .stream()
+                    .collect(Collectors.groupingBy(Assistant::getE));
+            for (String companyCode : companyMap.keySet()) {
+                System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
+                // 读取旧系统的序时账
+                Assistant Firstassistant = companyMap.get(companyCode).get(0);
+                String companyName = Firstassistant.getE();
+                List<Assistant> realAssistantList = companyMap.get(companyCode);
+                List<OtherInfo3> result1 = new ArrayList<>();
+                System.out.println("共"+realAssistantList.size()+"条");
+                List<OtherInfo3> cachedDataList = FindFileUtil.readDetailExcel(company);
+                cachedDataList.forEach(item -> {
+                    LevelUtil.organizeDataItem(item);
+                    item.setSystemForm("新系统");
+                });
+                for (int i = 0; i < realAssistantList.size(); i++) {
+                    Assistant assistant = realAssistantList.get(i);
+                    String z = assistant.getZ();
+                    if (z == null) {
+                        continue;
+                    }
+                    // 账户组合描述
+                    String projectName = assistant.getR();
+                    String onlySign = assistant.getOnlySign();
+                    List<OtherInfo3> startCollect = cachedDataList.stream()
+                            .filter(item -> item.getOnlySign().equals(onlySign))
 //                        .peek(item -> {
 //                            item.setTransactionCode(assistant.getTransactionObjectCode());
 //                        })
-                        .collect(Collectors.toList());
+                            .collect(Collectors.toList());
 //                if (startCollect.isEmpty()){
 //                    System.out.println("找不到对应的值："+onlySign);
 //                    continue;
 //                }
-                List<OtherInfo3> result = findLevel.doMain(
-                        true,
-                        false,
-                        true,
-                        null,
-                        cachedDataList,
-                        startCollect,
-                        assistant.getZ(),
-                        assistant);
-                if (result.isEmpty()){
-                    // 证明所有的都借贷相互抵消了
-                    OtherInfo3 otherInfo3 = new OtherInfo3();
-                    otherInfo3.setA(String.valueOf(i));
-                    otherInfo3.setNo("1");
-                    otherInfo3.setLevel(1);
-                    otherInfo3.setS(assistant.getForm());
+                    List<OtherInfo3> result = findLevel.doMain(
+                            true,
+                            false,
+                            true,
+                            null,
+                            cachedDataList,
+                            startCollect,
+                            assistant.getZ(),
+                            assistant);
+                    if (result.isEmpty()){
+                        // 证明所有的都借贷相互抵消了
+                        OtherInfo3 otherInfo3 = new OtherInfo3();
+                        otherInfo3.setA(String.valueOf(i));
+                        otherInfo3.setNo("1");
+                        otherInfo3.setLevel(1);
+                        otherInfo3.setS(assistant.getForm());
 //                    otherInfo3.setBalanceSum(new BigDecimal(assistant.getZ()));
-                    otherInfo3.setZ(projectName);
-                    otherInfo3.setZDesc(assistant.getRDesc());
-                    otherInfo3.setTransactionId(assistant.getTransactionObjectId());
-                    otherInfo3.setTransactionName(assistant.getTransactionObjectName());
-                    otherInfo3.setOriginZ(projectName);
-                    result1.add(otherInfo3);
-                } else {
-                    HashMap<Integer,BigDecimal> lastLevelMap = new HashMap<>();
-                    for (int i1 = 0; i1 < result.size(); i1++) {
-                        OtherInfo3 item = result.get(i1);
-                        item.setA(String.valueOf(i));
-                        if (!Objects.equals(item.getSystemForm(),"老系统")) {
-                            item.setZDesc(assistant.getRDesc());
-                            String transactionObjectCode = assistant.getTransactionObjectCode();
-                            String assistantTransactionObjectCodeCopy = assistant.getTransactionObjectCodeCopy();
-                            // 源-交易对象编码
-                            item.setTransactionCode(transactionObjectCode);
-                            // 处理-交易对象编码
-                            item.setTransactionCodeCopy(assistantTransactionObjectCodeCopy);
-                            item.setOriginZ(projectName);
-                            item.setOriginZCopy(projectName.replaceAll("\\.","-"));
-                            // 处理-账户组合
-                            String zCopy = item.getZ().replaceAll("\\.","-");
-                            item.setZCopy(zCopy);
-                            item.setMergeValue(zCopy + (item.getTransactionCodeCopy() == null ? "" : item.getTransactionCodeCopy()));
-                        }
-                        // 计算余额
-                        // 计算余额
-                        OtherInfo3 lastOne = i1 == 0 ? null : result.get(i1-1);
-                        BigDecimal lastBalance;
-                        if (lastOne == null){
-                            lastBalance = BigDecimal.ZERO;
-                        }else {
-                            if (lastOne.getLevel().equals(item.getLevel())){
-                                // 等级相等,
-                                lastBalance = lastOne.getBalanceSum();
-                            }else if (lastOne.getLevel() < item.getLevel()){
-                                lastLevelMap.put(lastOne.getLevel(),lastOne.getBalanceSum());
+                        otherInfo3.setZ(projectName);
+                        otherInfo3.setZDesc(assistant.getRDesc());
+                        otherInfo3.setTransactionId(assistant.getTransactionObjectId());
+                        otherInfo3.setTransactionName(assistant.getTransactionObjectName());
+                        otherInfo3.setOriginZ(projectName);
+                        result1.add(otherInfo3);
+                    } else {
+                        HashMap<Integer,BigDecimal> lastLevelMap = new HashMap<>();
+                        for (int i1 = 0; i1 < result.size(); i1++) {
+                            OtherInfo3 item = result.get(i1);
+                            item.setA(String.valueOf(i));
+                            if (!Objects.equals(item.getSystemForm(),"老系统")) {
+                                item.setZDesc(assistant.getRDesc());
+                                String transactionObjectCode = assistant.getTransactionObjectCode();
+                                String assistantTransactionObjectCodeCopy = assistant.getTransactionObjectCodeCopy();
+                                // 源-交易对象编码
+                                item.setTransactionCode(transactionObjectCode);
+                                // 处理-交易对象编码
+                                item.setTransactionCodeCopy(assistantTransactionObjectCodeCopy);
+                                item.setOriginZ(projectName);
+                                item.setOriginZCopy(projectName.replaceAll("\\.","-"));
+                                // 处理-账户组合
+                                String zCopy = item.getZ().replaceAll("\\.","-");
+                                item.setZCopy(zCopy);
+                                item.setMergeValue(zCopy + (item.getTransactionCodeCopy() == null ? "" : item.getTransactionCodeCopy()));
+                            }
+                            // 计算余额
+                            // 计算余额
+                            OtherInfo3 lastOne = i1 == 0 ? null : result.get(i1-1);
+                            BigDecimal lastBalance;
+                            if (lastOne == null){
                                 lastBalance = BigDecimal.ZERO;
                             }else {
-                                lastBalance = lastLevelMap.getOrDefault(item.getLevel(),BigDecimal.ZERO);
+                                if (lastOne.getLevel().equals(item.getLevel())){
+                                    // 等级相等,
+                                    lastBalance = lastOne.getBalanceSum();
+                                }else if (lastOne.getLevel() < item.getLevel()){
+                                    lastLevelMap.put(lastOne.getLevel(),lastOne.getBalanceSum());
+                                    lastBalance = BigDecimal.ZERO;
+                                }else {
+                                    lastBalance = lastLevelMap.getOrDefault(item.getLevel(),BigDecimal.ZERO);
+                                }
                             }
+                            item.setBalanceSum(lastBalance.add(CommonUtil.getBigDecimalValue(item.getV()).subtract(CommonUtil.getBigDecimalValue(item.getW()))));
                         }
-                        item.setBalanceSum(lastBalance.add(CommonUtil.getBigDecimalValue(item.getV()).subtract(CommonUtil.getBigDecimalValue(item.getW()))));
+                        result1.addAll(result);
                     }
-                    result1.addAll(result);
                 }
-            }
 
-            String resultFileName = "分级-" + companyName + ".xlsx";
-            try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
-                WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
-                excelWriter.write(result1, writeSheet1);
-                System.out.println(resultFileName+"导出完成");
+                String resultFileName = "分级-" + companyName + ".xlsx";
+                try (ExcelWriter excelWriter = EasyExcel.write(resultFileName).build()) {
+                    WriteSheet writeSheet1 = EasyExcel.writerSheet(0, "已匹配").head(OtherInfo3.class).build();
+                    excelWriter.write(result1, writeSheet1);
+                    System.out.println(resultFileName+"导出完成");
+                }
             }
         }
         System.out.println("结束");

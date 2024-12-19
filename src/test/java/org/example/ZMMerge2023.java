@@ -10,6 +10,7 @@ import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
+import org.example.新老系统.FindUtil;
 import org.example.新老系统.Step6;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +30,8 @@ public class ZMMerge2023 {
     private Step6 step6Test;
     @Resource
     private JdbcTemplate jdbcTemplate;
+    @Resource
+    private FindUtil findUtil;
     @Resource
     private CoverNewDate coverNewDate;
     @Test
@@ -53,7 +56,7 @@ public class ZMMerge2023 {
                 continue;
             }
             // 旧系统
-            List<Step6OldDetailExcel> excels = step6Test.readPropertyExcel(fileName);
+            List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String oldCompanyName : companyMap.keySet()) {
                 String str = oldCompanyName.split("-")[0];

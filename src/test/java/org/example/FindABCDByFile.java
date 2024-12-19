@@ -8,6 +8,7 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.sun.org.apache.bcel.internal.generic.PUSH;
 import org.example.enitty.Assistant;
 import org.example.enitty.LevelFileExcel;
 import org.example.enitty.SourceFileData;
@@ -40,8 +41,21 @@ public class FindABCDByFile {
     @Resource
     private SqlUtil sqlUtil;
     @Test
-    void findABCD() {
-        String company = "江苏中南物业服务有限公司常德分公司";
+    void test(){
+        List<String> list = new ArrayList<>();
+        list.add("江苏中南物业服务有限公司武汉分公司");
+        list.add("江苏中南物业服务有限公司常德分公司");
+        list.add("江苏中南物业服务有限公司潜江分公司");
+        list.add("江苏中南物业服务有限公司长沙分公司");
+        list.add("禹洲物业服务有限公司武汉分公司");
+        for (String company : list) {
+            findABCD(company);
+        }
+    }
+
+
+    void findABCD(String company) {
+//        String company = "江苏中南物业服务有限公司常德分公司";
         List<Assistant> assistants = FindFileUtil.redaBalance(company);
         Map<String, List<Assistant>> companyMap = assistants.stream().collect(Collectors.groupingBy(Assistant::getE));
         for (String companyCode : companyMap.keySet()) {
@@ -50,7 +64,7 @@ public class FindABCDByFile {
             Assistant Firstassistant = companyMap.get(companyCode).get(0);
             String companyName = Firstassistant.getE();
             List<Assistant> realAssistantList = companyMap.get(companyCode);
-            List<SourceFileData> sourceFileDataList = readExcel(realAssistantList);
+//            List<SourceFileData> sourceFileDataList = readExcel(realAssistantList);
 //            List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, null);
             System.out.println("共"+realAssistantList.size()+"条");
             List<OtherInfo3> cachedDataList = FindFileUtil.readDetailExcel(company);
@@ -64,7 +78,7 @@ public class FindABCDByFile {
             List<AssistantResult> excelExcelData = new ArrayList<>();
             for (int i = 0; i < realAssistantList.size(); i++) {
                 Assistant assistant = realAssistantList.get(i);
-//                if (!assistant.getR().equals("WRMB0-0-2241030101-01-0-0-0-0-30013420-0")){
+//                if (!assistant.getR().equals("WRMB0-0-1002010101-ZD001398-0-0-0-0-0-0")){
 //                    continue;
 //                }
                 String onlySign = assistant.getOnlySign();
@@ -101,9 +115,14 @@ public class FindABCDByFile {
                 if (z == null) {
                     continue;
                 }
+
                 List<OtherInfo3> startCollect = cachedDataList.stream()
                         .filter(item -> item.getOnlySign().equals(onlySign))
                         .collect(Collectors.toList());
+                if (startCollect.isEmpty()) {
+//                    excelExcelData.add(assistantResult);
+                    continue;
+                }
                 startCollect.forEach(LevelUtil::organizeDataItem);
                 String form = startCollect.stream().map(OtherInfo3::getS).distinct().collect(Collectors.joining("、"));
                 assistantResult.setForm(form);

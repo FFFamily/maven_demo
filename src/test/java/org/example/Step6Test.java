@@ -15,6 +15,7 @@ import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
+import org.example.新老系统.FindUtil;
 import org.example.新老系统.Step1;
 import org.example.新老系统.Step6;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,8 @@ public class Step6Test {
     @Resource
     private Step6 step6;
     @Resource
+    private FindUtil findUtil;
+    @Resource
     private CoverNewDate coverNewDate;
 
     @Test
@@ -49,7 +52,7 @@ public class Step6Test {
             if (!name.equals("物业上海公司1")){
                 continue;
             }
-            List<Step6OldDetailExcel> excels = step6.readPropertyExcel(fileName);
+            List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
                 String companyName = item.getCompanyName().split("-")[0];
                 return CompanyConstant.getNewCompanyByOldCompany(companyName);

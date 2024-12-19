@@ -32,8 +32,8 @@ public class MergeService {
     private Find2024 find2024;
     @Resource
     private FindUtil findUtil;
-    @Resource
-    private FindAllBalance findAllBalance;
+//    @Resource
+//    private FindAllBalance findAllBalance;
     @Data
     @AllArgsConstructor
     public static class Item{
@@ -76,6 +76,9 @@ public class MergeService {
         for (String fileName : file.list()) {
             String name = fileName.replace(".xlsx", "");
             System.out.println("2023-当前文件："+name);
+            if (!name.equals("物业成都公司")){
+                continue;
+            }
             // 老系统数据
             List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
             Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
@@ -84,6 +87,9 @@ public class MergeService {
             }));
             for (String newCompanyName : companyMap.keySet()) {
                 System.out.println("开始- 当前公司为："+newCompanyName);
+                if (!newCompanyName.equals("江苏中南物业服务有限公司西安分公司")){
+                    continue;
+                }
                 List<OracleData> list1 = find2022.find(newCompanyName);
                 List<OracleData> list2 = find2023.find(companyMap, newCompanyName);
                 List<OracleData> list3 = find2024.find(newCompanyName);
