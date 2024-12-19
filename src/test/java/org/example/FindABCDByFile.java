@@ -185,9 +185,20 @@ public class FindABCDByFile {
 
     public List<OtherInfo3> readDetailExcel(String company){
         List<OtherInfo3> cachedDataList = new ArrayList<>();
-        EasyExcel.read("src/main/java/org/example/excel/ewai/"+company+"-总账.xlsx", LevelFileExcel.class,
+        EasyExcel.read("src/main/java/org/example/excel/ewai/总帐凭证行查 _"+company+".xlsx", LevelFileExcel.class,
                 new PageReadListener<LevelFileExcel>(dataList -> {
                     for (LevelFileExcel levelFileExcel : dataList) {
+//                                    String s = levelFileExcel.getS();
+                        String project = levelFileExcel.getProject();
+                        if (!(project.startsWith("应付账款")
+                                || project.startsWith("预付账款")
+                                || project.startsWith("合同负债")
+                                || project.startsWith("预收账款")
+                                || project.startsWith("应收账款")
+                                || project.startsWith("其他应付款")
+                                || project.startsWith("其他应收款"))){
+                            continue;
+                        }
                         OtherInfo3 info = new OtherInfo3();
                         //
                         // 有效日期
@@ -210,8 +221,8 @@ public class FindABCDByFile {
                         info.setTransactionId(getStr(levelFileExcel.getTransactionId()));
                         info.setTransactionName(getStr( levelFileExcel.getTransactionName()));
                         info.setTransactionCodeCopy(getStr(levelFileExcel.getTransactionCodeCopy()));
-                        info.setOnlySign(info.getZ()+info.getTransactionCodeCopy());
-                        info.setOriginZCopy(info.getZCopy()+info.getTransactionCodeCopy());
+                        info.setOnlySign(info.getZCopy()+info.getTransactionCodeCopy());
+//                                    info.setOriginZCopy(info.getZCopy()+info.getTransactionCodeCopy());
                         // 公司名称
                         info.setCompanyName(company);
                         // 用于追溯老系统
