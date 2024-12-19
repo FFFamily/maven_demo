@@ -44,7 +44,7 @@ public class FindABCDByFile {
     private SqlUtil sqlUtil;
     @Test
     void findABCD() {
-        Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
+//        Map<String, DraftFormatTemplate> mapping = getDraftFormatTemplateExcelData("src/main/java/org/example/分类/明细分类汇总-总部提供.xlsx", "明细");
         String company = "江苏中南物业服务有限公司常德分公司";
         List<Assistant> assistants = redaBalance(company);
         Map<String, List<Assistant>> companyMap = assistants.stream().collect(Collectors.groupingBy(Assistant::getE));
@@ -56,7 +56,7 @@ public class FindABCDByFile {
             List<Assistant> realAssistantList = companyMap.get(companyCode);
 //            List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
             List<SourceFileData> sourceFileDataList = readExcel(realAssistantList);
-            List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, mapping);
+            List<AssistantResult> dataList = ExcelDataUtil.covertAssistantResult(sourceFileDataList, null);
             System.out.println("共"+realAssistantList.size()+"条");
             List<OtherInfo3> cachedDataList = readDetailExcel(company);
             cachedDataList.forEach(item -> {
@@ -64,7 +64,7 @@ public class FindABCDByFile {
                 item.setSystemForm("新系统");
             });
             List<AssistantResult> excelExcelData = new ArrayList<>();
-            for (int i = 0; i < realAssistantList.size(); i++) {
+            for (int i = 0; i < dataList.size(); i++) {
                 Assistant assistant = realAssistantList.get(i);
                 String onlySign = assistant.getOnlySign();
                 AssistantResult assistantResult = dataList.get(i);
@@ -100,6 +100,7 @@ public class FindABCDByFile {
                     @Override
                     public void invoke(Map<Integer,String> o, AnalysisContext analysisContext) {
                         Assistant assistant3 = new Assistant();
+
                         // 左前缀匹配
                         BigDecimal v = new BigDecimal(o.get(7).replaceAll(",",""));
                         BigDecimal w = new BigDecimal(o.get(8).replaceAll(",",""));
@@ -115,7 +116,7 @@ public class FindABCDByFile {
                         // 辅助核算段
                         String s = o.get(2);
                         String[] split = s.split("\\.");
-
+                        assistant3.setA(s);
                         assistant3.setTransactionObjectCodeCopy(split[1].equals("-") ? "" : split[1]);
                         // 科目段描述
                         String codeName = o.get(1);

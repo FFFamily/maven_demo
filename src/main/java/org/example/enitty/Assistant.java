@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class Assistant {
+    // 备用：辅助核算段
     private String a;
     private String b;
     private String c;
