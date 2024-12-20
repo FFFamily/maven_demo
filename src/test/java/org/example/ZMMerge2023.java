@@ -61,7 +61,7 @@ public class ZMMerge2023 {
             for (String oldCompanyName : companyMap.keySet()) {
                 String str = oldCompanyName.split("-")[0];
                 String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(str);
-                Step6.Step6TestResult step6TestResult = step6Test.step6Test(oldCompanyName, companyMap);
+                Step6.Step6TestResult step6TestResult = step6Test.step6Test(oldCompanyName, companyMap.get(oldCompanyName));
                 if (step6TestResult == null){
                     continue;
                 }

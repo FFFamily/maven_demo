@@ -61,7 +61,7 @@ public class Step6Test {
                 if (!companyName.equals("江苏中南物业服务有限公司")){
                     continue;
                 }
-                Step6.Step6TestResult step6TestResult = step6.step6Test(companyName, companyMap);
+                Step6.Step6TestResult step6TestResult = step6.step6Test(companyName, companyMap.get(companyName));
                 if (step6TestResult == null) {
                     continue;
                 }
