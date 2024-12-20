@@ -2,20 +2,12 @@ package org.example.新老系统;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.read.listener.PageReadListener;
-import com.alibaba.excel.write.metadata.WriteSheet;
 import lombok.Data;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.enitty.zhong_nan.Step6Result1;
-import org.example.enitty.zhong_nan.ZNProjectMapping;
 import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
-import org.example.utils.CoverNewDate;
-import org.example.寻找等级.FindNccZhongNanLevel;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -47,42 +39,19 @@ public class Step6 {
             this.oracleDataList = oracleDataList;
         }
     }
-    public Step6TestResult step6Test(String companyName, List<Step6OldDetailExcel> list){
+
+    /**
+     *
+     * @param companyName
+     * @param step5Result 新系统全部数据
+     * @param list
+     * @return
+     */
+    public Step6TestResult step6Test(String companyName, List<OracleData> step5Result, List<Step6OldDetailExcel> list){
         List<Step6Result1> result1s = new ArrayList<>();
         List<OracleData> result2s = new ArrayList<>();
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
         String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(companyName);
-        // 新系统全部数据
-        List<OracleData> step5Result = step5.step5Test(newCompanyName)
-                .stream()
-                .filter(item -> item.get额外字段() == null)
-                .filter(item -> {
-                    try {
-                        String time = item.get期间();
-                        String[] split1 = time.split("-");
-                        String year = split1[0];
-                        int i = Integer.parseInt(year);
-                        String month = split1[1];
-                        int i1 = Integer.parseInt(month);
-                        if(newCompanyName.equals("江苏中南物业服务有限公司张家港分公司")){
-                            return (i == 2023 && (i1 >= 7 && i1 <= 12)) || (i == 2024 && (i1 >= 1 && i1 <= 9));
-                        }
-                        return i == 2023 && (i1 >= 7 && i1 <= 12);
-                    }catch (Exception e){
-                        return true;
-                    }
-                })
-                .peek(item -> {
-                    String newProject = getNewProject(item);
-                    item.setActualProject(newProject);
-                    if (newProject.contains("合同负债") || newProject.contains("预收账款")){
-                        item.setMatchProject("合同负债/预收账款");
-                    }else {
-                        item.setMatchProject(newProject);
-                    }
-                })
-                .filter(item -> findUtil.isBackProject(item.getActualProject()))
-                .collect(Collectors.toList());
         // 将新系统过滤出NCC导入的数据
         List<OracleData> nccstep5Result = step5Result
                 .stream()
@@ -497,9 +466,7 @@ public class Step6 {
 
 
 
-    private String getNewProject(OracleData oracleData){
-        return oracleData.get科目段描述().split("-")[0];
-    }
+
 
 
 

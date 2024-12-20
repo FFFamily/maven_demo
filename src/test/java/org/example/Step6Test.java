@@ -1,38 +1,22 @@
 package org.example;
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import lombok.Data;
-import org.example.enitty.Assistant;
 import org.example.enitty.OracleData;
-import org.example.enitty.yu_zhou.YuZhouOldBalanceExcel;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.enitty.zhong_nan.Step6Result1;
-import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
 import org.example.新老系统.FindUtil;
-import org.example.新老系统.Step1;
 import org.example.新老系统.Step6;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.math.BigDecimal;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.example.utils.CommonUtil.getZ;
 
 @SpringBootTest
 public class Step6Test {
@@ -61,7 +45,7 @@ public class Step6Test {
                 if (!companyName.equals("江苏中南物业服务有限公司")){
                     continue;
                 }
-                Step6.Step6TestResult step6TestResult = step6.step6Test(companyName, companyMap.get(companyName));
+                Step6.Step6TestResult step6TestResult = step6.step6Test(companyName, step5Result, companyMap.get(companyName));
                 if (step6TestResult == null) {
                     continue;
                 }

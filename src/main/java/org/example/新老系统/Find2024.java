@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.NewBalanceExcelResult;
+import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.utils.CommonUtil;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,6 +20,12 @@ import java.util.stream.Stream;
 public class Find2024 {
     @Resource
     private JdbcTemplate jdbcTemplate;
+    @Resource
+    private Step6 step6Test;
+    @Resource
+    private FindUtil findUtil;
+    @Resource
+    private Step5 step5;
     public List<OracleData> find( String selectCompanyName){
         Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
         EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/"+ selectCompanyName +"最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
@@ -44,22 +51,75 @@ public class Find2024 {
                 }
                 System.out.println("2024-当前公司："+newCompanyName);
                 List<OracleData> list3 = new ArrayList<>();
-                String findSql = "select * from ZDPROD_EXPDP_20241120 z where z.\"公司段描述\" = '" + newCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
-                List<OracleData> newDataList = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class));
-                for (OracleData data : newDataList) {
-                    String form = data.get科目段描述();
-                    boolean isProject = form.startsWith("应付账款")
-                            || form.startsWith("预付账款")
-                            || form.startsWith("合同负债")
-                            || form.startsWith("预收账款")
-                            || form.startsWith("应收账款")
-                            || form.startsWith("其他应付款")
-                            || form.startsWith("其他应收款");
-                    if (isProject){
-                        data.setForm("24年1-9月序时账");
-                        list3.add(data);
+                if (newCompanyName.equals("")){
+                    List<OracleData> step5Result = step5.step5Test(newCompanyName)
+                            .stream()
+                            .filter(item -> item.get额外字段() == null)
+                            .filter(item -> {
+                                try {
+                                    String time = item.get期间();
+                                    String[] split1 = time.split("-");
+                                    String year = split1[0];
+                                    int i = Integer.parseInt(year);
+                                    String month = split1[1];
+                                    int i1 = Integer.parseInt(month);
+                                    return i == 2024 && (i1 >= 1 && i1 <= 9);
+                                }catch (Exception e){
+                                    return true;
+                                }
+                            })
+                            .peek(item -> {
+                                String newProject = getNewProject(item);
+                                item.setActualProject(newProject);
+                                if (newProject.contains("合同负债") || newProject.contains("预收账款")){
+                                    item.setMatchProject("合同负债/预收账款");
+                                }else {
+                                    item.setMatchProject(newProject);
+                                }
+                            })
+                            .filter(item -> findUtil.isBackProject(item.getActualProject()))
+                            .collect(Collectors.toList());
+                    List<Step6OldDetailExcel> list = new ArrayList<>();
+                    EasyExcel.read("src/main/java/org/example/excel/zhong_nan/detail/",
+                            Step6OldDetailExcel.class,
+                            new PageReadListener<Step6OldDetailExcel>(list::addAll)
+                    );
+                    Step6.Step6TestResult step6TestResult = step6Test.step6Test(newCompanyName, step5Result,list);
+                    // 旧系统处理后数据
+                    List<Step6OldDetailExcel> oldDataList = step6TestResult.getResult3s()
+                            .stream()
+                            .filter(item ->  "匹配成功".equals(item.getRemark()))
+                            .collect(Collectors.toList());
+                    // 旧系统
+                    for (Step6OldDetailExcel data : oldDataList) {
+                        OracleData oracleData = findUtil.coverStep6OldDetailExcelToOracleData(data,"24年1-9月旧系统序时账");
+                        list3.add(oracleData);
+                    }
+                    for (OracleData oracleData : step6TestResult.getOracleDataList()) {
+                        oracleData.setForm(oracleData.getForm() == null ? "2024未被处理" : oracleData.getForm());
+                        list3.add(oracleData);
+                    }
+                }else {
+                    String findSql = "select * from ZDPROD_EXPDP_20241120 z where z.\"公司段描述\" = '" + newCompanyName + "' and z.\"期间\" >= '2024-01' and z.\"期间\" <= '2024-09'";
+                    List<OracleData> newDataList = jdbcTemplate.query(findSql, new BeanPropertyRowMapper<>(OracleData.class));
+                    for (OracleData data : newDataList) {
+                        String form = data.get科目段描述();
+                        boolean isProject = form.startsWith("应付账款")
+                                || form.startsWith("预付账款")
+                                || form.startsWith("合同负债")
+                                || form.startsWith("预收账款")
+                                || form.startsWith("应收账款")
+                                || form.startsWith("其他应付款")
+                                || form.startsWith("其他应收款");
+                        if (isProject){
+                            data.setForm("24年1-9月序时账");
+                            list3.add(data);
+                        }
                     }
                 }
+
+
+
                 List<NewBalanceExcelResult> result = new ArrayList<>();
                 List<OracleData> list1 = new ArrayList<>();
                 List<OracleData> list2 = new ArrayList<>();
@@ -118,6 +178,11 @@ public class Find2024 {
         EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+ selectCompanyName +"-最终组合结果-2024-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
         return xsList;
     }
+
+    private String getNewProject(OracleData oracleData){
+        return oracleData.get科目段描述().split("-")[0];
+    }
+
 
     private static String getStr(String str){
         return str == null ?"":str;

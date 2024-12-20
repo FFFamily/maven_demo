@@ -14,7 +14,6 @@ import org.example.新老系统.FindUtil;
 import org.example.新老系统.Step6;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Resource;
@@ -61,7 +60,7 @@ public class ZMMerge2023 {
             for (String oldCompanyName : companyMap.keySet()) {
                 String str = oldCompanyName.split("-")[0];
                 String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(str);
-                Step6.Step6TestResult step6TestResult = step6Test.step6Test(oldCompanyName, companyMap.get(oldCompanyName));
+                Step6.Step6TestResult step6TestResult = step6Test.step6Test(oldCompanyName, step5Result, companyMap.get(oldCompanyName));
                 if (step6TestResult == null){
                     continue;
                 }

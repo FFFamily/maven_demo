@@ -23,6 +23,8 @@ import java.util.stream.Stream;
 @Service
 public class Find2023 {
     @Resource
+    private Step5 step5;
+    @Resource
     private Step6 step6Test;
     @Resource
     private FindUtil findUtil;
@@ -34,7 +36,39 @@ public class Find2023 {
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
         List<OracleData> xsList = new ArrayList<>();
                 System.out.println("2023-当前公司为： "+newCompanyName);
-                Step6.Step6TestResult step6TestResult = step6Test.step6Test(newCompanyName, list);
+
+        List<OracleData> step5Result = step5.step5Test(newCompanyName)
+                .stream()
+                .filter(item -> item.get额外字段() == null)
+                .filter(item -> {
+                    try {
+                        String time = item.get期间();
+                        String[] split1 = time.split("-");
+                        String year = split1[0];
+                        int i = Integer.parseInt(year);
+                        String month = split1[1];
+                        int i1 = Integer.parseInt(month);
+                        if(newCompanyName.equals("江苏中南物业服务有限公司张家港分公司")){
+                            return (i == 2023 && (i1 >= 7 && i1 <= 12)) || (i == 2024 && (i1 >= 1 && i1 <= 9));
+                        }
+                        return i == 2023 && (i1 >= 7 && i1 <= 12);
+                    }catch (Exception e){
+                        return true;
+                    }
+                })
+                .peek(item -> {
+                    String newProject = getNewProject(item);
+                    item.setActualProject(newProject);
+                    if (newProject.contains("合同负债") || newProject.contains("预收账款")){
+                        item.setMatchProject("合同负债/预收账款");
+                    }else {
+                        item.setMatchProject(newProject);
+                    }
+                })
+                .filter(item -> findUtil.isBackProject(item.getActualProject()))
+                .collect(Collectors.toList());
+
+                Step6.Step6TestResult step6TestResult = step6Test.step6Test(newCompanyName, step5Result,list);
                 if (step6TestResult == null){
                     return new ArrayList<>();
                 }
@@ -56,33 +90,10 @@ public class Find2023 {
                 // 旧系统
                 List<OracleData> list3 = new ArrayList<>();
                 for (Step6OldDetailExcel data : oldDataList) {
-                    coverNewDate.cover("2023-7-12",data);
-                    OracleData oracleData = new OracleData();
-                    oracleData.setForm("23年7-12月旧系统序时账");
-                    oracleData.set公司段描述(data.getCompanyName());
-                    oracleData.set账户组合(data.getOnlySign());
-                    oracleData.set账户描述(data.getOnlySignName());
-                    oracleData.set交易对象(data.getAuxiliaryAccountingCode());
-                    oracleData.set交易对象名称(data.getAuxiliaryAccounting());
-                    oracleData.set输入借方(data.getV());
-                    oracleData.set输入贷方(data.getW());
-                    oracleData.set单据编号(data.getVoucherCode());
-                    oracleData.set有效日期(data.getTime());
-                    DateTime parse = DateUtil.parse(data.getTime());
-                    oracleData.set期间(parse.year()+"-"+(parse.month()+1));
-                    oracleData.set科目代码(data.getProjectCode());
-                    oracleData.set科目段描述(data.getProjectName());
-                    oracleData.set对方科目(data.getOtherProjectCode());
-                    oracleData.set对方科目名称(data.getOtherProjectName());
-                    oracleData.set行说明(data.getMatch());
-                    oracleData.set项目(data.getEventCode());
-                    oracleData.set项目段描述(data.getEventName());
-                    oracleData.set部门代码(data.getOrgCode());
-                    oracleData.set部门名称(data.getOrgName());
+                    OracleData oracleData = findUtil.coverStep6OldDetailExcelToOracleData(data,"23年7-12月旧系统序时账");
                     list3.add(oracleData);
                 }
                 for (OracleData oracleData : step6TestResult.getOracleDataList()) {
-//                    oracleData.setForm("23年7-12月新系统序时账");
                     oracleData.setForm(oracleData.getForm() == null ? "2023未被处理" : oracleData.getForm());
                     list3.add(oracleData);
                 }
@@ -140,6 +151,10 @@ public class Find2023 {
 
         EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/"+ newCompanyName +"最终组合结果-2023-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
         return xsList;
+    }
+
+    private String getNewProject(OracleData oracleData){
+        return oracleData.get科目段描述().split("-")[0];
     }
 
     public Map<String, List<NewBalanceExcelResult>>  initBalance(String str){
