@@ -31,25 +31,8 @@ public class Find2023 {
 
     public List<OracleData> find(List<Step6OldDetailExcel> list, String newCompanyName){
         Map<String, List<NewBalanceExcelResult>> listMap = initBalance(newCompanyName);
-//        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
         List<OracleData> xsList = new ArrayList<>();
-//        for (String fileName : Objects.requireNonNull(file.list())) {
-//            String name = fileName.replace(".xlsx", "");
-//            if (!name.equals(path)){
-//                continue;
-//            }
-//            System.out.println("2023-当前文件："+name);
-            // 旧系统
-//            List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
-//            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
-//                String companyName = item.getCompanyName().split("-")[0];
-//                return CompanyConstant.getNewCompanyByOldCompany(companyName);
-//            }));
-//            for (String newCompanyName : companyMap.keySet()) {
-//                if (!newCompanyName.equals(selectCompanyName)){
-//                    continue;
-//                }
                 System.out.println("2023-当前公司为： "+newCompanyName);
                 Step6.Step6TestResult step6TestResult = step6Test.step6Test(newCompanyName, list);
                 if (step6TestResult == null){

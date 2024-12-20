@@ -57,8 +57,10 @@ public class Step6 {
         List<Step6Result1> result1s = new ArrayList<>();
         List<OracleData> result2s = new ArrayList<>();
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
-        String[] split = companyName.split("-");
-        String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(split[0]);
+//        String[] split = companyName.split("-");
+//        String company = item.getCompanyName().substring(0,item.getCompanyName().lastIndexOf("-"));
+//        String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(split[0]);
+        String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(companyName);
 //        System.out.println("当前公司为： "+newCompanyName);
 //        if (!newCompanyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
 //            return null;
