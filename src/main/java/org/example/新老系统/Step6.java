@@ -64,7 +64,7 @@ public class Step6 {
                         int i = Integer.parseInt(year);
                         String month = split1[1];
                         int i1 = Integer.parseInt(month);
-                        if(newCompanyName.equals("")){
+                        if(newCompanyName.equals("江苏中南物业服务有限公司张家港分公司")){
                             return (i == 2023 && (i1 >= 7 && i1 <= 12)) || (i == 2024 && (i1 >= 1 && i1 <= 9));
                         }
                         return i == 2023 && (i1 >= 7 && i1 <= 12);

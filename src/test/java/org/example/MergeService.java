@@ -74,7 +74,7 @@ public class MergeService {
         List<String> allCompany = findAllCompany();
         Map<String, String> map = initMap();
         Map<String, List<String>> fileMap = allCompany.stream().collect(Collectors.groupingBy(item -> map.getOrDefault(item, "其他")));
-        String selectCompany = "江苏中南物业服务有限公司-杭州公司PPP项目";
+        String selectCompany = "江苏中南物业服务有限公司张家港分公司";
         String fileFilter = null;
         for (String key : fileMap.keySet()) {
             if (fileMap.get(key).stream().anyMatch(item -> item.equals(selectCompany))){
