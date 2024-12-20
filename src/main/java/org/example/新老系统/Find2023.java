@@ -30,7 +30,7 @@ public class Find2023 {
     @Resource
     private CoverNewDate coverNewDate;
 
-    public List<OracleData> find(Map<String, List<Step6OldDetailExcel>> companyMap, String newCompanyName){
+    public List<OracleData> find(List<Step6OldDetailExcel> list, String newCompanyName){
         Map<String, List<NewBalanceExcelResult>> listMap = initBalance(newCompanyName);
 //        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
@@ -52,7 +52,7 @@ public class Find2023 {
 //                    continue;
 //                }
                 System.out.println("2023-当前公司为： "+newCompanyName);
-                Step6.Step6TestResult step6TestResult = step6Test.step6Test(newCompanyName, companyMap);
+                Step6.Step6TestResult step6TestResult = step6Test.step6Test(newCompanyName, list);
                 if (step6TestResult == null){
                     return new ArrayList<>();
                 }

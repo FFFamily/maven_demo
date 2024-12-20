@@ -53,7 +53,7 @@ public class Step6 {
             this.oracleDataList = oracleDataList;
         }
     }
-    public Step6TestResult step6Test(String companyName, Map<String, List<Step6OldDetailExcel>> companyMap){
+    public Step6TestResult step6Test(String companyName, List<Step6OldDetailExcel> list){
         List<Step6Result1> result1s = new ArrayList<>();
         List<OracleData> result2s = new ArrayList<>();
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
@@ -63,7 +63,7 @@ public class Step6 {
 //        if (!newCompanyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
 //            return null;
 //        }
-        List<Step6OldDetailExcel> list = companyMap.get(companyName);
+//        List<Step6OldDetailExcel> list = companyMap.get(companyName);
         // 新系统全部数据
         List<OracleData> step5Result = step5.step5Test(newCompanyName)
                 .stream()
