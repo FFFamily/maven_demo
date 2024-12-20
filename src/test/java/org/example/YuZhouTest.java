@@ -38,8 +38,12 @@ public class YuZhouTest {
         File file = new File("src/main/java/org/example/excel/yu_zhou/balance");
         for (String fileName : file.list()) {
             System.out.println("当前文件："+fileName);
+            if (!fileName.equals("禹洲物业服务有限公司上海分公司.xlsx")){
+                continue;
+            }
+            List<Assistant> assistants1 = readBalanceExcel(fileName);
             // 余额
-            Map<String, List<Assistant>> collect = readBalanceExcel(fileName).stream().collect(Collectors.groupingBy(Assistant::getE));
+            Map<String, List<Assistant>> collect =assistants1.stream().collect(Collectors.groupingBy(Assistant::getE));
 
             for (String company : collect.keySet()) {
                 List<Assistant> assistants = collect.get(company);
@@ -47,11 +51,16 @@ public class YuZhouTest {
                 System.out.println("当前公司："+company);
                 // 便利余额
                 for (int i = 0; i < assistants.size(); i++) {
+
                     Assistant assistant = assistants.get(i);
                     String companyName = assistant.getE();
 
                     // 这个公司的所有明细
                     List<OtherInfo3> otherInfo3s = readDetailExcel(fileName,companyName);
+                    if (otherInfo3s.isEmpty()){
+                        System.out.println("跳过");
+                        continue;
+                    }
                     List<OtherInfo3> startCollect = otherInfo3s.stream().filter(item -> item.getOnlySign().equals(assistant.getOnlySign())).collect(Collectors.toList());
                     List<OtherInfo3> res = findLevel.doMain(
                             true,
@@ -69,7 +78,10 @@ public class YuZhouTest {
                     });
                     result.addAll(res);
                 }
-                EasyExcel.write("禹州老系统分级-"+company+ ".xlsx", OtherInfo3.class).sheet("模板").doWrite(result);
+                if (!result.isEmpty()){
+                    EasyExcel.write(fileName.replace(".xlsx","")+"-禹州老系统分级-"+company+ ".xlsx", OtherInfo3.class).sheet("模板").doWrite(result);
+
+                }
             }
         }
     }
@@ -100,9 +112,9 @@ public class YuZhouTest {
                                     assistant.setE(data.getQ().split("-")[0]);
                                     balanceExcels.add(assistant);
                                 }catch (Exception e){
-                                    System.out.println("解析禹州数据出错");
+                                    System.out.println("解析禹州数据出错："+e.getMessage());
                                     System.out.println(data);
-                                    e.printStackTrace();
+//                                    e.printStackTrace();
                                 }
                             }
                         }))
@@ -142,10 +154,10 @@ public class YuZhouTest {
                                     otherInfo3.setS("人工");
                                     // 借
 //                                    otherInfo3.setV(data.getL() == null ? null : new BigDecimal(data.getL()));
-                                    otherInfo3.setV(data.getL());
+                                    otherInfo3.setV(data.getL() == null ? null :  new BigDecimal(data.getL().replaceAll(",","").replaceAll(" ","")));
                                     // 贷
 //                                    otherInfo3.setW(data.getN() == null ? null : new BigDecimal(data.getN()));
-                                    otherInfo3.setW(data.getN());
+                                    otherInfo3.setW(data.getN() == null ?  null :  new BigDecimal(data.getN().replaceAll(",","").replaceAll(" ","")));
                                     otherInfo3.setX(CommonUtil.getX(otherInfo3.getV(), otherInfo3.getW()));
                                     // 唯一标识
                                     // 科目编码-辅助段

@@ -1,5 +1,6 @@
 package org.example;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import lombok.AllArgsConstructor;
@@ -76,39 +77,44 @@ public class MergeService {
         for (String fileName : file.list()) {
             String name = fileName.replace(".xlsx", "");
             System.out.println("2023-当前文件："+name);
-            if (!name.equals("物业成都公司")){
+            if (!name.equals("物业杭州公司")){
                 continue;
             }
-            // 老系统数据
-            List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
-            Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
-                String companyName = item.getCompanyName().split("-")[0];
-                return CompanyConstant.getNewCompanyByOldCompany(companyName);
-            }));
-            for (String newCompanyName : companyMap.keySet()) {
-                System.out.println("开始- 当前公司为："+newCompanyName);
-                if (!newCompanyName.equals("江苏中南物业服务有限公司西安分公司")){
-                    continue;
-                }
-                List<OracleData> list1 = find2022.find(newCompanyName);
-                List<OracleData> list2 = find2023.find(companyMap, newCompanyName);
-                List<OracleData> list3 = find2024.find(newCompanyName);
-                List<OracleData> xsList = new ArrayList<>();
-                xsList.addAll(list1);
-                xsList.addAll(list2);
-                xsList.addAll(list3);
+            try {
+                // 老系统数据
+                List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
+                Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
+                    String companyName = item.getCompanyName().split("-")[0];
+                    return CompanyConstant.getNewCompanyByOldCompany(companyName);
+                }));
+                for (String newCompanyName : companyMap.keySet()) {
+                    System.out.println("开始- 当前公司为：" + newCompanyName + ": " + DateUtil.date());
+                    if (!newCompanyName.equals("江苏中南物业服务有限公司余杭分公司")){
+                        continue;
+                    }
+                    List<OracleData> list1 = find2022.find(newCompanyName);
+                    List<OracleData> list2 = find2023.find(companyMap, newCompanyName);
+                    List<OracleData> list3 = find2024.find(newCompanyName);
+                    List<OracleData> xsList = new ArrayList<>();
+                    xsList.addAll(list1);
+                    xsList.addAll(list2);
+                    xsList.addAll(list3);
 //                findAllBalance.find(selectPath,newCompanyName);
-                File excelFile = new File(newCompanyName + "-总序时账" + ".xlsx");
-                if (excelFile.exists()){
-                    System.out.println("文件存在");
-                    List<OracleData> oldList = new ArrayList<>();
-                    EasyExcel.read(excelFile, Step6OldDetailExcel.class,
-                            new PageReadListener<OracleData>(oldList::addAll));
-                    oldList.addAll(xsList);
-                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(oldList);
-                }else {
-                    EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
+                    File excelFile = new File(newCompanyName + "-总序时账" + ".xlsx");
+                    if (excelFile.exists()) {
+                        System.out.println("文件存在");
+                        List<OracleData> oldList = new ArrayList<>();
+                        EasyExcel.read(excelFile, Step6OldDetailExcel.class,
+                                new PageReadListener<OracleData>(oldList::addAll));
+                        oldList.addAll(xsList);
+                        EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(oldList);
+                    } else {
+                        EasyExcel.write(excelFile.getName(), OracleData.class).sheet("组合结果").doWrite(xsList);
+                    }
+                    System.out.println("结束- 当前公司为：" + newCompanyName + ": " + DateUtil.date());
                 }
+            }catch (Exception e){
+                System.out.println("异常- 当前公司为：" + DateUtil.date());
             }
         }
 

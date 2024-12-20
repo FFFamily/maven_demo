@@ -33,7 +33,7 @@ public class Find2024 {
         })).sheet("余额表").doRead();
 //        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
-        List<OracleData> xsList = null;
+        List<OracleData> xsList = new ArrayList<>();
 //        for (String fileName : Objects.requireNonNull(file.list())) {
 //            String name = fileName.replace(".xlsx", "");
 //            if (!name.equals(selectPath)){

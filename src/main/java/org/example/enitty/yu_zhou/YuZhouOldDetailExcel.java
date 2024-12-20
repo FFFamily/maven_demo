@@ -34,8 +34,8 @@ public class YuZhouOldDetailExcel {
     private String i;
     // 借
     @ExcelProperty(index = 11)
-    private BigDecimal l;
+    private String l;
     // 贷
     @ExcelProperty(index = 13)
-    private BigDecimal n;
+    private String n;
 }

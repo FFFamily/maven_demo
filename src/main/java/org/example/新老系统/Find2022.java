@@ -43,7 +43,7 @@ public class Find2022 {
         if (!file.isDirectory()){
             throw new RuntimeException("不是目录");
         }
-        List<OracleData> xsList = null;
+        List<OracleData> xsList = new ArrayList<>();
         for (String fileName : file.list()) {
             if (fileName.equals(".DS_Store")){
                 continue;
