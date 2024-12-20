@@ -80,7 +80,7 @@ public class Find2024 {
                             .filter(item -> findUtil.isBackProject(item.getActualProject()))
                             .collect(Collectors.toList());
                     List<Step6OldDetailExcel> list = new ArrayList<>();
-                    EasyExcel.read("src/main/java/org/example/excel/zhong_nan/detail/",
+                    EasyExcel.read("src/main/java/org/example/excel/zhong_nan/file/2024发生额.xlsx",
                             Step6OldDetailExcel.class,
                             new PageReadListener<Step6OldDetailExcel>(list::addAll)
                     );
