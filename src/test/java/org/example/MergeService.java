@@ -1,6 +1,7 @@
 package org.example;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.hash.Hash;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import lombok.AllArgsConstructor;
@@ -8,7 +9,9 @@ import lombok.Data;
 import org.apache.tomcat.Jar;
 import org.example.enitty.OracleData;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
+import org.example.utils.CommonUtil;
 import org.example.utils.CompanyConstant;
+import org.example.utils.CompanyTypeConstant;
 import org.example.新老系统.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,38 +46,47 @@ public class MergeService {
         // 江苏中南物业服务有限公司
         private String selectCompanyName;
     }
+    private Map<String,String> initMap(){
+        Map<String,String> map = new HashMap<>();
+        return map;
+    };
     @Test
-    void mergeAll(){
-        // 8.江苏中南物业服务有限公司泰兴分公司  物业上海公司3
-        // 9.江苏中南物业服务有限公司东台分公司  物业上海公司3
-        // 10.青岛中南物业管理有限公司烟台分公司 物业济南公司
-        // 11.江苏中南物业服务有限公司淮安分公司 物业南京公司
-        // 12.江苏中南物业服务有限公司南京分公司  物业南京公司
-        // 13.江苏中南物业服务有限公司蚌埠分公司  物业合肥公司
-        // 14.江苏中南物业服务有限公司厦门分公司  物业厦门公司
-        // 15.江苏中南物业服务有限公司晋江分公司  物业厦门公司
-        // 16.江苏中南物业服务有限公司南充分公司  物业成都公司
-        // 17.江苏中南物业服务有限公司成都分公司  物业成都公司
-        // 18.江苏中南物业服务有限公司天津分公司  物业北京公司
-        // 19.江苏中南物业服务有限公司太仓分公司  物业南京公司
-        // 20.江苏中南物业服务有限公司梅州分公司  物业深圳公司
-        // 21.江苏中南物业服务有限公司西安分公司  物业成都公司
-        List<Item> list = new ArrayList<>();
-//        list.add(new Item("物业合肥公司","江苏中南物业服务有限公司蚌埠分公司"));
-//        list.add(new Item("物业厦门公司","江苏中南物业服务有限公司厦门分公司"));
-//        list.add(new Item("物业厦门公司","江苏中南物业服务有限公司晋江分公司"));
-        list.add(new Item("物业上海公司1","江苏中南物业服务有限公司"));
-//        list.add(new Item("物业成都公司","江苏中南物业服务有限公司南充分公司"));
-//        list.add(new Item("物业成都公司","江苏中南物业服务有限公司成都分公司"));
-//        list.add(new Item("物业北京公司","江苏中南物业服务有限公司天津分公司"));
-//        list.add(new Item("物业南京公司","江苏中南物业服务有限公司太仓分公司"));
-//        list.add(new Item("物业深圳公司","江苏中南物业服务有限公司梅州分公司"));
-//
-//        list.add(new Item("物业成都公司","江苏中南物业服务有限公司西安分公司"));
-//        list.add(new Item("物业深圳公司","江苏中南物业服务有限公司惠州分公司"));
-//        File file = new File();
+    void init(){
         File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
+        for (String fileName : file.list()) {
+            String name = fileName.replace(".xlsx", "");
+            System.out.println("2023-当前文件："+name);
+            try {
+                // 老系统数据
+                List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
+                Map<String, List<Step6OldDetailExcel>> companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
+                    String companyName = item.getCompanyName().split("-")[0];
+                    return CompanyConstant.getNewCompanyByOldCompany(companyName);
+                }));
+                for (String newCompanyName : companyMap.keySet()) {
+                    System.out.println("map.put(\"" + newCompanyName + "\", \""+name+"\");");
+                }
+            }catch (Exception e){
+                System.out.println("异常- 当前公司为：" + DateUtil.date());
+            }
+        }
+    }
+    @Test
+    void  test(){
+        List<String> allCompany = findAllCompany();
+        for (String company : allCompany) {
+            String type = CompanyTypeConstant.mapping.get(company);
+            System.out.println("当前公司："+company);
+            System.out.println("当前公司分类："+type);
+            if (type.equals(CompanyTypeConstant.ZHONG_NAN)){
+                // 只有中南的才跑
+                mergeAll(company);
+            }
+        }
+    }
 
+    void mergeAll(String company){
+        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
         for (String fileName : file.list()) {
             String name = fileName.replace(".xlsx", "");
             System.out.println("2023-当前文件："+name);
