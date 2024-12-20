@@ -74,10 +74,10 @@ public class MergeService {
         List<String> allCompany = findAllCompany();
         Map<String, String> map = initMap();
         Map<String, List<String>> fileMap = allCompany.stream().collect(Collectors.groupingBy(item -> map.getOrDefault(item, "其他")));
-        String selectCompany = null;
+        String selectCompany = "江苏中南物业服务有限公司余杭分公司";
         String fileFilter = null;
         for (String key : fileMap.keySet()) {
-            if (fileMap.get(key).stream().anyMatch(item -> item.equals("江苏中南物业服务有限公司余杭分公司"))){
+            if (fileMap.get(key).stream().anyMatch(item -> item.equals(selectCompany))){
                 fileFilter = key;
             }
         }
@@ -104,9 +104,9 @@ public class MergeService {
                     continue;
                 }
                 String type = CompanyTypeConstant.mapping.get(company);
-                log("当前公司："+company+ "当前公司分类："+type);
                 if (type.equals(CompanyTypeConstant.ZHONG_NAN)){
                     // 只有中南的才跑
+                    log("当前公司："+company);
                     mergeAll(companyMap.getOrDefault(company,new ArrayList<>()),company);
                 }
             }
