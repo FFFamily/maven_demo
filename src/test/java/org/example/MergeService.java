@@ -74,7 +74,7 @@ public class MergeService {
         List<String> allCompany = findAllCompany();
         Map<String, String> map = initMap();
         Map<String, List<String>> fileMap = allCompany.stream().collect(Collectors.groupingBy(item -> map.getOrDefault(item, "其他")));
-        String selectCompany = "江苏中南物业服务有限公司余杭分公司";
+        String selectCompany = "江苏中南物业服务有限公司-杭州公司PPP项目";
         String fileFilter = null;
         for (String key : fileMap.keySet()) {
             if (fileMap.get(key).stream().anyMatch(item -> item.equals(selectCompany))){
@@ -94,13 +94,16 @@ public class MergeService {
             }else {
                 List<Step6OldDetailExcel> excels = findUtil.readPropertyExcel(fileName);
                 companyMap = excels.stream().collect(Collectors.groupingBy(item -> {
-                    String companyName = item.getCompanyName().split("-")[0];
+//                    String[] split = item.getCompanyName().split("-");
+
+//                    String companyName = item.getCompanyName().split("-")[0];
+                    String companyName = item.getCompanyName().substring(0,item.getCompanyName().lastIndexOf("-"));
                     return CompanyConstant.getNewCompanyByOldCompany(companyName);
                 }));
             }
             List<String> companyList = fileMap.get(file);
             for (String company : companyList) {
-                if (company.equals(selectCompany)){
+                if (!company.equals(selectCompany)){
                     continue;
                 }
                 String type = CompanyTypeConstant.mapping.get(company);
@@ -129,9 +132,9 @@ public class MergeService {
 
 //                for (String newCompanyName : companyMap.keySet()) {
                     System.out.println("开始- 当前公司为：" + newCompanyName + ": " + DateUtil.date());
-                    if (!newCompanyName.equals("江苏中南物业服务有限公司余杭分公司")){
-                        return;
-                    }
+//                    if (!newCompanyName.equals("江苏中南物业服务有限公司余杭分公司")){
+//                        return;
+//                    }
                     List<OracleData> list1 = find2022.find(newCompanyName);
                     List<OracleData> list2 = find2023.find(list, newCompanyName);
                     List<OracleData> list3 = find2024.find(newCompanyName);
@@ -154,6 +157,7 @@ public class MergeService {
                     System.out.println("结束- 当前公司为：" + newCompanyName + ": " + DateUtil.date());
 //                }
             }catch (Exception e){
+                e.printStackTrace();
                 System.out.println("异常- 当前公司为：" + DateUtil.date());
             }
 //        }

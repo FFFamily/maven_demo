@@ -11,7 +11,6 @@ import org.example.enitty.zhong_nan.NewBalanceExcelResult;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.enitty.zhong_nan.Step6Result1;
 import org.example.utils.CommonUtil;
-import org.example.utils.CompanyConstant;
 import org.example.utils.CoverNewDate;
 import org.springframework.stereotype.Service;
 
@@ -104,16 +103,19 @@ public class Find2023 {
                     oracleData.setForm(oracleData.getForm() == null ? "2023未被处理" : oracleData.getForm());
                     list3.add(oracleData);
                 }
-                EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/"+newCompanyName+"-2023-1-6-组合序时账.xlsx",
-                        OracleData.class,
-                        new PageReadListener<OracleData>(dataList -> {
-                            //coverNewDate.cover("2023-1-6",data);
-                            for (OracleData oracleData : dataList) {
-                                oracleData.setForm(oracleData.getForm() == null ? "2023-1-6月未被处理" : oracleData.getForm());
-                                list3.add(oracleData);
-                            }
-                        })
-                ).sheet("组合结果").doRead();
+                File file = new File("src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/" + newCompanyName + "-2023-1-6-组合序时账.xlsx");
+                if (file.exists()){
+                    EasyExcel.read(file,
+                            OracleData.class,
+                            new PageReadListener<OracleData>(dataList -> {
+                                //coverNewDate.cover("2023-1-6",data);
+                                for (OracleData oracleData : dataList) {
+                                    oracleData.setForm(oracleData.getForm() == null ? "2023-1-6月未被处理" : oracleData.getForm());
+                                    list3.add(oracleData);
+                                }
+                            })
+                    ).sheet("组合结果").doRead();
+                }
                 List<NewBalanceExcelResult> result = new ArrayList<>();
                 List<OracleData> list1 = new ArrayList<>();
                 List<OracleData> list2 = new ArrayList<>();
