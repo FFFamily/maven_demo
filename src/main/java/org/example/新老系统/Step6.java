@@ -33,12 +33,6 @@ public class Step6 {
     private Step5 step5;
     @Resource
     private FindUtil findUtil;
-    @Resource
-    private JdbcTemplate jdbcTemplate;
-    @Resource
-    private CoverNewDate coverNewDate;
-    @Resource
-    private FindNccZhongNanLevel findNccZhongNanLevel;
     @Data
     public static class Step6TestResult{
         List<Step6Result1> result1s;
@@ -57,15 +51,7 @@ public class Step6 {
         List<Step6Result1> result1s = new ArrayList<>();
         List<OracleData> result2s = new ArrayList<>();
         List<Step6OldDetailExcel> result3s = new ArrayList<>();
-//        String[] split = companyName.split("-");
-//        String company = item.getCompanyName().substring(0,item.getCompanyName().lastIndexOf("-"));
-//        String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(split[0]);
         String newCompanyName = CompanyConstant.getNewCompanyByOldCompany(companyName);
-//        System.out.println("当前公司为： "+newCompanyName);
-//        if (!newCompanyName.equals("唐山中南国际旅游度假物业服务有限责任公司")){
-//            return null;
-//        }
-//        List<Step6OldDetailExcel> list = companyMap.get(companyName);
         // 新系统全部数据
         List<OracleData> step5Result = step5.step5Test(newCompanyName)
                 .stream()
@@ -78,9 +64,11 @@ public class Step6 {
                         int i = Integer.parseInt(year);
                         String month = split1[1];
                         int i1 = Integer.parseInt(month);
+                        if(newCompanyName.equals("")){
+                            return (i == 2023 && (i1 >= 7 && i1 <= 12)) || (i == 2024 && (i1 >= 1 && i1 <= 9));
+                        }
                         return i == 2023 && (i1 >= 7 && i1 <= 12);
                     }catch (Exception e){
-//                        System.out.println("解析时间出错："+e.getMessage());
                         return true;
                     }
                 })
@@ -124,10 +112,6 @@ public class Step6 {
                 notWithNcc.add(data);
             }
         }
-
-//        oracleData.addAll(addCondition(newCompanyName,step5Result));
-
-
         // 按月进行分组
         Map<String, List<Step6OldDetailExcel>> timeOldCollect = list.stream().collect(Collectors.groupingBy(item -> {
             DateTime date = DateUtil.parseDate(item.getTime());
@@ -180,14 +164,6 @@ public class Step6 {
                 result3s.addAll(projectOld);
             }
         }
-//        result2s.stream().filter(item -> "和旧系统余额不相等".equals(item.get备注())).forEach(item ->{
-//            item.setForm("新系统和旧系统余额不相等保留数据");
-//            notWithNcc.add(item);
-//        });
-//        result2s.stream().filter(item -> "多余数据".equals(item.get备注())).forEach(item ->{
-//            item.setForm("新系统多余数据");
-//            notWithNcc.add(item);
-//        });
         result2s.stream().filter(item -> item.getRemark() ==null || !item.getRemark().equals("匹配成功")).forEach(item -> {
             item.setRemark("");
             notWithNcc.add(item);
@@ -400,18 +376,8 @@ public class Step6 {
     private void findOld(List<Step6OldDetailExcel>  projectOld, List<OracleData> projectNew, List<OracleData> result2s, List<Step6OldDetailExcel> result3s){
         // 找到造成差额的明细账
         int oldSize = projectOld.size();
-        int newSize = projectNew.size();
         // 先从旧系统出发
-//        if (oldSize > newSize) {
         matchOld(projectOld,projectNew,result2s,result3s,oldSize);
-//            for (int i = newSize; i < oldSize; i++) {
-//                Step6OldDetailExcel data = projectOld.get(i);
-//                data.setRemark("多余数据");
-//                result3s.add(data);
-//            }
-//        }else {
-//            matchOld(projectOld,projectNew,result3s,oldSize);
-//        }
     }
 
     private void matchOld(List<Step6OldDetailExcel>  projectOld, List<OracleData> projectNew, List<OracleData> result2s, List<Step6OldDetailExcel> result3s, int size){
@@ -451,10 +417,8 @@ public class Step6 {
                 }
                 if (flag){
                     oldData.setRemark("未能匹配多个数据");
-//                    result3s.add(oldData);
                 }
             }
-//            result3s.add(oldData);
         }
     }
 
@@ -464,16 +428,7 @@ public class Step6 {
         int oldSize = projectOld.size();
         int newSize = projectNew.size();
         // 先从旧系统出发
-//        if (oldSize >= newSize) {
         matchNew(projectOld,projectNew,result2s,newSize);
-//        }else {
-//            matchNew(projectOld,projectNew,result2s,oldSize);
-//            for (int i = oldSize; i < newSize; i++) {
-//                OracleData data = projectNew.get(i);
-//                data.set备注("多余数据");
-//                result2s.add(data);
-//            }
-//        }
     }
 
     private void matchNew(List<Step6OldDetailExcel>  projectOld,List<OracleData> projectNew,List<OracleData> result2s,int size){

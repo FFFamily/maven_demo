@@ -31,14 +31,8 @@ public class Find2024 {
                 listMap.put(data.getCompanyName(), orDefault);
             }
         })).sheet("余额表").doRead();
-//        File file = new File("src/main/java/org/example/excel/zhong_nan/detail");
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
         List<OracleData> xsList = new ArrayList<>();
-//        for (String fileName : Objects.requireNonNull(file.list())) {
-//            String name = fileName.replace(".xlsx", "");
-//            if (!name.equals(selectPath)){
-//                continue;
-//            }
             System.out.println("2024-当前文件："+selectCompanyName);
             List<String> companyList = jdbcTemplate.queryForList(
                     "select z.\"公司段描述\" from ZDPROD_EXPDP_20241120 z GROUP BY z.\"公司段描述\" ",
