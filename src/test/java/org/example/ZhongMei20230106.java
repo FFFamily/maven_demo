@@ -41,7 +41,7 @@ public class ZhongMei20230106 {
 //            "src/main/java/org/example/excel/zhong_nan/detail/物业重庆公司.xlsx"
 //    );
     public List<String> pathList = Lists.newArrayList(
-            "src/main/java/org/example/excel/zhong_nan/detail/物业重庆公司.xlsx"
+            "src/main/java/org/example/excel/zhong_nan/detail/武汉潜江序时账22-23(1).xlsx"
     );
     @Data
     @Builder
@@ -57,13 +57,13 @@ public class ZhongMei20230106 {
             List<NewBalanceExcelResult> pathResult = new ArrayList<>();
             Map<String, List<Step6OldDetailExcel>> collect = excels.stream().collect(Collectors.groupingBy(Step6OldDetailExcel::getCompanyName));
             for (String companyName : collect.keySet()) {
-                if (!companyName.equals("江苏中南物业服务有限公司昆明分公司")){
-                    continue;
-                }
+//                if (!companyName.equals("江苏中南物业服务有限公司昆明分公司")){
+//                    continue;
+//                }
                 System.out.println(companyName);
                 Result result = doTest(collect, companyName);
                 pathResult.addAll(result.getResults());
-                String fileName2 = "src/main/java/org/example/excel/zhong_nan/merge/company_2023_6_12/组合余额表-2023-1-6-总账-"+companyName + ".xlsx";
+                String fileName2 = "src/main/java/org/example/excel/zhong_nan/merge/wuhan/company_2023_1_6/组合余额表-2023-1-6-总账-"+companyName + ".xlsx";
                 File file = new File(fileName2);
                 if (file.exists()){
                     System.out.println("文件存在");
@@ -77,7 +77,7 @@ public class ZhongMei20230106 {
                 }
             }
             String[] split = path.split("/");
-            String fileName ="src/main/java/org/example/excel/zhong_nan/merge/余额表-"+split[split.length -1];
+            String fileName ="src/main/java/org/example/excel/zhong_nan/merge/wuhan/余额表-"+split[split.length -1];
             EasyExcel.write(fileName, NewBalanceExcelResult.class).sheet("旧系统").doWrite(pathResult);
         }
 
@@ -116,8 +116,14 @@ public class ZhongMei20230106 {
         EasyExcel.read(path, Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
-                                coverNewDate.cover(startTime,data);
-                                excels.add(data);
+                                boolean cover = coverNewDate.cover(startTime, data);
+                                if (cover){
+                                    int i = data.getCompanyName().lastIndexOf("-");
+                                    if (i != -1){
+                                        data.setCompanyName(data.getCompanyName().substring(0,i));
+                                    }
+                                    excels.add(data);
+                                }
                             }
                         }))
                 .sheet("综合查询表").doRead();

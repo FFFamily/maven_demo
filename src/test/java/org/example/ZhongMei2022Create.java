@@ -23,24 +23,24 @@ public class ZhongMei2022Create {
     @Resource
     private CoverNewDate coverNewDate;
 
-    public List<String> pathList = Lists.newArrayList(
-            "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业北京公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司1.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司2.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业厦门公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业合肥公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业成都公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业沈阳公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业济南公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业深圳公司.xlsx",
-            "src/main/java/org/example/excel/zhong_nan/detail/物业重庆公司.xlsx"
-    );
 //    public List<String> pathList = Lists.newArrayList(
-//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx"
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业南京公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业北京公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司1.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司2.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业上海公司3.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业厦门公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业合肥公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业成都公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业杭州公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业沈阳公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业济南公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业深圳公司.xlsx",
+//            "src/main/java/org/example/excel/zhong_nan/detail/物业重庆公司.xlsx"
 //    );
+    public List<String> pathList = Lists.newArrayList(
+            "src/main/java/org/example/excel/zhong_nan/detail/武汉潜江序时账22-23(1).xlsx"
+    );
     @Data
     @Builder
     private static class Result{
@@ -62,7 +62,7 @@ public class ZhongMei2022Create {
                 System.out.println("原公司："+companyName +" 现公司："+newCompanyName);
                 Result result = doTest(collect, companyName);
                 pathResult.addAll(result.getResults());
-                String fileName2 = "src/main/java/org/example/excel/zhong_nan/merge/company/组合余额表-2022-总账-"+newCompanyName + ".xlsx";
+                String fileName2 = "src/main/java/org/example/excel/zhong_nan/merge/wuhan/company/组合余额表-2022-总账-"+newCompanyName + ".xlsx";
                 File file = new File(fileName2);
                 if (file.exists()){
                     System.out.println("文件存在");
@@ -115,8 +115,14 @@ public class ZhongMei2022Create {
         EasyExcel.read(path, Step6OldDetailExcel.class,
                         new PageReadListener<Step6OldDetailExcel>(dataList -> {
                             for (Step6OldDetailExcel data : dataList) {
-                                coverNewDate.cover(startTime,data);
-                                excels.add(data);
+                                boolean cover = coverNewDate.cover(startTime, data);
+                                if (cover){
+                                    int i = data.getCompanyName().lastIndexOf("-");
+                                    if (i != -1){
+                                        data.setCompanyName(data.getCompanyName().substring(0,i));
+                                    }
+                                    excels.add(data);
+                                }
                             }
                         }))
                 .sheet("综合查询表").doRead();

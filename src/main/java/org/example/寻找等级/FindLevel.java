@@ -51,9 +51,6 @@ public class FindLevel {
         List<OtherInfo3> result = new ArrayList<>();
         for (int i = 0; i < finalResult.size(); i++) {
             OtherInfo3 otherInfo3 = finalResult.get(i);
-//            int level = 1;
-//            otherInfo3.setLevel(otherInfo3.getLevel() == null ? i : otherInfo3.getLevel());
-//            otherInfo3.setNo(otherInfo3.getNo()==null ? String.valueOf(otherInfo3.getLevel()) : otherInfo3.getNo()+"-"+(i+1));
             otherInfo3.setLevel(1);
             otherInfo3.setNo(String.valueOf(i+1));
             // 计算余额
@@ -90,6 +87,7 @@ public class FindLevel {
                     }
                 }
             }
+
         }
         return result;
     }
@@ -112,6 +110,7 @@ public class FindLevel {
             OtherInfo3 child = iterator.next();
             if (child.getR().equals(parentItem.getR()) && (child.getV() != null ? child.getV().equals(parentItem.getW()) : child.getW().equals(parentItem.getV()))) {
                 // 如果凭证一样 && 借贷相抵
+                System.out.println("子和父能够借贷相抵："+parentItem);
                 return new HashSet<>();
             }
         }else if (childList.isEmpty() && isOpenFindUp ){
@@ -213,13 +212,11 @@ public class FindLevel {
                                         Integer level,
                                         boolean isOpenFindUp) {
         if (!isOpenFindUp) {
-//            return new ArrayList<>();
             return new HashSet<>();
         }
         if (level > 10) {
             // 级别超过10次
             item.setErrorMsg("循环超过10次");
-//            return new ArrayList<>();
             return new HashSet<>();
         }
         BigDecimal v = item.getV();
@@ -292,16 +289,22 @@ public class FindLevel {
                                 collect1.subList(0, indexOf),
                                 otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString()
                         );
+                        if (!otherInfo3Sup.isEmpty()) {
+                            System.out.println("上半部能找到："+otherInfo3);
+                        }
                         if (otherInfo3Sup.isEmpty() && indexOf != (collect1.size() - 1)) {
+                            // 下半部分
                             otherInfo3Slow = LevelUtil.FindFirstLevel(
                                     collect1.subList(indexOf + 1, collect1.size()),
                                     otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString()
                             );
+                            System.out.println("能找到下半部分"+otherInfo3);
                         }
                     } else {
                         otherInfo3Sup.add(otherInfo3);
                     }
                 } else {
+                    System.out.println("子类能够直接借贷相抵的："+findOne.get(findOne.size() -1));
                     otherInfo3Sup = LevelUtil.FindFirstLevel(
                             findOne.stream().skip((long) findOne.size() - 1).collect(Collectors.toList()),
                             otherInfo3.getV() != null ? String.valueOf(otherInfo3.getV().doubleValue()) : BigDecimal.ZERO.subtract(otherInfo3.getW()).toString()

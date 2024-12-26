@@ -13,7 +13,6 @@ import org.example.utils.CommonUtil;
 import org.example.utils.LevelUtil;
 import org.example.寻找等级.FindLevel;
 import org.example.寻找等级.OtherInfo3;
-import org.example.新老系统.Step1;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -37,10 +36,11 @@ public class YuZhouTest {
     void test1() {
         File file = new File("src/main/java/org/example/excel/yu_zhou/balance");
         for (String fileName : file.list()) {
-            System.out.println("当前文件："+fileName);
-            if (!fileName.equals("禹洲物业服务有限公司上海分公司.xlsx")){
+
+            if (!fileName.equals("禹洲厦门.xlsx")){
                 continue;
             }
+            System.out.println("当前文件："+fileName);
             List<Assistant> assistants1 = readBalanceExcel(fileName);
             // 余额
             Map<String, List<Assistant>> collect =assistants1.stream().collect(Collectors.groupingBy(Assistant::getE));
@@ -49,6 +49,7 @@ public class YuZhouTest {
                 List<Assistant> assistants = collect.get(company);
                 List<OtherInfo3> result = new ArrayList<>();
                 System.out.println("当前公司："+company);
+                List<OtherInfo3> otherInfo3s = readDetailExcel(fileName,company);
                 // 便利余额
                 for (int i = 0; i < assistants.size(); i++) {
 
@@ -56,11 +57,12 @@ public class YuZhouTest {
                     String companyName = assistant.getE();
 
                     // 这个公司的所有明细
-                    List<OtherInfo3> otherInfo3s = readDetailExcel(fileName,companyName);
+
                     if (otherInfo3s.isEmpty()){
-                        System.out.println("跳过");
+//                        System.out.println("跳过");
                         continue;
                     }
+                    System.out.println("有了");
                     List<OtherInfo3> startCollect = otherInfo3s.stream().filter(item -> item.getOnlySign().equals(assistant.getOnlySign())).collect(Collectors.toList());
                     List<OtherInfo3> res = findLevel.doMain(
                             true,

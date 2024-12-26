@@ -33,21 +33,21 @@ public class TestDemo {
         List<SourceFileData> sourceFileDataList = ExcelDataUtil.getExcelData("src/main/java/org/example/分类/9月科目辅助余额表.xlsx","Sheet1");
         Map<String, List<Assistant>> companyMap = ExcelDataUtil.covertAssistant(sourceFileDataList, null, null)
                 .stream()
-//                .filter(item -> item.getCompanyCode().equals("WCRC0"))
-//                .filter(item -> item.getR().equals("WCRC0.0.1122010101.05.999999.0.0.0.30017821.0"))
-//                .filter(item -> item.getTransactionObjectId().equals("SS:72747717"))
+//                .filter(item -> item.getCompanyCode().equals("JODV0"))
+//                .filter(item -> item.getR().equals("JODV0.0.1122010101.0409.0.0.2006.0.30013293.0"))
+//                .filter(item -> item.getTransactionObjectId().equals("CS:13058509"))
                 // 根据公司分组
                 .collect(Collectors.groupingBy(Assistant::getCompanyCode));
         for (String companyCode : companyMap.keySet()) {
-            System.out.println(DateUtil.date()+ " 当前公司："+ companyCode);
+
             // 读取旧系统的序时账
             Assistant Firstassistant = companyMap.get(companyCode).get(0);
             String companyName = Firstassistant.getE();
-            String companyType = CompanyTypeConstant.mapping.get(companyName);
-            if (!companyType.equals(CompanyTypeConstant.LANG_JI)){
-                System.out.println("不是朗基的公司，跳过");
+            if(!companyName.equals("禹洲物业服务有限公司泉州分公司")){
                 continue;
             }
+            System.out.println(DateUtil.date()+ " 当前公司："+ companyName);
+            String companyType = CompanyTypeConstant.mapping.get(companyName);
             List<OtherInfo3> oldCachedDataList = findNccLangJiLevel.getOldCachedDataListByCompanyName(companyName);
             oldCachedDataList.forEach(LevelUtil::organizeDataItem);
             List<Assistant> realAssistantList = companyMap.get(companyCode);
@@ -61,6 +61,7 @@ public class TestDemo {
                 item.setSystemForm("新系统");
             });
             for (int i = 0; i < realAssistantList.size(); i++) {
+                System.out.println("==============================================开始=======================================");
                 Assistant assistant = realAssistantList.get(i);
                 String z = assistant.getZ();
                 if (z == null) {

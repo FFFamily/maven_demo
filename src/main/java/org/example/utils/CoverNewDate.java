@@ -12,28 +12,28 @@ import javax.annotation.Resource;
 public class CoverNewDate {
     @Resource
     private FindNccZhongNanLevel findNccZhongNanLevel;
-    public void cover(String startTime,Step6OldDetailExcel data) {
+    public boolean cover(String startTime,Step6OldDetailExcel data) {
         try {
             if (data.getV() == null && data.getW() == null){
                 throw new RuntimeException("无法计算金额");
             }
             String projectName = data.getProjectName();
             if (!isBackProject2022(projectName)){
-                return;
+                return false;
             }
             String time = data.getTime();
             DateTime date = DateUtil.parseDate(time);
             if (startTime.equals("2022")){
                 if (date.isBefore(DateUtil.parse("2022-01-01")) || date.isAfter(DateUtil.parse("2022-12-31"))) {
-                    return;
+                    return false;
                 }
             }else if (startTime.equals("2023-1-6")){
                 if (date.isBefore(DateUtil.parse("2023-01-01")) || date.isAfter(DateUtil.parse("2023-06-30"))) {
-                    return;
+                    return false;
                 }
             }else if (startTime.equals("2023-7-12")){
                 if (date.isBefore(DateUtil.parse("2023-07-01")) || date.isAfter(DateUtil.parse("2023-12-31"))) {
-                    return;
+                    return false;
                 }
             } else {
                 throw new RuntimeException();
@@ -107,11 +107,12 @@ public class CoverNewDate {
             }
             data.setAuxiliaryAccounting(auxiliaryAccounting);
             data.setAuxiliaryAccountingCode(auxiliaryAccountingCode);
-
+            return true;
         }catch (Exception e){
 //                                    System.out.println("解析中南老系统明细数据出错: "+e.getMessage());
             System.out.println(data);
             e.printStackTrace();
+            return false;
         }
     }
 

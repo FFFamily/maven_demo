@@ -1,4 +1,4 @@
-package org.example;
+package org.example.武汉新老系统;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -7,63 +7,43 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.read.listener.PageReadListener;
 import lombok.Data;
 import org.example.enitty.OracleData;
-import org.example.enitty.zhong_nan.Merge22Result;
 import org.example.enitty.zhong_nan.NewBalanceExcelResult;
 import org.example.enitty.zhong_nan.Step6OldDetailExcel;
 import org.example.utils.CommonUtil;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
-public class ZMMerge20230612Test {
-    public static void main(String[] args) {
-        merge20230612();
+@Service
+public class WuHanFind2022 {
+    @Resource
+    private WuHanFindUtil wuHanFindUtil;
+    Map<String, List<OracleData>> map1 = new HashMap<>();
+    Map<String, List<OracleData>> map2 = new HashMap<>();
+    Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
+    @PostConstruct
+    public void init(){
+        map1 = init1();
+        map2 = init2();
+        listMap = initListMap();
     }
-
-    static void merge20230612(){
-        List<Merge22Result> res = new ArrayList<>();
-        Map<String,List<OracleData>> map1 = new HashMap<>();
-        // 22 调整
-//        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/23年1-6月调整.xlsx", OracleData.class, new PageReadListener<OracleData>(dataList -> {
-//            for (OracleData data : dataList) {
-//                List<OracleData> list = map1.getOrDefault(data.get公司段描述(), new ArrayList<>());
-//                data.setForm("23年1-6月调整");
-//                list.add(data);
-//                map1.put(data.get公司段描述(),list);
-//            }
-//        })).sheet("Sheet1").doRead();
-        // 22年应收账款预估
-        Map<String,List<OracleData>> map2 = new HashMap<>();
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/wuhan/23年1-6月应收账款预估收缴率调整.xlsx", OracleData.class, new PageReadListener<OracleData>(dataList -> {
-            for (OracleData data : dataList) {
-                data.setForm("23年1-6月预估收缴率");
-                List<OracleData> list = map2.getOrDefault(data.get公司段描述(), new ArrayList<>());
-                list.add(data);
-                map2.put(data.get公司段描述(),list);
-            }
-        })).sheet("模板").doRead();
-        Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
-        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/wuhan/余额表-武汉潜江序时账22-23(1).xlsx", NewBalanceExcelResult.class, new PageReadListener<NewBalanceExcelResult>(dataList -> {
-            for (NewBalanceExcelResult data : dataList) {
-                List<NewBalanceExcelResult> orDefault = listMap.getOrDefault(data.getCompanyName(), new ArrayList<>());
-                data.setForm("2022期末");
-                data.setV(null);
-                data.setW(null);
-//                data.setBalance(data.getPreBalance());
-//                data.setPreBalance(null);
-                orDefault.add(data);
-                listMap.put(data.getCompanyName(), orDefault);
-            }
-        })).sheet("旧系统").doRead();
+    public List<OracleData> find(String companyName){
+//        Map<String, List<OracleData>> map1 =  init1();
+//        Map<String,List<OracleData>> map2 = init2();
+//        Map<String, List<NewBalanceExcelResult>> listMap = initListMap();
         List<NewBalanceExcelResult> finalExcel = new ArrayList<>();
-        File file = new File("src/main/java/org/example/excel/zhong_nan/merge/wuhan/company_2023_1_6");
+        String filePath = "src/main/java/org/example/excel/zhong_nan/merge/wuhan/company";
+        File file = new File(filePath);
         if (!file.isDirectory()){
             throw new RuntimeException("不是目录");
         }
+        List<OracleData> xsList = new ArrayList<>();
         for (String fileName : file.list()) {
             if (fileName.equals(".DS_Store")){
                 continue;
@@ -71,14 +51,14 @@ public class ZMMerge20230612Test {
             List<OracleData> list3 = new ArrayList<>();
             String[] split = fileName.split("-");
             String company = split[split.length - 1].replace(".xlsx", "");
-            System.out.println("当前公司："+company);
-//            if (!company.equals("唐山中南国际旅游度假物业服务有限责任公司")){
-//                continue;
-//            }
-            EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/wuhan/company_2023_1_6/"+fileName, Step6OldDetailExcel.class, new PageReadListener<Step6OldDetailExcel>(dataList -> {
+            if (!company.equals(companyName)){
+                continue;
+            }
+            System.out.println("步骤2022-当前公司："+company);
+            EasyExcel.read(filePath+"/"+fileName, Step6OldDetailExcel.class, new PageReadListener<Step6OldDetailExcel>(dataList -> {
                 for (Step6OldDetailExcel data : dataList) {
                     OracleData oracleData = new OracleData();
-                    oracleData.setForm("23年1-6月序时账");
+                    oracleData.setForm("22年序时账");
                     oracleData.set公司段描述(data.getCompanyName());
                     oracleData.set账户组合(data.getOnlySign());
                     oracleData.set账户描述(data.getOnlySignName());
@@ -102,31 +82,17 @@ public class ZMMerge20230612Test {
                     list3.add(oracleData);
                 }
             })).sheet("总账").doRead();
-
             List<NewBalanceExcelResult> result = new ArrayList<>();
             List<OracleData> list1 = map1.getOrDefault(company, new ArrayList<>());
             List<OracleData> list2 = map2.getOrDefault(company, new ArrayList<>());
-            List<OracleData> xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
+            xsList = Stream.of(list1, list2, list3).flatMap(Collection::stream).collect(Collectors.toList());
             Map<String, List<OracleData>> group = xsList.stream().collect(Collectors.groupingBy(item -> item.get账户组合() + getStr(item.get交易对象())));
             for (String key : group.keySet()) {
                 List<OracleData> all = group.get(key);
-                OracleData one = all.get(0);
-                NewBalanceExcelResult newBalanceExcelResult = new NewBalanceExcelResult();
-                newBalanceExcelResult.setForm("2023年1-6月");
-                newBalanceExcelResult.setCompanyName(company);
-                newBalanceExcelResult.setProjectCode(one.get账户组合());
-                newBalanceExcelResult.setProjectName(one.get账户描述()+".");
-                newBalanceExcelResult.setProject(one.get科目段描述());
-                newBalanceExcelResult.setAuxiliaryAccounting(one.get交易对象名称());
-                newBalanceExcelResult.setV(all.stream().map(OracleData::get输入借方).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
-                newBalanceExcelResult.setW(all.stream().map(OracleData::get输入贷方).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
-                newBalanceExcelResult.setBalance(newBalanceExcelResult.getV().subtract(newBalanceExcelResult.getW()));
+                NewBalanceExcelResult newBalanceExcelResult = wuHanFindUtil.caculate(company, all);
                 result.add(newBalanceExcelResult);
             }
-//            if (company.equals("青岛中南物业管理有限公司")){
-//                EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
-//            }
-            EasyExcel.write(company + "-2023-1-6-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
+//            EasyExcel.write(company + "-组合序时账" + ".xlsx", OracleData.class).sheet("组合结果").doWrite(xsList);
             List<NewBalanceExcelResult> results = Stream.of(result, listMap.getOrDefault(company,new ArrayList<>())).flatMap(Collection::stream).collect(Collectors.toList());
             Map<String, List<NewBalanceExcelResult>> cGroup = results.stream().collect(Collectors.groupingBy(item -> item.getProjectCode() + item.getAuxiliaryAccounting()));
             for (String s : cGroup.keySet()) {
@@ -141,12 +107,65 @@ public class ZMMerge20230612Test {
                 re.setV(results1.stream().map(NewBalanceExcelResult::getV).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                 re.setW(results1.stream().map(NewBalanceExcelResult::getW).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                 re.setBalance(results1.stream().map(NewBalanceExcelResult::getBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
-                re.setPreBalance(results1.stream().filter(item -> item.getForm().equals("2022期末")).map(NewBalanceExcelResult::getBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
+                re.setPreBalance(results1.stream().filter(item -> item.getForm().equals("期初")).map(NewBalanceExcelResult::getBalance).reduce(BigDecimal.ZERO, (prev, curr) -> prev.add(CommonUtil.getBigDecimalValue(curr)), (l, r) -> l));
                 finalExcel.add(re);
             }
         }
-        EasyExcel.write( "最终组合结果-2023-1-6-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+
+        EasyExcel.write( "src/main/java/org/example/excel/zhong_nan/merge/wuhan/"+ companyName +"-最终组合结果-2022-余额表.xlsx", NewBalanceExcelResult.class).sheet("余额表").doWrite(finalExcel);
+        return xsList;
     }
+
+    public Map<String, List<OracleData>> init1() {
+        Map<String, List<OracleData>> map1 = new HashMap<>();
+        // 22 调整
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/wuhan/22年调整.xlsx", OracleData.class, new PageReadListener<OracleData>(dataList -> {
+            for (OracleData data : dataList) {
+                List<OracleData> list = map1.getOrDefault(data.get公司段描述(), new ArrayList<>());
+                data.setForm("22年调整");
+                list.add(data);
+                map1.put(data.get公司段描述(),list);
+            }
+        })).sheet("模板").doRead();
+        System.out.println("22年调整.xlsx 读取完成");
+        return map1;
+    }
+    public Map<String, List<OracleData>> init2() {
+        Map<String, List<OracleData>> map2 = new HashMap<>();
+        // 22年应收账款预估
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/wuhan/22年应收账款预估收缴率调整.xlsx", OracleData.class, new PageReadListener<OracleData>(dataList -> {
+            for (OracleData data : dataList) {
+                data.setForm("22年预估收缴率");
+                List<OracleData> list = map2.getOrDefault(data.get公司段描述(), new ArrayList<>());
+                list.add(data);
+                map2.put(data.get公司段描述(),list);
+            }
+        })).sheet("模板").doRead();
+        System.out.println("22年应收账款预估收缴率调整.xlsx 读取完成");
+        return map2;
+    }
+
+    public  Map<String, List<NewBalanceExcelResult>> initListMap() {
+        Map<String, List<NewBalanceExcelResult>> listMap = new HashMap<>();
+        EasyExcel.read("src/main/java/org/example/excel/zhong_nan/merge/wuhan/22期初.xlsx", OldBalance.class, new PageReadListener<OldBalance>(dataList -> {
+            for (OldBalance data : dataList) {
+                List<NewBalanceExcelResult> orDefault = listMap.getOrDefault(data.getCompanyName(), new ArrayList<>());
+                NewBalanceExcelResult oracleData = new NewBalanceExcelResult();
+                oracleData.setForm("期初");
+                oracleData.setCompanyName(data.getCompanyName());
+                oracleData.setProjectCode(data.getOnlySign());
+                oracleData.setProjectName(data.getOnlySignName());
+                oracleData.setAuxiliaryAccounting(data.getAuxiliaryAccounting());
+                oracleData.setBalance(data.getBalance());
+                orDefault.add(oracleData);
+                listMap.put(data.getCompanyName(), orDefault);
+            }
+        })).sheet("期初").doRead();
+        System.out.println("中南22期初.xlsx 读取完成");
+        return listMap;
+    }
+
+
     @Data
     public static class OldBalance{
         @ExcelProperty("主体")
@@ -163,6 +182,4 @@ public class ZMMerge20230612Test {
     private static String getStr(String str){
         return str == null ?"":str;
     }
-
-
 }

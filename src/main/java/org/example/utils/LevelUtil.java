@@ -24,6 +24,7 @@ public class LevelUtil {
         // 能找到直接相抵就停止找
         if (otherInfo3s.isEmpty() && temporaryResult != null) {
             result = new ArrayList<>();
+            System.out.println("能够直接和余额借贷相抵");
             result.add(temporaryResult);
         } else {
             // 找不到就得开始过滤查找
